@@ -1,0 +1,15 @@
+# -*- mode: snippet -*-
+# name: Simple unittest for codewars
+# key: test_codewars
+# --
+import unittest
+from solution import ${}
+
+
+class TestSolution(unittest.TestCase):
+    def test_solution(self):
+        self.assertEqual${}
+
+
+if __name__ == "__main__":
+    unittest.main()

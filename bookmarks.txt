@@ -1,0 +1,25 @@
+;;;; Emacs Bookmark Format Version 1 ;;;; -*- coding: utf-8-emacs -*-
+;;; This format is meant to be slightly human-readable;
+;;; nevertheless, you probably don't want to edit it.
+;;; -*- End Of Bookmark File Format Version Stamp -*-
+(("Creativè"
+ (filename . "~/Dropbox (Maestral)/Creativè/")
+ (front-context-string . "  /home/frailin/")
+ (rear-context-string)
+ (position . 1))
+("class-note-taking.org"
+ (filename . "~/Dropbox (Maestral)/Creativè/class-note-taking.org")
+ (front-context-string . "#+TITLE: School ")
+ (rear-context-string)
+ (position . 1))
+("init.el"
+ (filename . "~/.emacs.d/init.el")
+ (front-context-string . ";; Launch the de")
+ (rear-context-string)
+ (position . 1))
+("org-capture-last-stored"
+ (filename . "~/Dropbox (Maestral)/Creativè/org-roam/20210220215303-escuelas_secundarias.org")
+ (front-context-string . "#+title: Escuela")
+ (rear-context-string)
+ (position . 1))
+)

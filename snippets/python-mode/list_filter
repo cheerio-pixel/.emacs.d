@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: List filter
+# key: []f
+# --
+${List_matches name} = [
+                x for x in ${List to filter}
+                if ${x == 25 Condition}
+            ]

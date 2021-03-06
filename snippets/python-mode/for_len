@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: for loop with one element len
+# key: forlen
+# group: control structure
+# --
+for ${var} in range(len(${collection})):
+    ${0}

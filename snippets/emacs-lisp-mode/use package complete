@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: use package template complete
+# key: upc
+# --
+(use-package ${package-name}
+  ${ensure t}
+  ${:bind ()}
+  ${:init}
+  ${:config}
+  ${:hook}
+  )

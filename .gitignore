@@ -1,0 +1,17 @@
+auto-save-list/
+url/
+transient/
+persp/
+backups/
+auto-save-list/
+elpa/
+eshell/
+elpy/
+ac-comphist.dat
+history
+org-roam.db
+tramp.txt
+recentf
+projectile-bookmarks.eld
+projectile.cache
+tramp

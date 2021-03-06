@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Roam link
+# key: rl
+# --
+[[roam:${}]]
