@@ -5,6 +5,8 @@
 (require 'org)
 (require 'org-roam)
 (require 'magit)
+(require 'flycheck)
+(require 'expand-region)
 (use-package ryo-modal
   :ensure t
   :commands ryo-modal-mode
@@ -25,11 +27,15 @@
    ("p" keyboard-quit)
    ("," ryo-modal-repeat)
    ("m" newline)
-   ("M" smart-open-line)
+   ("M"
+    (("o" split-line)
+     ("m" smart-open-line)
+     )
+    )
    ("z"
     (("u" upcase-char)
      ("v" upcase-initials-region)
-     ("n" downcase-region)
+     ("n" downcase-dwim)
      )
     )
    ("S"
@@ -45,6 +51,7 @@
     )
    ("Z"
     (("v" fill-region)
+     ("s" my-save-word)
      )
     )
    ("Gg" magit-status)
@@ -65,6 +72,8 @@
    ("E" jump-to-register)
    ("ga" beginning-of-buffer)
    ("ge" end-of-buffer)
+   ("gu" scroll-down)
+   ("gn" scroll-up)
    )
   (ryo-modal-keys ;;; Avy
    ("i"
@@ -136,6 +145,7 @@
     (("an" duplicate-current-line)
      ("nd" replace-next-line)
      ("ad" replace-current-line)
+     ("u" helm-show-kill-ring)
      )
     )
    )
@@ -157,6 +167,7 @@
        ("n" switch-to-last-buffer)
        ("c" kill-current-buffer)
        ("m" helm-find-files :name "Find file")
+       ("y" find-name-dired)
        ("r" helm-find :name "Find file recursively") ;; Find files recursively
        )
       :name "Buffers, Files & and M-x"
@@ -176,6 +187,7 @@
        ("y" persp-switch)
        ("m" persp-set-buffer)
        ("k" persp-remove-buffer)
+       ("s" projectile-switch-project)
        )
       :name "Projectile & Perspective"
       )
@@ -197,24 +209,62 @@
      )
     )
    )
-  ;; Selection
+  ;; Org mode
+  (ryo-modal-keys
+   (:norepeat t)
+   ("O"
+    (("c" org-capture)
+     ("a" org-agenda)
+     )
+    )
+   )
+  ;; Flyckeck
+  (ryo-modal-keys
+   (:norepeat t)
+   ("!"
+    (("c" flycheck-buffer)
+     ("e" flycheck-explain-error-at-point)
+     ("l" flycheck-list-errors)
+     ("x" flycheck-disable-checker)
+     ("o" flycheck-mode)
+     )
+    )
+   )
+  ;; selection
   (ryo-modal-keys
    (:norepeat t)
    ("v" set-mark-command)
    ("V"
     (("v" rectangle-mark-mode)
+     ("c" exchange-point-and-mark)
      )
     )
    ("\'" er/expand-region)
-   ;; ("M-'"
-   ;;  (()
-   ;;   )
-   ;;  )
+   ("H"
+    (("c" er/mark-comment)
+     ("d" er/mark-defun)
+     ("w" er/mark-word)
+     ("m" er/mark-method-call)
+     ("s" er/mark-symbol)
+     ("a" er/mark-symbol-with-prefix)
+     ("q"
+      (("i" er/mark-inside-quotes)
+       ("o" er/mark-outside-quotes)
+       )
+      )
+     ("p"
+      (("i" er/mark-inside-pairs)
+       ("o" er/mark-outside-pairs)
+       )
+      )
+     ("n" er/mark-next-accessor) ;; skips over one period and mark next symbol
+     )
+    )
    )
   ;; digit-arguments
   (ryo-modal-keys
-   ;; First argument to ryo-modal-keys may be a list of keywords.
-   ;; These keywords will be applied to all keybindings.
+   ;; first argument to ryo-modal-keys may be a list of keywords.
+   ;; these keywords will be applied to all keybindings.
    (:norepeat t)
    ("0" "M-0")
    ("1" "M-1")
@@ -227,7 +277,7 @@
    ("8" "M-8")
    ("9" "M-9")
    )
-  ;; Emacs-lisp mode map
+  ;; emacs-lisp mode map
   (ryo-modal-major-mode-keys
    'emacs-lisp-mode
    ("s"
@@ -239,7 +289,7 @@
    )
   (ryo-modal-major-mode-keys
    'org-mode
-   ;; Avalible r s
+   ;; avalible r s
    ("M-m" org-meta-return)
    ("r"
     (("s" org-preview-latex-fragment)
@@ -260,37 +310,37 @@
    )
   (ryo-modal-major-mode-keys
    'python-mode
-   ;; Avalible rstf
-   ;; I came up the idea of special rules for the send statment commands
-   ;; From the position of the avalible keys, r s t, they will be for the cases
+   ;; avalible rstf
+   ;; i came up the idea of special rules for the send statment commands
+   ;; from the position of the avalible keys, r s t, they will be for the cases
    ;; i feel are the more comfortable and more frequenly used, but this can
    ;; change over time
    ;; (e)(f)(c)(s)(g)(w)(r)(b)
-   ("s" ;; Elpy interaction
-    (("y" ;; Eval code section
-      ;; Text Objects & Options:
-      (("e" ;; Send Statment
+   ("s" ;; elpy interaction
+    (("y" ;; eval code section
+      ;; text objects & options:
+      (("e" ;; send statment
         (("r" elpy-shell-send-statement-and-go)
          ("s" elpy-shell-send-statement)
          ("t" elpy-shell-send-statement-and-step)
          ("f" elpy-shell-send-statement-and-step-and-go)
          )
         )
-       ("f" ;; Send Function
+       ("f" ;; send function
         (("r" elpy-shell-send-defun-and-go)
          ("s" elpy-shell-send-defun)
          ("t" elpy-shell-send-defun-and-step)
          ("f" elpy-shell-send-defun-and-step-and-go)
          )
         )
-       ("c" ;; Send Class
+       ("c" ;; send class
         (("r" elpy-shell-send-defclass-and-go)
          ("s" elpy-shell-send-defclass)
          ("t" elpy-shell-send-defclass-and-step)
          ("f" elpy-shell-send-defclass-and-step-and-go)
          )
         )
-       ("s" ;; Send Top-statment
+       ("s" ;; send top-statment
         (("r" elpy-shell-send-top-statement-and-go)
          ("s" elpy-shell-send-top-statement)
          ("t" elpy-shell-send-top-statement-and-step)
@@ -386,6 +436,15 @@
       )
      )
     )
+   ("h"
+    (("b" er/mark-python-block)
+     ("s" er/mark-python-statement)
+     ("p" er/mark-python-block-and-decorator)
+     ("u" er/mark-outer-python-block)
+     ("i" er/mark-inside-python-string)
+     ("o" er/mark-outside-python-string)
+     )
+    )
    ("<f6>" elpy-pdb-toggle-breakpoint-at-point)
    )
   (ryo-modal-key
@@ -394,12 +453,14 @@
                       "Generic fast moving"
                       ("n" forward-sexp)
                       ("u" backward-sexp)
+                      ("U" ccm-scroll-down)
+                      ("N" ccm-scroll-up)
                       ("]" forward-paragraph)
                       ("[" backward-paragraph)
                       ("q" nil "cancel" :color blue)
                       ))
   (ryo-modal-key
-   "q ; e" :hydra
+   "q e" :hydra
    '(hydra-elpy ()
                 "Elpy Mode"
                 ("n" elpy-nav-move-line-or-region-down)
@@ -433,8 +494,9 @@
                   ))
   (ryo-modal-key
    "d" :hydra
-   '(hydra-delete (:color pink
-                          :hint nil)
+   '(hydra-delete (
+                   :color pink
+                   :hint nil)
                   "
                          ^Delete^
 ^^----------------------------------------
@@ -468,6 +530,13 @@ _s_: modified      ^ ^
                   ("ge" end-of-buffer)
                   ("q" nil "cancel" :color blue)
                   ))
+  (ryo-modal-key
+   "w" :hydra
+   '(hydra-undo-tree (:color pink :hint nil)
+                     ("n" undo-tree-undo)
+                     ("u" undo-tree-redo)
+                     ("q" nil "cancel" :color blue)
+                     ))
   )
 (which-key-add-key-based-replacements "ok" "Buffers, Files & and M-x")
 (which-key-add-key-based-replacements "oa" "Insert")

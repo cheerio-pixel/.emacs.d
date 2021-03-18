@@ -9,18 +9,27 @@
     (error (elpy-rgrep-symbol
             (concat "\\(def\\|class\\)\s" (thing-at-point 'symbol) "(")))))
 (defun isr/persp-get-buffers-list ()
-  "Get filtered list of buffers, sorted alphabetically."
+  "Get filtered list of buffers, sorted alphabetically, actually it take the list without sorting"
   ;; I suspect that the next line just return the name of the buffers
   (cl-remove-if '(lambda (b) ;; This function return a string without *
                    (if (stringp b)
                        (string-match "^\[* \]" b) t))
                 (mapcar 'buffer-name (persp-buffers (persp-curr)))))
+(defun pipenv-start-first-time ()
+  "My set of command to run when i want to create a virtual env"
+  (interactive)
+  (pipenv-lock)
+  (pipenv-shell)
+  )
 (defun my-save-word ()
   (interactive)
   (let ((current-location (point))
         (word (flyspell-get-word)))
     (when (consp word)
       (flyspell-do-correct 'save nil (car word) current-location (cadr word) (caddr word) current-location))))
+(defun enable-jedi()
+  (setq-local company-backends
+              (append '(company-jedi company-anaconda) company-backends)))
 (defun +org-toggle-inline-image-at-point ()
   "Toggle inline image at point."
   (interactive)
@@ -75,10 +84,6 @@
 (defun shift-left (count)
   (interactive "p")
   (shift-text (- count)))
-(defun company-jedi-start ()
-  (add-to-list 'company-backends 'company-jedi)
-  (setq-local company-backends (delete 'company-cmake company-backends))
-  )
 ;; Add yasnippet support for all company backends
 ;; https://github.com/syl20bnr/spacemacs/pull/179
 (defvar company-mode/enable-yas t
@@ -321,12 +326,6 @@ Position the cursor at its beginning, according to the current mode."
   (move-end-of-line nil)
   (newline-and-indent))
 
-(defun fu/helm-find-files-navigate-back (orig-fun &rest args)
-  (if (= (length helm-pattern) (length (helm-find-files-initial-input)))
-      (helm-find-files-up-one-level 1)
-    (apply orig-fun args)))
-(advice-add
- 'helm-ff-delete-char-backward :around #'fu/helm-find-files-navigate-back)
 
 (defun my-buffer-predicate (buffer)
   (if (string-match "helm" (buffer-name buffer))
@@ -391,12 +390,6 @@ Position the cursor at its beginning, according to the current mode."
       (set-cursor-color (setq hcz-set-cursor-color-color color))
       (setq hcz-set-cursor-color-buffer (buffer-name)))))
 
-(defun save-word-to-dict ()
-  (interactive)
-  (let ((current-location (point))
-        (word (flyspell-get-word)))
-    (when (consp word)
-      (flyspell-do-correct 'save nil (car word) current-location (cadr word) (caddr word) current-location))))
 ;;;;;DELETE FUNCTIONS
 (defun backward-delete-word (arg)
   "Delete characters backward until encountering the beginning of a word.

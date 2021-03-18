@@ -27,11 +27,14 @@
     use-package
     company-jedi
     flx
+    company-quickhelp
     pyenv-mode
     elisp-slime-nav
     py-autopep8
+    company-anaconda
+    anaconda-mode
     pipenv
-    poetry
+    ;; poetry
     ;; company-tabine
     company-fuzzy
     golden-ratio
@@ -103,6 +106,7 @@
 ;; Load the mapped ryo-modal
 (require 'MyMy-mode)
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;START;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -134,40 +138,49 @@
 (xterm-mouse-mode t)
 (savehist-mode t)
 (spaceline-emacs-theme t)
+(pdf-tools-install)
 
+(use-package eaf
+  :load-path "/usr/share/emacs/site-lisp/eaf"
+  :init
+  (use-package epc :defer t :ensure t)
+  (use-package ctable :defer t :ensure t)
+  (use-package deferred :defer t :ensure t)
+  (use-package s :defer t :ensure t)
+  :custom
+  (eaf-browser-continue-where-left-off t)
+  :config
+  (eaf-setq eaf-browser-enable-adblocker "true")
+  (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key take_photo "p" eaf-camera-keybinding)
+  (eaf-bind-key nil "M-q" eaf-browser-keybinding)) ;; unbind, see more in the Wiki
 (use-package elpy
-  :bind (("S-<return>" . nil)
-         :map python-mode-map
-         ("C-c C-q" . jupyter-eval-buffer)
-         ("C-c C-j" . jupyter-run-repl)
-         ("C-," . indent-tools-demote)
-         ("C-." . indent-tools-indent)
-         )
+  :bind (:map python-mode-map
+              ("C-c C-q" . jupyter-eval-buffer)
+              ("C-c C-j" . jupyter-run-repl)
+              )
   :init (with-eval-after-load 'python (elpy-enable))
   :hook
-  (elpy-mode . company-jedi-start) ; Note: a Deactivate the cmake backend
-  (elpy-mode . jedi:setup)
-  (elpy-mode . pipenv-mode)
-  (elpy-mode . rainbow-delimiters-mode)
-  (elpy-mode . indent-tools-minor-mode)
-  (elpy-mode . highlight-indentation-mode)
-  (elpy-mode . electric-operator-mode)
-  (elpy-mode . hs-minor-mode)
-  (elpy-mode . (lambda()
-                 (setq-local fill-column 79
-                             company-dabbrev-char-regexp "\\sw\\|\\s_"
-                             )
-                 ))
+  (python-mode . anaconda-mode)
+  (python-mode . rainbow-delimiters-mode)
+  (python-mode . highlight-indentation-mode)
+  (python-mode . electric-operator-mode)
+  (python-mode . hs-minor-mode)
+  (python-mode . (lambda()
+                   (setq-local
+                    fill-column 79
+                    company-dabbrev-char-regexp "\\sw\\|\\s_"
+                    )))
   (elpy-mode . mymy-global-mode)
   (inferior-python-mode . hide-mode-line-mode)
   :config
-  (setq jedi:complete-on-dot t)
   (setq python-indent-guess-indent-offset-verbose nil)
   (when (load "flycheck" t t)
     (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
     (add-hook 'elpy-mode-hook 'flycheck-mode))
-  (add-hook 'pyvenv-post-activate-hooks (lambda()
-                                          (pyvenv-restart-python)))
+  ;; (add-hook 'pyvenv-post-activate-hooks (lambda()
+  ;;                                         (pyvenv-restart-python)))
   (setq
    python-shell-interpreter "ipython"
    python-shell-interpreter-args "--colors=Linux --profile=default
@@ -181,13 +194,24 @@
    python-shell-completion-string-code
    "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
   )
+(use-package company-jedi
+  :ensure t
+  :hook (python-mode . enable-jedi)
+  :config (setq jedi:complete-on-dot t)
+  )
+(use-package pipenv
+  :hook (python-mode . pipenv-mode)
+  :init
+  (setq
+   pipenv-projectile-after-switch-function
+   #'pipenv-projectile-after-switch-extended)
+  )
 (use-package blacken
   :hook (python-mode . blacken-mode)
   :config
   (setq blacken-line-length 79))
 (use-package company
-  :config
-  (setq company-idle-delay 0.3)
+  :config  (setq company-idle-delay 1)
   (setq company-dabbrev-downcase nil)
   ;; Show suggestions after entering Nth characters.
   (setq company-minimum-prefix-length 3)
@@ -198,19 +222,18 @@
   (setq company-fuzzy-sorting-backend 'flx)
   (setq company-fuzzy-show-annotation t)
   (setq company-frontends '(company-pseudo-tooltip-frontend company-echo-metadata-frontend))
-  ;; (setq company-backends
-  ;;       '((company-files          ; files & directory
-  ;;          company-keywords       ; keywords
-  ;;          company-capf           ; completion-at-point-functions
-  ;;          )
-  ;;         (company-abbrev company-dabbrev)
-  ;;         ;; company-jedi
-  ;;         ))
-  (setq company-backends (mapcar #'company-mode/backend-with-yas company-backends))
-  (add-to-list 'company-backends #'company-tabnine)
   (define-key company-active-map (kbd "C-h") 'company-select-next-or-abort)
   (define-key company-active-map (kbd "C-l") 'company-select-previous-or-abort)
   (global-company-mode)
+  (company-tng-mode)
+  )
+(use-package company-quickhelp
+  :ensure t
+  :init
+  (eval-after-load 'company
+    '(define-key company-active-map (kbd "C-c h") #'company-quickhelp-manual-begin))
+  :config
+  (company-quickhelp-mode)
   )
 (use-package flycheck
   :bind (
@@ -250,6 +273,9 @@
          :map helm-map
          ("C-n" . helm-next-line)
          ("C-u" . helm-previous-line)
+         ("C-l" . helm-toggle-resplit-and-swap-windows)
+         :map helm-find-files-map
+         ("C-t" . helm-find-files-up-one-level)
          )
   :init
   (setq helm-split-window-default-side 'right)
@@ -264,8 +290,7 @@
          helm-source-buffer-not-found))
   (spaceline-helm-mode t)
   (spaceline-toggle-helm-number-on)
-  :config
-  (helm-mode t)
+  (helm-mode)
   )
 (use-package magit
   :ensure t)
@@ -273,7 +298,12 @@
   :custom
   ;; org-default-notes-file "~/task-of-the-day.org"
   ;; org-default-notes-file "~/org-mode/class-note-taking.org"
-  ;; initial-buffer-choice  org-default-notes-file
+  ;; initial-buffer-choice  org-default-notes-filev
+  (org-latex-pdf-process
+   '("pdflatex -interaction nonstopmode -output-directory %o %f"
+     "bibtex %b"
+     "pdflatex -interaction nonstopmode -output-directory %o %f"
+     "pdflatex -interaction nonstopmode -output-directory %o %f"))
   (org-log-done t)
   (org-pomodoro-length 25)
   (org-pomodoro-short-break-length 5)
@@ -284,7 +314,17 @@
   (org-todo-keywords
    '((sequence "TODO" "|" "DONE")
      (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
+     (sequence "|" "CLASES")
      (sequence "|" "CANCELED")))
+  (org-capture-templates
+   ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
+   '(("t" "Todo Scheduled" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
+      "* TODO %^t %?\n  %i\n")
+     ("T" "Plain Todo" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
+      "* TODO %?\n  %i\n")
+     )
+   )
+
   (org-format-latex-options '(plist-put org-format-latex-options :scale 2.0 :background auto :foreground "white"))
   (org-highlight-latex-and-related '(latex script entities))
   :bind (("C-c o c" . org-capture))
@@ -424,13 +464,11 @@
                           (recents  . 5)
                           (projects . 5)))
   :config
-  (dashboard-setup-startup-hook))
+  (dashboard-setup-startup-hook)
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+  )
 (use-package undo-tree
-  :config
-  (global-undo-tree-mode)
   :ryo
-  ("wn" undo-tree-undo)
-  ("wu" undo-tree-redo)
   ("q /" undo-tree-visualize)
   :bind
   (:map undo-tree-visualizer-mode-map
@@ -501,6 +539,8 @@
 (setq custom-file null-device)
 (setq use-package-always-demand (daemonp))
 (setq olivetti-body-width 80)
+(setq locate-command "plocate")
+(setq helm-locate-command "plocate")
 (setq-default tab-always-indent 'complete)
 (setq-default whitespace-line-column 1000)
 (setq-default cursor-type '(hbar . 3)) ;; Change cursor to a bar
@@ -656,12 +696,15 @@
             (which-function-mode t)
             (mymy-global-mode t)
             (yas-global-mode t)
+            (global-undo-tree-mode)
             ))
 (add-hook 'prog-mode
           (lambda()
             (auto-fill-mode t)
             )
           )
+(add-hook 'TeX-after-compilation-finished-functions
+          #'TeX-revert-document-buffer)
 
 (define-minor-mode mymy-mode
   "Define all keys to have a preference to override others"

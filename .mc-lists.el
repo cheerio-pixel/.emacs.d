@@ -23,8 +23,6 @@
         my-delete-whole-line
         org-end-of-line
         org-self-insert-command
-        ryo-modal-global-mode
-        ryo-modal-mode-all
         ryo:6c0b5bec3522d2e495ff80ad83791864:insert-quotes
         ryo:d77df2a102a270b1c4ab1b70c78e1fd0:insert\ text
         ryo:d80a40411c8db939213101425d5bc549:Comment
@@ -35,6 +33,8 @@
 
 (setq mc/cmds-to-run-once
       '(
+        ryo-modal-global-mode
+        ryo-modal-mode-all
         ace-jump-done
         ace-jump-move
         ace-mc-add-char
