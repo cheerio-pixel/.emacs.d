@@ -30,6 +30,7 @@
    ("M"
     (("o" split-line)
      ("m" smart-open-line)
+     ("n" open-line)
      )
     )
    ("z"

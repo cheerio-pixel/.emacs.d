@@ -320,6 +320,8 @@
    ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
    '(("t" "Todo Scheduled" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
       "* TODO %^t %?\n  %i\n")
+     ("tf" "Todo Scheduled pointing to a file" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
+      "* TODO %^t %?\n %i\n %a")
      ("T" "Plain Todo" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
       "* TODO %?\n  %i\n")
      )
