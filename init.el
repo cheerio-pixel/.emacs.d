@@ -325,11 +325,15 @@
   (org-startup-folded t)
   (org-default-notes-file "~/Dropbox (Maestral)/Creativè/agenda")
   (org-agenda-files '("~/Dropbox (Maestral)/Creativè/"))
+  (org-todo-keyword-faces
+   '(("CANCELED" . (:foreground "red" :weight bold))
+     ("CLASS" . (:foreground "purple" :weight bold))
+     ))
   (org-todo-keywords
    '((sequence "TODO" "|" "DONE")
      (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
-     (sequence "|" "CLASES")
-     (sequence "|" "CANCELED")))
+     (sequence "CLASS")
+     (sequence "CANCELED")))
   (org-capture-templates
    ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
    '(("t" "Todo Scheduled" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
