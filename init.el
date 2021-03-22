@@ -310,54 +310,56 @@
   ;; So the only way to set one is overwriting one (org-emphasis-alist
   ;; (btw, i can just modify org-font-lock-extra-keywords but i will not
   ;; get (org-hide-emphasis-markers t) with my current knowledge
-  ("/" italic)
-  ("_" underline)
-  ("=" (underline org-code))
-  ("~" org-code verbatim)
-  ("+"
-   (:strike-through t))
-  )))
-(org-pomodoro-length 25)
-(org-pomodoro-short-break-length 5)
-(org-pomodoro-long-break-length 15)
-(org-startup-folded t)
-(org-default-notes-file "~/Dropbox (Maestral)/Creativè/agenda")
-(org-agenda-files '("~/Dropbox (Maestral)/Creativè/"))
-(org-todo-keywords
- '((sequence "TODO" "|" "DONE")
-   (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
-   (sequence "|" "CLASES")
-   (sequence "|" "CANCELED")))
-(org-capture-templates
- ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
- '(("t" "Todo Scheduled" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
-    "* TODO %^t %?\n  %i\n")
-   ("tf" "Todo Scheduled pointing to a file" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
-    "* TODO %^t %?\n %i\n %a")
-   ("T" "Plain Todo" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
-    "* TODO %?\n  %i\n")
+  (org-emphasis-alist
+   (quote (("*" bold)
+           ("/" italic)
+           ("_" underline)
+           ("=" (underline org-code))
+           ("~" org-code verbatim)
+           ("+"
+            (:strike-through t))
+           )))
+  (org-pomodoro-length 25)
+  (org-pomodoro-short-break-length 5)
+  (org-pomodoro-long-break-length 15)
+  (org-startup-folded t)
+  (org-default-notes-file "~/Dropbox (Maestral)/Creativè/agenda")
+  (org-agenda-files '("~/Dropbox (Maestral)/Creativè/"))
+  (org-todo-keywords
+   '((sequence "TODO" "|" "DONE")
+     (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
+     (sequence "|" "CLASES")
+     (sequence "|" "CANCELED")))
+  (org-capture-templates
+   ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
+   '(("t" "Todo Scheduled" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
+      "* TODO %^t %?\n  %i\n")
+     ("tf" "Todo Scheduled pointing to a file" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
+      "* TODO %^t %?\n %i\n %a")
+     ("T" "Plain Todo" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
+      "* TODO %?\n  %i\n")
+     )
    )
- )
 
-(org-format-latex-options '(plist-put org-format-latex-options :scale 2.0 :background auto :foreground "white"))
-(org-highlight-latex-and-related '(latex script entities))
-:bind (("C-c o c" . org-capture))
-:hook
-(org-mode . org-superstar-mode)
-(org-mode . prettify-symbols-mode)
-(org-mode . org-indent-mode)
-(text-mode . olivetti-mode)
-(org-mode . flyspell-mode)
-(org-mode . auto-fill-mode)
-(org-mode . electric-operator-mode)
-(org-mode
- . (lambda () (setq-local fill-column 120
-                          tab-width 2
-                          golden-ratio-max-width 140
-                          fill-column 80
-                          indent-tabs-mode nil
-                          ispell-dictionary "spanish")))
-)
+  (org-format-latex-options '(plist-put org-format-latex-options :scale 2.0 :background auto :foreground "white"))
+  (org-highlight-latex-and-related '(latex script entities))
+  :bind (("C-c o c" . org-capture))
+  :hook
+  (org-mode . org-superstar-mode)
+  (org-mode . prettify-symbols-mode)
+  (org-mode . org-indent-mode)
+  (text-mode . olivetti-mode)
+  (org-mode . flyspell-mode)
+  (org-mode . auto-fill-mode)
+  (org-mode . electric-operator-mode)
+  (org-mode
+   . (lambda () (setq-local fill-column 120
+                            tab-width 2
+                            golden-ratio-max-width 140
+                            fill-column 80
+                            indent-tabs-mode nil
+                            ispell-dictionary "spanish")))
+  )
 ;; Why do i live, just to suffer?
 ;; (use-package org-journal
 ;;   :ensure t
