@@ -311,7 +311,7 @@
   ;; (btw, i can just modify org-font-lock-extra-keywords but i will not
   ;; get (org-hide-emphasis-markers t) with my current knowledge
   (org-emphasis-alist
-   (quote (("*" bold)
+   (quote (("*" (bold :foreground "magenta"))
            ("/" italic)
            ("_" underline)
            ("=" (underline org-code))
