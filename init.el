@@ -693,8 +693,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-;; (add-hook 'kill-emacs-hook
-;;           #'persp-state-save)
+(add-hook 'kill-emacs-hook
+          #'persp-state-save)
 
 
 (add-hook 'window-configuration-change-hook
