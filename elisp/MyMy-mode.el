@@ -155,6 +155,7 @@
      ("nd" replace-next-line)
      ("ad" replace-current-line)
      ("u" helm-show-kill-ring)
+     ("m" paste-primary-selection)
      )
     )
    )
