@@ -616,13 +616,6 @@ _s_: modified      ^ ^
                   ("ge" end-of-buffer)
                   ("q" nil "cancel" :color blue)
                   ))
-  (ryo-modal-key
-   "w" :hydra
-   '(hydra-undo-tree (:color pink :hint nil)
-                     ("n" undo-tree-undo)
-                     ("u" undo-tree-redo)
-                     ("q" nil "cancel" :color blue)
-                     ))
   )
 (which-key-add-key-based-replacements
   "ok" "Buffers, Files & and M-x"
