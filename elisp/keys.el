@@ -32,6 +32,7 @@
 (global-unset-key (kbd "C-M-s"))
 (global-unset-key (kbd "C-M-p"))
 (global-unset-key (kbd "C-c C-b"))
+(global-unset-key (kbd "C-M-e"))
 
 ;;;;;                   SET KEY
 (global-set-key (kbd "C-t") 'point-to-register)
