@@ -181,6 +181,10 @@
        ("m" helm-find-files :name "Find file")
        ("y" find-name-dired)
        ("r" helm-find :name "Find file recursively") ;; Find files recursively
+       ("i" helm-M-x)
+       ("s" save-buffer)
+       ("o" helm-apropos)
+       ("l" create-scratch-buffer)
        )
       :name "Buffers, Files & and M-x"
       )
