@@ -30,6 +30,11 @@
 (defun enable-jedi()
   (setq-local company-backends
               (append '(company-jedi company-anaconda) company-backends)))
+(defun my/refile (file headline)
+  (let ((pos (save-excursion
+               (find-file file)
+               (org-find-exact-headline-in-buffer headline))))
+    (org-refile nil nil (list headline file nil pos))))
 (defun +org-toggle-inline-image-at-point ()
   "Toggle inline image at point."
   (interactive)
