@@ -172,7 +172,8 @@
    (">>" isr/persp-next-buffer)
    ("<<" isr/persp-previous-buffer)
    ("o"
-    (("k"
+    (("l" helm-locate)
+     ("k"
       (("e" helm-mini)
        ("u" kill-buffer)
        ("n" switch-to-last-buffer)
