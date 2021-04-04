@@ -130,6 +130,7 @@
      ("f" delete-word)
      ("s" delete-char)
      ("r" backward-delete-char)
+     ("h" delete-line)
      ("(" delete-pair)
      ("SPC" delete-horizontal-space)
      ("/" delete-blank-lines)
