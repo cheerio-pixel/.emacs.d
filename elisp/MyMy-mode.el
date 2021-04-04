@@ -539,21 +539,24 @@ _s_: modified      ^ ^
                      ("q" nil "cancel" :color blue)
                      ))
   )
-(which-key-add-key-based-replacements "ok" "Buffers, Files & and M-x")
-(which-key-add-key-based-replacements "oa" "Insert")
-(which-key-add-key-based-replacements "op" "Projectile & Perspective")
-(which-key-add-key-based-replacements "ow" "Windows")
-(which-key-add-key-based-replacements "ot" "Bookmarks & Registers")
-(which-key-add-key-based-replacements "sye" "Send statment")
-(which-key-add-key-based-replacements "syf" "Send function")
-(which-key-add-key-based-replacements "syc" "Send class")
-(which-key-add-key-based-replacements "sys" "Send top-statment")
-(which-key-add-key-based-replacements "syg" "Send group")
-(which-key-add-key-based-replacements "syw" "Send cell")
-(which-key-add-key-based-replacements "syr" "Send region")
-(which-key-add-key-based-replacements "syb" "Send buffer")
-(which-key-add-key-based-replacements "sy" "Eval code section")
-(which-key-add-key-based-replacements "s@" "HideShow")
-(which-key-add-key-based-replacements "rd" "Debugging")
-(which-key-add-key-based-replacements "rr" "Refractoring")
+(which-key-add-key-based-replacements
+  "ok" "Buffers, Files & and M-x"
+  "oa" "Insert"
+  "op" "Projectile & Perspective"
+  "ow" "Windows"
+  "ot" "Bookmarks & Registers")
+(which-key-add-major-mode-key-based-replacements 'python-mode
+  "sye" "Send statment"
+  "syf" "Send function"
+  "syc" "Send class"
+  "sys" "Send top-statment"
+  "syg" "Send group"
+  "syw" "Send cell"
+  "syr" "Send region"
+  "syb" "Send buffer"
+  "sy" "Eval code section"
+  "s@" "HideShow"
+  "rd" "Debugging"
+  "rr" "Refractoring"
+  )
 ;;; power-mode.el ends here; I'm still wondering why do they put this
