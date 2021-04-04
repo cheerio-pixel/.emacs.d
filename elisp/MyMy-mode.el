@@ -34,6 +34,7 @@
     )
    ("z"
     (("u" upcase-char)
+     ("U" upcase-region)
      ("v" upcase-initials-region)
      ("n" downcase-dwim)
      )
