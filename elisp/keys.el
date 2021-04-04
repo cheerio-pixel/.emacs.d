@@ -84,6 +84,8 @@
 (global-set-key (kbd "C-a") 'smarter-move-beginning-of-line)
 (global-set-key (kbd "C-M-z") 'zen-mode)
 (global-set-key (kbd "C-M-,") 'company-capf)
+(global-set-key (kbd "C-M-e") 'company-complete)
+
 ;; (global-set-key (kbd "<f5>") 'keyboard-escape-quit) This is not the way to bind a command of this class
 (define-key key-translation-map (kbd "C-z") (kbd "C-g"))
 (define-key key-translation-map (kbd "<f5>") (kbd "C-g"))
