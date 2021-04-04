@@ -316,11 +316,68 @@
    ("s"
     ;; here
     (("a" org-archive-subtree)
+     ("A" org-toggle-archive-tag)
+     ("p" er/mark-org-element)
+     ("t" outline-up-heading)
+     ("T" er/mark-org-parent)
+     ("g" org-goto)
      ("ne" org-narrow-to-element)
+     ("nv" narrow-to-region)
      ("nw" widen)
+     ("m" outline-show-children)
+     ("k" outline-show-branches)
      ;; here
      )
     )
+   ("Y"
+    (("y" org-paste-special)
+     )
+    )
+   ("V"
+    (("b" org-mark-subtree)
+     )
+    )
+   ("K"
+    (("V" org-cut-special)
+     ("W" org-copy-special)
+     )
+    )
+   ("a" org-beginning-of-line)
+   ("e" org-end-of-line)
+   ("O"
+    (("o" org-clock-out)
+     ("i" org-clock-in)
+     ("r" org-refile)
+     ("e" org-clock-cancel)
+     ("d" org-insert-drawer)
+     )
+    )
+   ("O R" :hydra
+    '(hydra-org-refile ()
+                       "Org refile"
+                       ("r" (lambda () (interactive) (my/refile "notebook.org" "=What I'm Doing Now=")))
+                       ("s" (lambda () (interactive) (my/refile "notebook.org" "=What I've Done Today=")))
+                       ("t" (lambda () (interactive) (my/refile "notebook.org" "Completed task")))
+                       ("n" next-line)
+                       ("u" previous-line)
+                       ("N" backward-char)
+                       ("U" forward-char)
+                       ("a" smarter-move-beginning-of-line)
+                       ("e" end-of-line)
+                       ("ga" beginning-of-buffer)
+                       ("ge" end-of-buffer)
+                       ("q" nil "cancel" :color blue)
+                       )
+    )
+   ("q n" :hydra
+    '(hydra-org-heading-move ()
+                             "Heading move Mode"
+                             ("n" org-forward-heading-same-level)
+                             ("u" org-backward-heading-same-level)
+                             ("U" org-metaup)
+                             ("N" org-metadown)
+                             ("q" nil "cancel" :color blue)
+                             ))
    )
   (ryo-modal-major-mode-keys
    'python-mode
