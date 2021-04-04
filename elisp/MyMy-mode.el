@@ -470,6 +470,7 @@
      ;; I'm not going to remove the other just to keep things clean
      ;; And because a don't see any harm
      ("RET" elpy-shell-send-statement-and-step)
+     ("b" blacken-buffer)
      ;; Don't know how the specific purpose of this but i think it's to control
      ;; Shortcuts under a protected key, so i don't do <s-any-letter> and shoot
      ;; myself in the feet
