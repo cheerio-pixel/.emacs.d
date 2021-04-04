@@ -47,6 +47,13 @@
      ("I" org-roam-insert-immediate)
      ("g" org-roam-graph)
      ("c" org-roam-dailies-capture-today)
+     ("C"
+      (("f" org-roam-dailies-find-today)
+       ("d" org-roam-dailies-find-date)
+       ("t" org-roam-dailies-find-directory)
+       )
+      )
+     ("r" org-roam-db-build-cache)
      ;; ("r" revert-buffer-no-confirm)
      )
     )
