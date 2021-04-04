@@ -188,6 +188,8 @@
        ("y" persp-switch)
        ("m" persp-set-buffer)
        ("k" persp-remove-buffer)
+       ("\;" persp-state-save)
+       ("\:" persp-state-load)
        ("s" projectile-switch-project)
        )
       :name "Projectile & Perspective"
