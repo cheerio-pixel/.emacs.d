@@ -317,6 +317,7 @@
    'org-mode
    ;; avalible r s
    ("M-m" org-meta-return)
+   ("C-m" org-insert-heading-respect-content)
    ("r"
     (("s" org-preview-latex-fragment)
      ("t" org-latex-preview)
