@@ -33,8 +33,6 @@
 
 (setq mc/cmds-to-run-once
       '(
-        ryo-modal-global-mode
-        ryo-modal-mode-all
         ace-jump-done
         ace-jump-move
         ace-mc-add-char
