@@ -5,6 +5,7 @@
       '(
         abort-recursive-edit
         ace-jump-move
+        backward-delete-char
         backward-delete-word
         delete-current-line
         god-mode-self-insert
