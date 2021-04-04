@@ -46,4 +46,6 @@
         hydra-git/nil
         jupyter-eval-buffer
         point-to-register
+        ryo-modal-global-mode
+        ryo-modal-mode-all
         ))
