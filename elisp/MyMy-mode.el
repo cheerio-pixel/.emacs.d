@@ -235,6 +235,12 @@
    ("O"
     (("c" org-capture)
      ("a" org-agenda)
+     ("u" org-clock-goto)
+     ("m"
+      (("y" org-goto-tasks)
+       ("n" org-goto-school-schedule)
+       )
+      )
      )
     )
    )
