@@ -220,6 +220,8 @@
       )
      ("n"
       (("$" mymy/insert-pair$)
+       ("~" mymy/insert-pair~)
+       ("=" mymy/insert-pair=)
        ("\\" insert-pair)
        )
       :name "Insert pairs"
