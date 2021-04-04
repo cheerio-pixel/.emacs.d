@@ -50,6 +50,14 @@
 ;;    (cl-remove-if '(lambda (b) (if (stringp b) (string-match "^\[* \]" b) t))
 ;;                  (mapcar 'buffer-name (persp-buffers (persp-curr))))
 ;;    'string<))
+(defun org-goto-tasks()
+  (interactive)
+  (org-id-goto "2271da12-1a80-4627-be66-9678d3926a36")
+  )
+(defun org-goto-school-schedule ()
+  (interactive)
+  (org-id-goto "d3b993f2-6132-422c-8b30-ce2ef1867235")
+  )
 
 (defun isr/persp-next-buffer ()
   "My own version of `next-buffer'. Don't show internal buffers."
