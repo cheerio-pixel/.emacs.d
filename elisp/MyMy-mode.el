@@ -600,6 +600,7 @@ _s_: modified      ^ ^
                   ("(" delete-pair)
                   ("SPC" delete-horizontal-space)
                   ("/" delete-blank-lines)
+                  ("h" delete-line)
                   ;; Motion
                   ("n" next-line)
                   ("u" previous-line)
