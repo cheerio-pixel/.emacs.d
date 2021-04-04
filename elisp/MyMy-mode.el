@@ -23,8 +23,6 @@
    ("gs" org-sidebar-tree)
    ("gt" org-sidebar-tree-toggle)
    ("/" undo)
-   ("oki" helm-M-x)
-   ("oks" save-buffer)
    ("p" keyboard-quit)
    ("," ryo-modal-repeat)
    ("m" newline)
