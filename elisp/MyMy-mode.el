@@ -266,7 +266,7 @@
      )
     )
    ("\'" er/expand-region)
-   ("H"
+   ("On"
     (("c" er/mark-comment)
      ("d" er/mark-defun)
      ("w" er/mark-word)
