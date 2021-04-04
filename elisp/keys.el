@@ -24,6 +24,7 @@
 (global-unset-key (kbd "M-r"))
 (global-unset-key (kbd "M-p"))
 (global-unset-key (kbd "M-u"))
+(global-unset-key (kbd "C-l"))
 
 (global-unset-key (kbd "C-M-p"))
 (global-unset-key (kbd "C-M-f"))
