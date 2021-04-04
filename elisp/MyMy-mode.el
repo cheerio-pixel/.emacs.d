@@ -12,8 +12,6 @@
   :commands ryo-modal-mode
   :bind
   ("S-SPC" . ryo-modal-global-mode)
-  ("ü" . ryo-modal-global-mode)
-  ("ú" . ryo-modal-global-mode)
   ("ç" . ryo-modal-global-mode)
   ("M-t" . ryo-modal-global-mode)
   :config
