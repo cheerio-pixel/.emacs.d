@@ -19,6 +19,9 @@
   (setq ryo-modal-cursor-type 'beam)
   ;; Section-less
   (ryo-modal-keys
+   ("gr" golden-ratio-mode)
+   ("gs" org-sidebar-tree)
+   ("gt" org-sidebar-tree-toggle)
    ("/" undo)
    ("oki" helm-M-x)
    ("oks" save-buffer)
