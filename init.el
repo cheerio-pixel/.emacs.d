@@ -523,6 +523,7 @@
   (spaceline-toggle-process-on)
   (spaceline-toggle-nyan-cat-on)
   (setq powerline-default-separator 'wave)
+  (spaceline-compile)
   )
 (use-package avy
   :ensure t
