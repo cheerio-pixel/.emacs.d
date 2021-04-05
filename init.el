@@ -497,7 +497,6 @@
               (("C-c n I" . org-roam-insert-immediate))
               )
   )
-
 (use-package projectile
   :ensure t
   :diminish projectile-mode
