@@ -602,6 +602,7 @@
 (use-package which-key ;; Useful to tell what is the next command that i can do
   :ensure t
   :init
+  (setq which-key-enable-extended-define-key t)
   (setq which-key-side-window-location 'bottom)
   (setq which-key-side-window-max-height 0.40)
   (setq which-key-side-window-max-width 0.66)
