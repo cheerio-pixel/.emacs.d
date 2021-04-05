@@ -327,6 +327,7 @@
   (org-hide-emphasis-markers t)
   (org-refile-targets '((nil :maxlevel . 2)))
   (org-catch-invisible-edits 'error)
+  (org-special-ctrl-a/e t)
   ;; Theres seems to be a bug where i can't set new emphasis keywords
   ;; So the only way to set one is overwriting one (org-emphasis-alist
   ;; (btw, i can just modify org-font-lock-extra-keywords but i will not
