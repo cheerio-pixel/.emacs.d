@@ -426,6 +426,8 @@
   (after-init . winner-mode)
   :custom
   (org-roam-graph-exclude-matcher '("daily"))
+  (org-roam-graph-node-extra-config
+   '(("color" . "skyblue")))
   (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
   (org-roam-completion-everywhere t)
   ;; Daily notes
