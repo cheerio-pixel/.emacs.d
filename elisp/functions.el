@@ -232,6 +232,12 @@ This command assumes point is not in a string or comment."
 (defun switch-to-last-buffer ()
   (interactive)
   (switch-to-buffer nil))
+(defun create-scratch-buffer nil
+  "create a scratch buffer"
+  (interactive)
+  (switch-to-buffer (get-buffer-create "*scratch*"))
+  (python-mode)
+  )
 
 (defun my-god-mode-update-cursor ()
   (setq cursor-type (if (or god-local-mode buffer-read-only)
