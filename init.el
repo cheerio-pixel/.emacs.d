@@ -286,6 +286,7 @@
 (use-package magit
   :ensure t)
 (use-package org-mode
+  :init
   :custom
   ;; org-default-notes-file "~/task-of-the-day.org"
   ;; org-default-notes-file "~/org-mode/class-note-taking.org"
