@@ -107,7 +107,15 @@
       backend
     (append (if (consp backend) backend (list backend))
             '(:with company-yasnippet))))
+(defun paste-primary-selection ()
+  (interactive)
+  (insert (gui-get-primary-selection)))
 
+(defun yank-at-point ()
+  (interactive)
+  (yank)
+  (pop-global-mark)
+  )
 (defun mymy/insert-pair$ ()
   (interactive)
   (save-excursion
