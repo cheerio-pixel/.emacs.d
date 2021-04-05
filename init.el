@@ -306,6 +306,7 @@
      (screen . nil)
      (sql . nil)
      (sqlite . t)))
+  :config
   :custom
   ;; org-default-notes-file "~/task-of-the-day.org"
   ;; org-default-notes-file "~/org-mode/class-note-taking.org"
