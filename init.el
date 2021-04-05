@@ -390,17 +390,17 @@
   (org-mode . org-superstar-mode)
   (org-mode . prettify-symbols-mode)
   (org-mode . org-indent-mode)
-  (text-mode . olivetti-mode)
   (org-mode . flyspell-mode)
   (org-mode . auto-fill-mode)
-  (org-mode . electric-operator-mode)
+  ;; (org-mode . electric-operator-mode)
   (org-mode
    . (lambda () (setq-local fill-column 120
                             tab-width 2
-                            golden-ratio-max-width 140
                             fill-column 80
                             indent-tabs-mode nil
-                            ispell-dictionary "spanish")))
+                            ispell-dictionary "spanish"
+                            python-shell-interpreter "python3"
+                            )))
   )
 ;; Why do i live, just to suffer?
 (use-package org-journal
