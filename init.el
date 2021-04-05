@@ -325,6 +325,7 @@
      "xelatex -interaction nonstopmode %f"))
   (org-log-done t)
   (org-hide-emphasis-markers t)
+  (org-refile-targets '((nil :maxlevel . 2)))
   ;; Theres seems to be a bug where i can't set new emphasis keywords
   ;; So the only way to set one is overwriting one (org-emphasis-alist
   ;; (btw, i can just modify org-font-lock-extra-keywords but i will not
