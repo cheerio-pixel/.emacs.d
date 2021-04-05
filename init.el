@@ -26,7 +26,6 @@
   '(elpy
     use-package
     company-jedi
-    flx
     company-quickhelp
     pyenv-mode
     elisp-slime-nav
@@ -36,7 +35,6 @@
     pipenv
     ;; poetry
     ;; company-tabine
-    company-fuzzy
     golden-ratio
     perspective
     ryo-modal
@@ -82,7 +80,6 @@
     centered-cursor-mode
     emacsql-sqlite
     emacsql-sqlite3
-    olivetti
     bind-key
     yasnippet
     ace-jump-mode
