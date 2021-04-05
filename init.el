@@ -403,16 +403,16 @@
                             ispell-dictionary "spanish")))
   )
 ;; Why do i live, just to suffer?
-;; (use-package org-journal
-;;   :ensure t
-;;   :defer t
-;;   :init
-;;   ;; Change default prefix key; needs to be set before loading org-journal
-;;   (setq org-journal-prefix-key "C-c j ")
-;;   :config
-;;   (setq org-journal-dir "~/Dropbox (Maestral)/Creativè/journal/"
-;;         org-journal-date-format "%A, %d %B %Y")
-;;   )
+(use-package org-journal
+  :ensure t
+  :defer t
+  :init
+  ;; Change default prefix key; needs to be set before loading org-journal
+  (setq org-journal-prefix-key "C-c j")
+  :config
+  (setq org-journal-dir "~/Dropbox (Maestral)/Creativè/journal/"
+        org-journal-date-format "%A, %d %B %Y")
+  )
 (use-package org-superstar
   :ensure t
   :config
