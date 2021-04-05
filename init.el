@@ -234,6 +234,8 @@
          ("M-u" . flycheck-previous-error))
   )
 (use-package perspective
+  :custom
+  (persp-state-default-file "~/.emacs.d/persp/save-default")
   :config
   (persp-mode)
   )
