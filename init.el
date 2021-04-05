@@ -137,6 +137,8 @@
 (savehist-mode t)
 (spaceline-emacs-theme t)
 (pdf-tools-install)
+(persp-state-load)
+
 
 (use-package elpy
   :bind (:map python-mode-map
