@@ -8,13 +8,6 @@
   (condition-case nil (elpy-goto-definition)
     (error (elpy-rgrep-symbol
             (concat "\\(def\\|class\\)\s" (thing-at-point 'symbol) "(")))))
-(defun isr/persp-get-buffers-list ()
-  "Get filtered list of buffers, sorted alphabetically, actually it take the list without sorting"
-  ;; I suspect that the next line just return the name of the buffers
-  (cl-remove-if '(lambda (b) ;; This function return a string without *
-                   (if (stringp b)
-                       (string-match "^\[* \]" b) t))
-                (mapcar 'buffer-name (persp-buffers (persp-curr)))))
 (defun pipenv-start-first-time ()
   "My set of command to run when i want to create a virtual env"
   (interactive)
@@ -44,12 +37,6 @@
             (end (cdr bounds)))
       (org-display-inline-images nil nil beg end)
     (org-toggle-inline-images)))
-;; (defun isr/persp-get-buffers-list ()
-;;   "Get filtered list of buffers, sorted alphabetically."
-;;   (sort
-;;    (cl-remove-if '(lambda (b) (if (stringp b) (string-match "^\[* \]" b) t))
-;;                  (mapcar 'buffer-name (persp-buffers (persp-curr))))
-;;    'string<))
 (defun org-goto-tasks()
   (interactive)
   (org-id-goto "2271da12-1a80-4627-be66-9678d3926a36")
@@ -58,20 +45,6 @@
   (interactive)
   (org-id-goto "d3b993f2-6132-422c-8b30-ce2ef1867235")
   )
-
-(defun isr/persp-next-buffer ()
-  "My own version of `next-buffer'. Don't show internal buffers."
-  (interactive)
-  (let ((buffername (buffer-name (current-buffer)))
-        (bufferlist (isr/persp-get-buffers-list)))
-    (switch-to-buffer (or (cadr (member buffername bufferlist)) (car bufferlist)))))
-
-(defun isr/persp-previous-buffer ()
-  "My own version of `next-buffer'. Don't show internal buffers"
-  (interactive)
-  (let ((buffername (buffer-name (current-buffer)))
-        (bufferlist (reverse (isr/persp-get-buffers-list))))
-    (switch-to-buffer (or (cadr (member buffername bufferlist)) (car bufferlist)))))
 (defun revert-buffer-no-confirm ()
   "Revert buffer without confirmation."
   (interactive)

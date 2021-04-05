@@ -36,7 +36,6 @@
     ;; poetry
     ;; company-tabine
     golden-ratio
-    perspective
     ryo-modal
     julia-mode
     yasnippet-snippets
@@ -137,7 +136,6 @@
 (savehist-mode t)
 (spaceline-emacs-theme t)
 (pdf-tools-install)
-(persp-state-load)
 
 
 (use-package elpy
@@ -235,13 +233,6 @@
          ("M-n" . flycheck-next-error)
          ("M-u" . flycheck-previous-error))
   )
-(use-package perspective
-  :custom
-  (persp-state-default-file "~/.emacs.d/persp/save-default")
-  :config
-  (persp-mode)
-  )
-
 ;;;;;                   MODAL CORNER
 (use-package god-mode
   :ensure t
@@ -783,9 +774,6 @@
 ;;;;;;;;;;;HOOKS;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-(add-hook 'kill-emacs-hook
-          #'persp-state-save)
 
 
 ;; (add-hook 'window-configuration-change-hook

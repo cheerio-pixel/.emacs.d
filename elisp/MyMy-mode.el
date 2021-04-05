@@ -1,5 +1,4 @@
 (provide 'MyMy-mode)
-(require 'perspective)
 (require 'elpy)
 (require 'hideshow)
 (require 'org)
@@ -169,8 +168,8 @@
    )
   ;; Buffers
   (ryo-modal-keys
-   (">>" isr/persp-next-buffer)
-   ("<<" isr/persp-previous-buffer)
+   (">>" next-buffer)
+   ("<<" previous-buffer)
    ("o"
     (("l" helm-locate)
      ("k"
@@ -198,16 +197,9 @@
       :name "Insert"
       )
      ("p" ;; Some commands are left
-      (("n" persp-next)
-       ("u" persp-prev)
-       ("y" persp-switch)
-       ("m" persp-set-buffer)
-       ("k" persp-remove-buffer)
-       ("\;" persp-state-save)
-       ("\:" persp-state-load)
-       ("s" projectile-switch-project)
+      (("s" projectile-switch-project)
        )
-      :name "Projectile & Perspective"
+      :name "Projectile"
       )
      ("w"
       (("f" ace-window)
@@ -620,7 +612,7 @@ _s_: modified      ^ ^
 (which-key-add-key-based-replacements
   "ok" "Buffers, Files & and M-x"
   "oa" "Insert"
-  "op" "Projectile & Perspective"
+  "op" "Projectile"
   "ow" "Windows"
   "ot" "Bookmarks & Registers")
 (which-key-add-major-mode-key-based-replacements 'python-mode
