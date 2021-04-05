@@ -657,8 +657,14 @@
 (setq-default tab-width 4)
 (setq-default
  prettify-symbols-alist
- '(("#+BEGIN_SRC"     . "λ")
-   ("#+END_SRC"       . "λ")
+ '(("#+BEGIN_SRC"     . "Λ")
+   ("#+END_SRC"       . "Λ")
+   ("#+begin_src"     . "Λ")
+   ("#+end_src"       . "Λ")
+   ("lambda"          . "λ")
+   ("!=" . "≠")
+   ("<=" . "≤")
+   (">=" . "≥")
    ("[ ]" . "☐")
    ("[X]" . "☑")
    ("[-]" . "❍")
