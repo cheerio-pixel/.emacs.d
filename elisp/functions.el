@@ -124,6 +124,23 @@
     (insert "$")
     )
   )
+(defun mymy/insert-pair~ ()
+  (interactive)
+  (save-excursion
+    (insert "~")
+    (exchange-point-and-mark)
+    (insert "~")
+    )
+  )
+(defun mymy/insert-pair= ()
+  (interactive)
+  (save-excursion
+    (insert "=")
+    (exchange-point-and-mark)
+    (insert "=")
+    )
+  )
+
 
 (defun avy-delete-region (arg)
   "Select two lines and delete the region between them.
