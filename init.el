@@ -142,6 +142,7 @@
   :bind (:map python-mode-map
               ("C-c C-q" . jupyter-eval-buffer)
               ("C-c C-j" . jupyter-run-repl)
+              ("C-M-y" . company-jedi)
               )
   :init (with-eval-after-load 'python (elpy-enable))
   :hook
