@@ -417,7 +417,7 @@
   :ensure t
   :config
   (org-superstar-configure-like-org-bullets)
-  (setq org-superstar-headline-bullets-list '(?◉ ?⮔ ?○ ?✸ ?✿ ?✥ ?❂ ?❄ ?‖))
+  (setq org-superstar-headline-bullets-list '(?◉ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄ ?⁋))
   )
 (use-package org-roam
   :ensure t
