@@ -110,13 +110,14 @@
 ;; Set the font
 (custom-set-faces
  '(default
-    ((t (:family
-         "Fantasque Sans Mono"
-         :foundry "outline"
-         :slant normal
-         :weight normal
-         :height 160
-         :width normal)))))
+    ((t
+      (:family "Fantasque Sans Mono"
+               :foundry "outline"
+               :slant normal
+               :weight normal
+               :height 160
+               :width normal
+               )))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
