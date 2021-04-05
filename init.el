@@ -287,6 +287,7 @@
   :ensure t)
 (use-package org-mode
   :init
+  (setq org-modules '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m))
   :custom
   ;; org-default-notes-file "~/task-of-the-day.org"
   ;; org-default-notes-file "~/org-mode/class-note-taking.org"
