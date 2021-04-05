@@ -289,6 +289,23 @@
   :init
   (setq org-modules '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m))
   (setq org-clock-string-limit 20)
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((R . t)
+     (ditaa . t)
+     (dot . t)
+     (emacs-lisp . t)
+     (gnuplot . t)
+     (haskell . nil)
+     (latex . t)
+     (ledger . t)
+     (ocaml . nil)
+     (octave . t)
+     (python . t)
+     (ruby . t)
+     (screen . nil)
+     (sql . nil)
+     (sqlite . t)))
   :custom
   ;; org-default-notes-file "~/task-of-the-day.org"
   ;; org-default-notes-file "~/org-mode/class-note-taking.org"
