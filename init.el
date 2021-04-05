@@ -794,10 +794,9 @@
 
 (add-hook 'emacs-lisp-mode-hook
           (lambda()
-            (aggressive-indent-mode t)
-            (company-mode t)
-            (rainbow-delimiters-mode t)
-            (company-fuzzy-mode)
+            (aggressive-indent-mode)
+            (company-mode)
+            (rainbow-delimiters-mode)
             ))
 
 (add-hook 'post-command-hook ;Execute after a command
