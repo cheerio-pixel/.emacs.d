@@ -195,7 +195,8 @@
   :config
   (setq blacken-line-length 79))
 (use-package company
-  :config  (setq company-idle-delay 1)
+  :config
+  (setq company-idle-delay 1)
   (setq company-dabbrev-downcase nil)
   ;; Show suggestions after entering Nth characters.
   (setq company-minimum-prefix-length 3)
