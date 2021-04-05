@@ -642,6 +642,7 @@
 (setq inhibit-compacting-font-caches t)
 (setq custom-file null-device)
 (setq use-package-always-demand (daemonp))
+(setq initial-major-mode 'python-mode)
 (setq-default tab-always-indent 'complete)
 (setq-default whitespace-line-column 1000)
 (setq-default cursor-type '(hbar . 3)) ;; Change cursor to a bar
