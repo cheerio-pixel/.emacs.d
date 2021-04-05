@@ -436,12 +436,49 @@
       :file-name "daily/%<%Y-%m-%d>"
       :head "#+title: %<%Y-%m-%d>\n\n"
       :olp ("Default note"))
-     ("t" "task" entry
+     ("f" "Findings" entry
       #'org-roam-capture--get-point
-      "* TODO %?"
+      "* %?\n"
       :file-name "daily/%<%Y-%m-%d>"
       :head "#+title: %<%Y-%m-%d>\n\n"
-      :olp ("Task"))
+      :olp ("Findings")
+      )
+     ("s" "Code Snippet")
+     ("sp" "Python" entry
+      #'org-roam-capture--get-point
+      "* %?\n#+BEGIN_SRC python\n%x\n#+END_SRC"
+      :file-name "daily/%<%Y-%m-%d>"
+      :head "#+title: %<%Y-%m-%d>\n\n"
+      :olp ("Code Snippet")
+      )
+     ("t" "Magnum Opus" entry
+      #'org-roam-capture--get-point
+      "* %? %^g\n"
+      :file-name "daily/%<%Y-%m-%d>"
+      :head "#+title: %<%Y-%m-%d>\n\n"
+      :olp ("Magnum Opus")
+      )
+     ("l" "Links" entry
+      #'org-roam-capture--get-point
+      "* [[%x][%?]]\n"
+      :file-name "daily/%<%Y-%m-%d>"
+      :head "#+title: %<%Y-%m-%d>\n\n"
+      :olp ("Links")
+      )
+     ("o" "Ocurrence" entry
+      #'org-roam-capture--get-point
+      "* %?\n"
+      :file-name "daily/%<%Y-%m-%d>"
+      :head "#+title: %<%Y-%m-%d>\n\n"
+      :olp ("Ocurrence")
+      )
+     ("p" "Phone" entry
+      #'org-roam-capture--get-point
+      "* %x \n"
+      :file-name "daily/%<%Y-%m-%d>"
+      :head "#+title: %<%Y-%m-%d>\n\n"
+      :olp ("Phone")
+      )
      ))
   :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
