@@ -642,6 +642,7 @@
 (setq inhibit-compacting-font-caches t)
 (setq custom-file null-device)
 (setq use-package-always-demand (daemonp))
+(setq mouse-yank-at-point t)
 (setq initial-major-mode 'python-mode)
 (setq initial-scratch-message "\
 # This buffer is for notes you don't want to save, and for Python code.")
