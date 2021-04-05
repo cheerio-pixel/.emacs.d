@@ -206,9 +206,6 @@
   (setq company-tooltip-align-annotations t)
   (setq company-fuzzy-sorting-backend 'flx)
   (setq company-fuzzy-show-annotation t)
-  (setq company-frontends '(company-pseudo-tooltip-frontend company-echo-metadata-frontend))
-  (define-key company-active-map (kbd "C-h") 'company-select-next-or-abort)
-  (define-key company-active-map (kbd "C-l") 'company-select-previous-or-abort)
   (add-to-list 'company-frontends '(company-pseudo-tooltip-frontend
                                     company-echo-metadata-frontend))
   (define-key yas-minor-mode-map "\C-l" 'yas-expand)
