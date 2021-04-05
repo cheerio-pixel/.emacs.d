@@ -782,9 +782,9 @@
           #'persp-state-save)
 
 
-(add-hook 'window-configuration-change-hook
-          (lambda ()
-            (set-window-margins (car (get-buffer-window-list (current-buffer) nil t)) 2 2)))
+;; (add-hook 'window-configuration-change-hook
+;;           (lambda ()
+;;             (set-window-margins (car (get-buffer-window-list (current-buffer) nil t)) 2 2)))
 
 (add-hook 'emacs-lisp-mode-hook
           (lambda()
