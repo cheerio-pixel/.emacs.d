@@ -425,6 +425,7 @@
   (after-init . org-roam-mode)
   (after-init . winner-mode)
   :custom
+  (org-roam-graph-exclude-matcher '("daily"))
   (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
   (org-roam-completion-everywhere t)
   ;; Daily notes
