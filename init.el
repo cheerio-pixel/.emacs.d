@@ -329,6 +329,8 @@
   (org-catch-invisible-edits 'error)
   (org-special-ctrl-a/e t)
   (org-habit-show-all-today t)
+  ;; In collapsed view, hide empty lines between subtrees
+  (org-cycle-separator-lines 0)
   ;; Theres seems to be a bug where i can't set new emphasis keywords
   ;; So the only way to set one is overwriting one (org-emphasis-alist
   ;; (btw, i can just modify org-font-lock-extra-keywords but i will not
