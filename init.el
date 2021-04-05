@@ -267,9 +267,6 @@
          :map helm-map
          ("C-n" . helm-next-line)
          ("C-u" . helm-previous-line)
-         ("C-l" . helm-toggle-resplit-and-swap-windows)
-         :map helm-find-files-map
-         ("C-t" . helm-find-files-up-one-level)
          )
   :init
   (setq helm-split-window-default-side 'right)
