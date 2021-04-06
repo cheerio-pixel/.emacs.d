@@ -21,6 +21,7 @@
    ("gr" golden-ratio-mode)
    ("gs" org-sidebar-tree)
    ("gt" org-sidebar-tree-toggle)
+   ("gd" remember)
    ("/" undo)
    ("p" keyboard-quit)
    ("," ryo-modal-repeat)
@@ -309,6 +310,7 @@
    'org-mode
    ;; avalible r s
    ("M-m" org-meta-return)
+   ("M-c" org-toggle-checkbox)
    ("C-m" org-insert-heading-respect-content)
    ("r"
     (("s" org-preview-latex-fragment)
