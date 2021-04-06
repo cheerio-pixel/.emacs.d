@@ -136,9 +136,10 @@
 (savehist-mode t)
 (spaceline-emacs-theme t)
 (pdf-tools-install)
-(desktop-save-mode)
+()
+;; (desktop-save-mode)
 ;; optional: automatically load previous session on startup
-(desktop-read)
+;; (desktop-read)
 
 
 (use-package elpy
