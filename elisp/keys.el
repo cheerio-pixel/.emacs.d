@@ -34,6 +34,8 @@
 (global-unset-key (kbd "C-M-p"))
 (global-unset-key (kbd "C-c C-b"))
 (global-unset-key (kbd "C-M-e"))
+(global-unset-key (kbd "M-o"))
+
 
 ;;;;;                   SET KEY
 (global-set-key (kbd "C-t") 'point-to-register)
@@ -87,6 +89,7 @@
 (global-set-key (kbd "C-M-z") 'zen-mode)
 (global-set-key (kbd "C-M-,") 'company-capf)
 (global-set-key (kbd "C-M-e") 'company-complete)
+(global-set-key (kbd "C-c y y") 'yas-insert-snippet)
 
 ;; (global-set-key (kbd "<f5>") 'keyboard-escape-quit) This is not the way to bind a command of this class
 (define-key key-translation-map (kbd "C-z") (kbd "C-g"))

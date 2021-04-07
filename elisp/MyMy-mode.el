@@ -6,6 +6,7 @@
 (require 'magit)
 (require 'flycheck)
 (require 'expand-region)
+(require 'yasnippet)
 (use-package ryo-modal
   :ensure t
   :commands ryo-modal-mode
