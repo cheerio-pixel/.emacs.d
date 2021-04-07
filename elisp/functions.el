@@ -114,7 +114,6 @@
     )
   )
 
-
 (defun avy-delete-region (arg)
   "Select two lines and delete the region between them.
 

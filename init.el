@@ -102,7 +102,6 @@
 ;; Load the mapped ryo-modal
 (require 'MyMy-mode)
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;START;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -136,7 +135,7 @@
 (savehist-mode t)
 (spaceline-emacs-theme t)
 (pdf-tools-install)
-()
+(save-place-mode)
 ;; (desktop-save-mode)
 ;; optional: automatically load previous session on startup
 ;; (desktop-read)
@@ -249,7 +248,6 @@
         ((god-mode-disabled) . my-god-mode-update-cursor)
         )
   )
-
 ;;;;;                   HELM MODE
 (use-package helm
   :ensure t
