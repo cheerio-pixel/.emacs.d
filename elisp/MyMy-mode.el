@@ -22,6 +22,8 @@
    ("gs" org-sidebar-tree)
    ("gt" org-sidebar-tree-toggle)
    ("gd" remember)
+   ("gD" remember-notes)
+   ("gy" yas-visit-snippet-file)
    ("/" undo)
    ("p" keyboard-quit)
    ("," ryo-modal-repeat)
