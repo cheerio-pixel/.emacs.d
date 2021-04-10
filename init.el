@@ -522,6 +522,8 @@
          )
   :init
   (setq-default projectile-project-search-path '("~/Projects/"))
+  (setq projectile-completion-system 'helm
+        projectile-switch-project-action 'helm-projectile)
   )
 (use-package spaceline
   :ensure t
