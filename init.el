@@ -377,7 +377,7 @@
   (org-todo-keywords
    '((sequence "TODO" "|" "DONE")
      (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
-     (sequence "CLASS")
+     (sequence "CLASS" "|")
      (sequence "CANCELED")))
   (org-capture-templates
    ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
