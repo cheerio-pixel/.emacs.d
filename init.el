@@ -573,17 +573,20 @@
 (use-package dashboard
   :ensure t
   :init
+  ;; It's just that i like the phrase
   (setq dashboard-banner-logo-title "Welcome back, legend")
   ;; Set the banner
   ;; (setq dashboard-startup-banner [VALUE])
   (setq dashboard-set-footer nil)
-  (setq dashboard-show-shortcuts nil)
+  (setq dashboard-show-shortcuts t)
+  (setq dashboard-agenda-release-buffers t)
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
   (setq dashboard-center-content t)
   (setq dashboard-items '((recents  . 5)
-                          (projects . 5)
+                          (agenda . 5)
                           (bookmarks . 10)
+                          (projects . 5)
                           ))
   :config
   (dashboard-setup-startup-hook)
