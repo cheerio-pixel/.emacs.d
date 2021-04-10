@@ -233,10 +233,9 @@
   (setq company-require-match nil)
   (setq company-show-numbers t)
   (setq company-tooltip-align-annotations t)
-  (setq company-fuzzy-sorting-backend 'flx)
-  (setq company-fuzzy-show-annotation t)
   (add-to-list 'company-frontends '(company-pseudo-tooltip-frontend
                                     company-echo-metadata-frontend))
+  (add-to-list 'company-backends #'company-tabnine)
   (define-key yas-minor-mode-map "\C-l" 'yas-expand)
   (define-key yas-keymap "\C-l" 'yas-next-field-or-maybe-expand)
   (dolist (keymap (list yas-minor-mode-map yas-keymap))
