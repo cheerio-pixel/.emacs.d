@@ -334,15 +334,15 @@
   ;; org-default-notes-file "~/org-mode/class-note-taking.org"
   ;; initial-buffer-choice  org-default-notes-filev
   ;; Pdflatex
-  ;; (org-latex-pdf-process
-  ;;  '("pdflatex -interaction nonstopmode -output-directory %o %f"
-  ;;    ;; "bibtex %b"
-  ;;    "pdflatex -interaction nonstopmode -output-directory %o %f"
-  ;;    "pdflatex -interaction nonstopmode -output-directory %o %f"))
-  ;; Xelatex
   (org-latex-pdf-process
-   '("xelatex -interaction nonstopmode %f"
-     "xelatex -interaction nonstopmode %f"))
+   '("pdflatex -interaction nonstopmode -output-directory %o %f"
+     ;; "bibtex %b"
+     "pdflatex -interaction nonstopmode -output-directory %o %f"
+     "pdflatex -interaction nonstopmode -output-directory %o %f"))
+  ;; Xelatex
+  ;; (org-latex-pdf-process
+  ;;  '("xelatex -interaction nonstopmode %f"
+  ;;    "xelatex -interaction nonstopmode %f"))
   (org-log-done t)
   (org-hide-emphasis-markers t)
   (org-refile-targets '((nil :maxlevel . 2)))
