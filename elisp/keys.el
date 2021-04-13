@@ -1,5 +1,4 @@
 (provide 'keys)
-(global-set-key (kbd "C-u") 'previous-line)
 (global-set-key (kbd "C-M-y") 'duplicate-current-line);; Duplicate line
 (global-set-key (kbd "C-S-e") 'forward-word)
 
@@ -73,8 +72,6 @@
 (global-set-key (kbd "C-M-b") 'isearch-backward-regexp)
 (global-set-key (kbd "C-M-f") 'isearch-forward-regexp)
 
-(global-set-key (kbd "C-;") 'universal-argument)
-
 (global-set-key (kbd "C-q") 'backward-delete-word)
 (global-set-key (kbd "M-z") 'delete-region)
 (global-set-key (kbd "M-q") 'delete-line)
@@ -95,6 +92,8 @@
 (define-key key-translation-map (kbd "C-z") (kbd "C-g"))
 (define-key key-translation-map (kbd "<f5>") (kbd "C-g"))
 (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+(define-key key-translation-map (kbd "C-;") (kbd "C-u"))
+(define-key key-translation-map (kbd "C-u") (kbd "C-p"))
 
 
 
