@@ -134,7 +134,7 @@
 (xterm-mouse-mode t)
 (savehist-mode t)
 (spaceline-emacs-theme t)
-(pdf-tools-install)
+;; (pdf-tools-install)
 (save-place-mode)
 ;; (desktop-save-mode)
 ;; optional: automatically load previous session on startup

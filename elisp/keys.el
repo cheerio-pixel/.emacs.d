@@ -16,7 +16,6 @@
 (global-unset-key (kbd "C-s"))
 (global-unset-key (kbd "C-b"))
 (global-unset-key (kbd "C-f"))
-(global-unset-key (kbd "C-p"))
 (global-unset-key (kbd "M-f"))
 (global-unset-key (kbd "M-b"))
 (global-unset-key (kbd "M-s"))
@@ -37,8 +36,6 @@
 
 
 ;;;;;                   SET KEY
-(global-set-key (kbd "C-t") 'point-to-register)
-(global-set-key (kbd "C-S-t") 'jump-to-register)
 
 (global-set-key (kbd "C-o") 'smart-open-line)
 
@@ -80,7 +77,6 @@
 (global-set-key (kbd "C->") 'mc/mark-next-like-this)
 (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
 (global-set-key (kbd "C-c m c") 'mc/edit-lines)
-(global-set-key (kbd "C-p C-l") 'mc/mark-all-in-region)
 
 (global-set-key (kbd "C-a") 'smarter-move-beginning-of-line)
 (global-set-key (kbd "C-M-z") 'zen-mode)
