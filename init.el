@@ -548,18 +548,18 @@
   )
 (use-package avy
   :ensure t
-  :bind(("C-p C-q" . avy-goto-char)
-        ("C-p C-w" . avy-goto-char-2)
-        ("C-p C-f" . avy-goto-word-0)
-        ("C-p C-a" . avy-goto-word-1)
-        ("C-p C-p" . avy-goto-line)
-        ("C-p C-t" . avy-goto-word-crt-line)
-        ("C-p C-d" . (lambda () ;; Go to end of word of current line
-                       (interactive) (avy-goto-word-crt-line) (forward-word)))
-        ("C-p C-u" . avy-goto-parens)
-        ("M-g g" . avy-goto-line)
-        ("M-g M-g" . avy-goto-line)
-        )
+  ;; :bind(("C-p C-q" . avy-goto-char)
+  ;;       ("C-p C-w" . avy-goto-char-2)
+  ;;       ("C-p C-f" . avy-goto-word-0)
+  ;;       ("C-p C-a" . avy-goto-word-1)
+  ;;       ("C-p C-p" . avy-goto-line)
+  ;;       ("C-p C-t" . avy-goto-word-crt-line)
+  ;;       ("C-p C-d" . (lambda () ;; Go to end of word of current line
+  ;;                      (interactive) (avy-goto-word-crt-line) (forward-word)))
+  ;;       ("C-p C-u" . avy-goto-parens)
+  ;;       ("M-g g" . avy-goto-line)
+  ;;       ("M-g M-g" . avy-goto-line)
+  ;;       )
   :init
   (setq avy-case-fold-search nil)
   (setq avy-keys '(?n ?e ?i ?k ?y ?m ?u ?c ?r ?s ?t))
