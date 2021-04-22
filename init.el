@@ -14,7 +14,9 @@
 (set-frame-parameter nil 'fullscreen 'fullboth) ; Fullscreen
 (setq redisplay-dont-pause t)
 (setq frame-resize-pixelwise t)
-(setq gc-cons-threshold 40000000) ; Garbage collector threshold: 40mb
+;; (setq gc-cons-threshold 40000000) ; Garbage collector threshold: 40mb
+(setq gc-cons-threshold 100000000) ; Garbage collector threshold: 100mb
+(setq read-process-output-max (* 1024 1024)) ;; 1mb
 (tool-bar-mode -1)   ; This is much easier
 (menu-bar-mode -1)   ; than needing to change
 (scroll-bar-mode -1) ; this in every OS
@@ -308,7 +310,8 @@
 (use-package org-mode
   :init
   (setq org-modules '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m))
-  (setq org-clock-string-limit 20)
+  (setq org-clock-string-limit 25)
+  (setq spaceline-org-clock-format-function 'dwim/org-clock-get-string)
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((R . t)
@@ -451,55 +454,55 @@
   (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
   (org-roam-completion-everywhere t)
   ;; Daily notes
-  (org-roam-dailies-directory "daily/")
+  (org-roam-dailies-directory "capture")
   (org-roam-dailies-capture-templates
    '(("d" "default" entry
       #'org-roam-capture--get-point
       "* %?"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
+      :file-name "capture/capture"
+      :head "#+title: Note\n\n"
       :olp ("Default note"))
      ("f" "Findings" entry
       #'org-roam-capture--get-point
       "* %?\n"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
+      :file-name "capture/capture"
+      :head "#+title: Note\n\n"
       :olp ("Findings")
       )
      ("s" "Code Snippet")
      ("sp" "Python" entry
       #'org-roam-capture--get-point
       "* %?\n#+BEGIN_SRC python\n%x\n#+END_SRC"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
+      :file-name "capture/capture"
+      :head "#+title: Note\n\n"
       :olp ("Code Snippet")
       )
      ("t" "Magnum Opus" entry
       #'org-roam-capture--get-point
       "* %? %^g\n"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
+      :file-name "capture/capture"
+      :head "#+title: Note\n\n"
       :olp ("Magnum Opus")
       )
      ("l" "Links" entry
       #'org-roam-capture--get-point
       "* [[%x][%?]]\n"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
+      :file-name "capture/capture"
+      :head "#+title: Note\n\n"
       :olp ("Links")
       )
      ("o" "Ocurrence" entry
       #'org-roam-capture--get-point
       "* %?\n"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
+      :file-name "capture/capture"
+      :head "#+title: Note\n\n"
       :olp ("Ocurrence")
       )
      ("p" "Phone" entry
       #'org-roam-capture--get-point
       "* %x \n"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
+      :file-name "capture/capture"
+      :head "#+title: Note\n\n"
       :olp ("Phone")
       )
      ))
@@ -548,16 +551,7 @@
   )
 (use-package avy
   :ensure t
-  :bind(("C-p C-q" . avy-goto-char)
-        ("C-p C-w" . avy-goto-char-2)
-        ("C-p C-f" . avy-goto-word-0)
-        ("C-p C-a" . avy-goto-word-1)
-        ("C-p C-p" . avy-goto-line)
-        ("C-p C-t" . avy-goto-word-crt-line)
-        ("C-p C-d" . (lambda () ;; Go to end of word of current line
-                       (interactive) (avy-goto-word-crt-line) (forward-word)))
-        ("C-p C-u" . avy-goto-parens)
-        ("M-g g" . avy-goto-line)
+  :bind(("M-g g" . avy-goto-line)
         ("M-g M-g" . avy-goto-line)
         )
   :init
@@ -620,6 +614,18 @@
   :hook
   ((after-init) . nyan-mode)
   )
+(use-package buffer-flip
+  :ensure t
+  :bind  (("C-<tab>" . buffer-flip)
+          ("C-S-<iso-lefttab>" . buffer-flip-backward)
+          :map buffer-flip-map
+          ("C-<tab>" .   buffer-flip-forward)
+          ("C-S-<iso-lefttab>" . buffer-flip-backward)
+          ("M-ESC" .     buffer-flip-abort))
+  :config
+  (setq buffer-flip-skip-patterns
+        '("^\\*helm\\b"
+          "^\\*swiper\\*$")))
 (use-package which-key ;; Useful to tell what is the next command that i can do
   :ensure t
   :init
@@ -638,11 +644,7 @@
          )
   )
 (use-package change-inner
-  :ensure t
-  :bind (("C-p z" . change-inner)
-         ("C-p x" . change-outer)
-         )
-  )
+  :ensure t)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;DEFAULT;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -663,7 +665,7 @@
 (setq custom-file null-device)
 (setq use-package-always-demand (daemonp))
 (setq mouse-yank-at-point t)
-(setq initial-major-mode 'python-mode)
+(setq initial-major-mode 'org-mode)
 (setq initial-scratch-message "\
 # This buffer is for notes you don't want to save, and for Python code.")
 (setq-default tab-always-indent 'complete)
@@ -682,9 +684,6 @@
    ("#+begin_src"     . "Λ")
    ("#+end_src"       . "Λ")
    ("lambda"          . "λ")
-   ("!=" . "≠")
-   ("<=" . "≤")
-   (">=" . "≥")
    ("[ ]" . "☐")
    ("[X]" . "☑")
    ("[-]" . "❍")

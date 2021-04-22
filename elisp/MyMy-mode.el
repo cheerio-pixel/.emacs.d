@@ -13,7 +13,7 @@
   :bind
   ("S-SPC" . ryo-modal-global-mode)
   ("ç" . ryo-modal-global-mode)
-  ("M-t" . ryo-modal-global-mode)
+  ("C-t" . ryo-modal-global-mode)
   :config
   (setq ryo-modal-cursor-color nil)
   (setq ryo-modal-cursor-type 'beam)
