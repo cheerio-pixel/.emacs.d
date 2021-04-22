@@ -17,7 +17,7 @@
 (setq gc-cons-threshold 40000000) ; Garbage collector threshold: 40mb
 (tool-bar-mode -1)   ; This is much easier
 (menu-bar-mode -1)   ; than needing to change
-(scroll-bar-mode -1) ; this in every OS
+;; (scroll-bar-mode -1) ; this in every OS
 (add-to-list 'package-archives
              '("elpy" . "http://jorgenschaefer.github.io/packages/"))
 (unless package-archive-contents (package-refresh-contents)) ;; fetch the list of packages available
@@ -368,8 +368,8 @@
   (org-pomodoro-short-break-length 5)
   (org-pomodoro-long-break-length 15)
   (org-startup-folded t)
-  (org-default-notes-file "~/Dropbox (Maestral)/Creativè/agenda")
-  (org-agenda-files '("~/Dropbox (Maestral)/Creativè/"))
+  ;; (org-default-notes-file "~/Dropbox (Maestral)/Creativè/agenda")
+  ;; (org-agenda-files '("~/Dropbox (Maestral)/Creativè/"))
   (org-todo-keyword-faces
    '(("CANCELED" . (:foreground "red" :weight bold))
      ("CLASS" . (:foreground "purple" :weight bold))
@@ -379,30 +379,30 @@
      (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
      (sequence "CLASS" "|")
      (sequence "CANCELED")))
-  (org-capture-templates
-   ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
-   ;; https://orgmode.org/manual/Template-elements.html#Template-elements
-   '(("q" "Queue")
-     ("qt" "Queue Task Waiting" entry (file+headline "~/Dropbox (Maestral)/Creativè/notebook.org" "=What I'm Planing to do=")
-      "* %?\n %i" :prepend t
-      )
-     ("qi" "Queue Task Doing" entry (file+headline "~/Dropbox (Maestral)/Creativè/notebook.org" "=What I'm Doing Now=")
-      "* %?\n %i" :clock-in t :prepend t
-      )
-     ("t" "Simple Todo")
-     ("ts" "Todo Scheduled" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
-      "* TODO %^t %?\n  %i\n"
-      )
-     ("tf" "Todo Scheduled pointing to a file" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
-      "* TODO %^t %?\n %i\n %a"
-      )
-     ("tt" "Plain Todo" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
-      "* TODO %?\n  %i\n"
-      )
-     ("td" "Todo Daily" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Daily")
-      "* TODO %?\n    SCHEDULED: <%<%Y-%m-%d %a> ++1d/2d>\n    :PROPERTIES:\n    :STYLE:    habit\n    :END:\n"
-      )
-     ))
+  ;; (org-capture-templates
+  ;;  ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
+  ;;  ;; https://orgmode.org/manual/Template-elements.html#Template-elements
+  ;;  '(("q" "Queue")
+  ;;    ("qt" "Queue Task Waiting" entry (file+headline "~/Dropbox (Maestral)/Creativè/notebook.org" "=What I'm Planing to do=")
+  ;;     "* %?\n %i" :prepend t
+  ;;     )
+  ;;    ("qi" "Queue Task Doing" entry (file+headline "~/Dropbox (Maestral)/Creativè/notebook.org" "=What I'm Doing Now=")
+  ;;     "* %?\n %i" :clock-in t :prepend t
+  ;;     )
+  ;;    ("t" "Simple Todo")
+  ;;    ("ts" "Todo Scheduled" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
+  ;;     "* TODO %^t %?\n  %i\n"
+  ;;     )
+  ;;    ("tf" "Todo Scheduled pointing to a file" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
+  ;;     "* TODO %^t %?\n %i\n %a"
+  ;;     )
+  ;;    ("tt" "Plain Todo" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
+  ;;     "* TODO %?\n  %i\n"
+  ;;     )
+  ;;    ("td" "Todo Daily" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Daily")
+  ;;     "* TODO %?\n    SCHEDULED: <%<%Y-%m-%d %a> ++1d/2d>\n    :PROPERTIES:\n    :STYLE:    habit\n    :END:\n"
+  ;;     )
+  ;;    ))
   (org-format-latex-options '(plist-put org-format-latex-options :scale 2.0 :background auto :foreground "white"))
   (org-highlight-latex-and-related '(latex script entities))
   :bind (("C-c o c" . org-capture))
@@ -423,98 +423,98 @@
                             )))
   )
 ;; Why do i live, just to suffer?
-(use-package org-journal
-  :ensure t
-  :defer t
-  :init
-  ;; Change default prefix key; needs to be set before loading org-journal
-  (setq org-journal-prefix-key "C-c j")
-  :config
-  (setq org-journal-dir "~/Dropbox (Maestral)/Creativè/journal/"
-        org-journal-date-format "%A, %d %B %Y")
-  )
+;; (use-package org-journal
+;;   :ensure t
+;;   :defer t
+;;   :init
+;;   ;; Change default prefix key; needs to be set before loading org-journal
+;;   (setq org-journal-prefix-key "C-c j")
+;;   :config
+;;   (setq org-journal-dir "~/Dropbox (Maestral)/Creativè/journal/"
+;;         org-journal-date-format "%A, %d %B %Y")
+;;   )
 (use-package org-superstar
   :ensure t
   :config
   (org-superstar-configure-like-org-bullets)
   (setq org-superstar-headline-bullets-list '(?◉ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄ ?⁋))
   )
-(use-package org-roam
-  :ensure t
-  :hook
-  (after-init . org-roam-mode)
-  (after-init . winner-mode)
-  :custom
-  (org-roam-graph-exclude-matcher '("daily"))
-  (org-roam-graph-node-extra-config
-   '(("color" . "skyblue")))
-  (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
-  (org-roam-completion-everywhere t)
-  ;; Daily notes
-  (org-roam-dailies-directory "daily/")
-  (org-roam-dailies-capture-templates
-   '(("d" "default" entry
-      #'org-roam-capture--get-point
-      "* %?"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
-      :olp ("Default note"))
-     ("f" "Findings" entry
-      #'org-roam-capture--get-point
-      "* %?\n"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
-      :olp ("Findings")
-      )
-     ("s" "Code Snippet")
-     ("sp" "Python" entry
-      #'org-roam-capture--get-point
-      "* %?\n#+BEGIN_SRC python\n%x\n#+END_SRC"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
-      :olp ("Code Snippet")
-      )
-     ("t" "Magnum Opus" entry
-      #'org-roam-capture--get-point
-      "* %? %^g\n"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
-      :olp ("Magnum Opus")
-      )
-     ("l" "Links" entry
-      #'org-roam-capture--get-point
-      "* [[%x][%?]]\n"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
-      :olp ("Links")
-      )
-     ("o" "Ocurrence" entry
-      #'org-roam-capture--get-point
-      "* %?\n"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
-      :olp ("Ocurrence")
-      )
-     ("p" "Phone" entry
-      #'org-roam-capture--get-point
-      "* %x \n"
-      :file-name "daily/%<%Y-%m-%d>"
-      :head "#+title: %<%Y-%m-%d>\n\n"
-      :olp ("Phone")
-      )
-     ))
-  :bind (:map org-roam-mode-map
-              (("C-c n l" . org-roam)
-               ("C-c n f" . org-roam-find-file)
-               ("C-c n g" . org-roam-graph)
-               ("C-c n c" . org-roam-dailies-capture-today)
-               ;; ("C-c n ")
-               )
-              :map org-mode-map
-              (("C-c n i" . org-roam-insert))
-              (("C-c n I" . org-roam-insert-immediate))
-              )
-  )
+;; (use-package org-roam
+;;   :ensure t
+;;   :hook
+;;   (after-init . org-roam-mode)
+;;   (after-init . winner-mode)
+;;   :custom
+;;   (org-roam-graph-exclude-matcher '("daily"))
+;;   (org-roam-graph-node-extra-config
+;;    '(("color" . "skyblue")))
+;;   (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
+;;   (org-roam-completion-everywhere t)
+;;   ;; Daily notes
+;;   (org-roam-dailies-directory "daily/")
+;;   (org-roam-dailies-capture-templates
+;;    '(("d" "default" entry
+;;       #'org-roam-capture--get-point
+;;       "* %?"
+;;       :file-name "daily/%<%Y-%m-%d>"
+;;       :head "#+title: %<%Y-%m-%d>\n\n"
+;;       :olp ("Default note"))
+;;      ("f" "Findings" entry
+;;       #'org-roam-capture--get-point
+;;       "* %?\n"
+;;       :file-name "daily/%<%Y-%m-%d>"
+;;       :head "#+title: %<%Y-%m-%d>\n\n"
+;;       :olp ("Findings")
+;;       )
+;;      ("s" "Code Snippet")
+;;      ("sp" "Python" entry
+;;       #'org-roam-capture--get-point
+;;       "* %?\n#+BEGIN_SRC python\n%x\n#+END_SRC"
+;;       :file-name "daily/%<%Y-%m-%d>"
+;;       :head "#+title: %<%Y-%m-%d>\n\n"
+;;       :olp ("Code Snippet")
+;;       )
+;;      ("t" "Magnum Opus" entry
+;;       #'org-roam-capture--get-point
+;;       "* %? %^g\n"
+;;       :file-name "daily/%<%Y-%m-%d>"
+;;       :head "#+title: %<%Y-%m-%d>\n\n"
+;;       :olp ("Magnum Opus")
+;;       )
+;;      ("l" "Links" entry
+;;       #'org-roam-capture--get-point
+;;       "* [[%x][%?]]\n"
+;;       :file-name "daily/%<%Y-%m-%d>"
+;;       :head "#+title: %<%Y-%m-%d>\n\n"
+;;       :olp ("Links")
+;;       )
+;;      ("o" "Ocurrence" entry
+;;       #'org-roam-capture--get-point
+;;       "* %?\n"
+;;       :file-name "daily/%<%Y-%m-%d>"
+;;       :head "#+title: %<%Y-%m-%d>\n\n"
+;;       :olp ("Ocurrence")
+;;       )
+;;      ("p" "Phone" entry
+;;       #'org-roam-capture--get-point
+;;       "* %x \n"
+;;       :file-name "daily/%<%Y-%m-%d>"
+;;       :head "#+title: %<%Y-%m-%d>\n\n"
+;;       :olp ("Phone")
+;;       )
+;;      ))
+;;   :bind (:map org-roam-mode-map
+;;               (("C-c n l" . org-roam)
+;;                ("C-c n f" . org-roam-find-file)
+;;                ("C-c n g" . org-roam-graph)
+;;                ("C-c n c" . org-roam-dailies-capture-today)
+;;                ;; ("C-c n ")
+;;                )
+;;               :map org-mode-map
+;;               (("C-c n i" . org-roam-insert))
+;;               (("C-c n I" . org-roam-insert-immediate))
+;;               )
+;;   )
 (use-package projectile
   :ensure t
   :diminish projectile-mode
@@ -716,7 +716,7 @@
 ;; Note that the default is x100), but this seems too high.
 (setq undo-outer-limit 1006632960)
 
-(setq exec-path (append exec-path '("/home/frailin/.local/bin")))
+;; (setq exec-path (append exec-path '("/home/frailin/.local/bin")))
 (setq jit-lock-defer-time 0)
 (setq fast-but-imprecise-scrolling t)
 (setq auto-window-vscroll nil)
