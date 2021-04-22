@@ -8,6 +8,7 @@
         backward-delete-char
         backward-delete-word
         delete-current-line
+        delete-region
         god-mode-self-insert
         helm-confirm-and-exit-minibuffer
         helm-mini
@@ -22,8 +23,10 @@
         keyboard-quit
         kill-region
         my-delete-whole-line
+        org-beginning-of-line
         org-end-of-line
         org-self-insert-command
+        org-yank
         ryo:6c0b5bec3522d2e495ff80ad83791864:insert-quotes
         ryo:d77df2a102a270b1c4ab1b70c78e1fd0:insert\ text
         ryo:d80a40411c8db939213101425d5bc549:Comment

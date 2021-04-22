@@ -52,7 +52,7 @@
      ("c" org-roam-dailies-capture-today)
      ("C"
       (("f" org-roam-dailies-find-today)
-       ("d" org-roam-dailies-find-date)
+       ("d" org-roam-dailies-find-date) ;; Tecnically obsolete
        ("t" org-roam-dailies-find-directory)
        )
       )
@@ -315,6 +315,8 @@
    ("M-m" org-meta-return)
    ("M-c" org-toggle-checkbox)
    ("C-m" org-insert-heading-respect-content)
+   ("M-U" org-metaright)
+   ("M-N" org-metaleft)
    ("r"
     (("s" org-preview-latex-fragment)
      ("t" org-latex-preview)

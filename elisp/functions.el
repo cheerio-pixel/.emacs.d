@@ -146,6 +146,17 @@ The window scope is determined by `avy-all-windows' or
              (progn (goto-char (car beg)) (forward-visible-line 1) (point))
              (car end)))))))
     (select-window initial-window)))
+(defun dwim/org-clock-get-string ()
+  (let ((clock-string (org-clock-get-clock-string))
+        (help-text "Org mode clock is running.\nmouse-1 shows a \
+menu\nmouse-2 will jump to task"))
+    (if (and (> org-clock-string-limit 0)
+             (> (length clock-string) org-clock-string-limit))
+        (propertize
+         (substring clock-string 0 org-clock-string-limit)
+         'help-echo (concat help-text ": " org-clock-heading))
+      (propertize clock-string 'help-echo help-text)))
+  )
 (defun avy-delete-whole-line (arg)
   "Select line and delete the whole selected line.
 
@@ -208,7 +219,7 @@ This command assumes point is not in a string or comment."
   "create a scratch buffer"
   (interactive)
   (switch-to-buffer (get-buffer-create "*scratch*"))
-  (python-mode)
+  (org-mode)
   )
 
 (defun my-god-mode-update-cursor ()
