@@ -637,12 +637,12 @@
   :bind (("C-'" . er/expand-region)
          )
   )
-(use-package change-inner
-  :ensure t
-  :bind (("C-p z" . change-inner)
-         ("C-p x" . change-outer)
-         )
-  )
+;; (use-package change-inner
+;;   :ensure t
+;;   :bind (("C-p z" . change-inner)
+;;          ("C-p x" . change-outer)
+;;          )
+;;   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;DEFAULT;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
