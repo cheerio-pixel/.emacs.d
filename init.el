@@ -477,6 +477,13 @@
       :head "#+title: Note\n\n"
       :olp ("Code Snippet")
       )
+     ("c" "Programming")
+     ("cp" "Python" entry
+      #'org-roam-capture--get-point
+      "* %x \n"
+      :file-name "capture/capture"
+      :head "#+title: Note\n\n"
+      :olp ("Code"))
      ("t" "Magnum Opus" entry
       #'org-roam-capture--get-point
       "* %? %^g\n"
