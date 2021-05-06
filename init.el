@@ -673,6 +673,7 @@
 (setq use-package-always-demand (daemonp))
 (setq mouse-yank-at-point t)
 (setq initial-major-mode 'org-mode)
+(setq comp-async-report-warnings-errors nil)
 (setq initial-scratch-message "\
 # This buffer is for notes you don't want to save, and for Python code.")
 (setq-default tab-always-indent 'complete)
