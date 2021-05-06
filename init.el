@@ -815,6 +815,10 @@
             (rainbow-delimiters-mode)
             ))
 
+(add-hook 'csv-mode-hook
+          'csv-align-mode
+          )
+
 (add-hook 'post-command-hook ;Execute after a command
           'hcz-set-cursor-color-according-to-mode)
 (add-hook 'after-init-hook
