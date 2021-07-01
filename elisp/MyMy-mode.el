@@ -1,4 +1,3 @@
-(provide 'MyMy-mode)
 (require 'elpy)
 (require 'hideshow)
 (require 'org)
@@ -7,6 +6,12 @@
 (require 'flycheck)
 (require 'expand-region)
 (require 'yasnippet)
+(require 'csv-mode)
+(require 'centaur-tabs)
+(defun export-subtree-to-pdf()
+  (interactive)
+  (org-latex-export-to-pdf nil t nil nil nil)
+  )
 (use-package ryo-modal
   :ensure t
   :commands ryo-modal-mode
@@ -19,6 +24,7 @@
   (setq ryo-modal-cursor-type 'beam)
   ;; Section-less
   (ryo-modal-keys
+   ("C-\\" toggle-input-method :exit 1)
    ("gr" golden-ratio-mode)
    ("gs" org-sidebar-tree)
    ("gt" org-sidebar-tree-toggle)
@@ -172,8 +178,8 @@
    )
   ;; Buffers
   (ryo-modal-keys
-   (">>" next-buffer)
-   ("<<" previous-buffer)
+   (">>" centaur-tabs-move-current-tab-to-right)
+   ("<<" centaur-tabs-move-current-tab-to-left)
    ("o"
     (("l" helm-locate)
      ("k"
@@ -181,6 +187,8 @@
        ("u" kill-buffer)
        ("n" switch-to-last-buffer)
        ("c" kill-current-buffer)
+       ("x" reopen-killed-file)
+       ("X" reopen-killed-file-fancy)
        ("m" helm-find-files :name "Find file")
        ("y" find-name-dired)
        ("r" helm-find :name "Find file recursively") ;; Find files recursively
@@ -232,6 +240,7 @@
     (("c" org-capture)
      ("a" org-agenda)
      ("u" org-clock-goto)
+     ("y" export-subtree-to-pdf)
      ("m"
       (("y" org-goto-tasks)
        ("n" org-goto-school-schedule)
@@ -299,6 +308,13 @@
    ("8" "M-8")
    ("9" "M-9")
    )
+  (ryo-modal-major-mode-keys
+   'csv-mode
+   ("s"
+    (("t" csv-align-fields)
+     )
+    )
+   )
   ;; emacs-lisp mode map
   (ryo-modal-major-mode-keys
    'emacs-lisp-mode
@@ -314,9 +330,10 @@
    ;; avalible r s
    ("M-m" org-meta-return)
    ("M-c" org-toggle-checkbox)
-   ("C-m" org-insert-heading-respect-content)
+   ("C-M-m" org-insert-heading-respect-content)
    ("M-U" org-metaright)
    ("M-N" org-metaleft)
+   ("m" org-return)
    ("r"
     (("s" org-preview-latex-fragment)
      ("t" org-latex-preview)
@@ -582,7 +599,7 @@
                    :color pink
                    :hint nil)
                   "
-                         ^Delete^
+               ^Delete^
 ^^----------------------------------------
 _t_: whole-line    _r_: unmark
 _d_: backward-word _(_: unmark up
@@ -636,4 +653,5 @@ _s_: modified      ^ ^
   "rd" "Debugging"
   "rr" "Refractoring"
   )
-;;; power-mode.el ends here; I'm still wondering why do they put this
+(provide 'MyMy-mode)
+;;; power-mode.el ends here

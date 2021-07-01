@@ -1,6 +1,10 @@
 (provide 'functions)
 (require 'avy)
 (require 'elpy)
+(require 'subr-x)
+(require 'cl-lib)
+
+
 (defun elpy-goto-definition-or-rgrep ()
   "Go to the definition of the symbol at point, if found. Otherwise, run `elpy-rgrep-symbol'."
   (interactive)
@@ -37,6 +41,36 @@
             (end (cdr bounds)))
       (org-display-inline-images nil nil beg end)
     (org-toggle-inline-images)))
+
+
+(defvar killed-file-list nil
+  "List of recently killed files.")
+
+(defun add-file-to-killed-file-list ()
+  "If buffer is associated with a file name, add that file to the
+`killed-file-list' when killing the buffer."
+  (when buffer-file-name
+    (push buffer-file-name killed-file-list)))
+
+(add-hook 'kill-buffer-hook #'add-file-to-killed-file-list)
+
+(defun reopen-killed-file ()
+  "Reopen the most recently killed file, if one exists."
+  (interactive)
+  (when killed-file-list
+    (find-file (pop killed-file-list))))
+(defun reopen-killed-file-fancy ()
+  "Pick a file to revisit from a list of files killed during this
+Emacs session."
+  (interactive)
+  (if killed-file-list
+      (let ((file (completing-read "Reopen killed file: " killed-file-list
+                                   nil nil nil nil (car killed-file-list))))
+        (when file
+          (setq killed-file-list (cl-delete file killed-file-list :test #'equal))
+          (find-file file)))
+    (error "No recently-killed files to reopen")))
+
 (defun org-goto-tasks()
   (interactive)
   (org-id-goto "2271da12-1a80-4627-be66-9678d3926a36")
@@ -45,6 +79,16 @@
   (interactive)
   (org-id-goto "d3b993f2-6132-422c-8b30-ce2ef1867235")
   )
+
+
+(defun strip-<p>-html (paragraph contents info)
+  (string-remove-suffix
+   "</p>"
+   (string-remove-prefix
+    "<p>"
+    (org-html-paragraph paragraph contents info)))
+  )
+
 (defun revert-buffer-no-confirm ()
   "Revert buffer without confirmation."
   (interactive)
@@ -211,6 +255,10 @@ If region is active, insert enclosing characters at region boundaries.
 This command assumes point is not in a string or comment."
   (interactive "P")
   (insert-pair arg ?\" ?\"))
+
+;;(advice-add 'toggle-input-method :after 'ryo-modal-global-mode)
+;;;(advice-add 'toggle-input-method :after 'ryo-modal-global-mode)
+
 
 (defun switch-to-last-buffer ()
   (interactive)

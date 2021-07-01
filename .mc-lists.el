@@ -24,15 +24,21 @@
         kill-region
         my-delete-whole-line
         org-beginning-of-line
+        org-delete-char
         org-end-of-line
+        org-kill-line
+        org-return
         org-self-insert-command
         org-yank
+        rectangle-forward-char
+        rectangle-mark-mode
         ryo:6c0b5bec3522d2e495ff80ad83791864:insert-quotes
         ryo:d77df2a102a270b1c4ab1b70c78e1fd0:insert\ text
         ryo:d80a40411c8db939213101425d5bc549:Comment
         slime-autodoc-space
         slime-space
         smarter-move-beginning-of-line
+        switch-to-last-buffer
         ))
 
 (setq mc/cmds-to-run-once
@@ -50,6 +56,7 @@
         hydra-git/nil
         jupyter-eval-buffer
         point-to-register
+        rectangle-backward-char
         ryo-modal-global-mode
         ryo-modal-mode-all
         ))

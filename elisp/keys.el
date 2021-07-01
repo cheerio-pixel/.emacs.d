@@ -1,4 +1,5 @@
 (provide 'keys)
+(require 'centered-cursor-mode)
 (global-set-key (kbd "C-M-y") 'duplicate-current-line);; Duplicate line
 (global-set-key (kbd "C-S-e") 'forward-word)
 
@@ -66,12 +67,9 @@
 
 (global-set-key (kbd "C-M-u") 'backward-list)
 
-(global-set-key (kbd "C-b") 'search-backward)
-(global-set-key (kbd "C-f") 'search-forward)
 (global-set-key (kbd "M-b") 'isearch-backward)
 (global-set-key (kbd "M-f") 'isearch-forward)
 (global-set-key (kbd "C-M-b") 'isearch-backward-regexp)
-(global-set-key (kbd "C-M-f") 'isearch-forward-regexp)
 
 (global-set-key (kbd "C-q") 'backward-delete-word)
 (global-set-key (kbd "M-z") 'delete-region)
@@ -87,12 +85,21 @@
 (global-set-key (kbd "C-M-,") 'company-capf)
 (global-set-key (kbd "C-M-e") 'company-complete)
 (global-set-key (kbd "C-c y y") 'yas-insert-snippet)
+(global-set-key (kbd "<f7>") 'org-capture)
+;; Rare bindings
+(global-set-key (kbd "C-b") 'switch-to-last-buffer)
+(global-set-key (kbd "C-f") 'helm-mini)
+(global-set-key (kbd "C-M-f") 'helm-M-x)
 
-;; (global-set-key (kbd "<f5>") 'keyboard-escape-quit) This is not the way to bind a command of this class
-(define-key key-translation-map (kbd "C-z") (kbd "C-g"))
-(define-key key-translation-map (kbd "<f5>") (kbd "C-g"))
-(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+(define-key centered-cursor-keymap (kbd "C-M--") 'centered-cursor-raise-position-manually)
+(define-key centered-cursor-keymap (kbd "C-M-+") 'centered-cursor-lower-position-manually)
+(define-key centered-cursor-keymap (kbd "C-M-=") 'centered-cursor-lower-position-manually)
+(define-key centered-cursor-keymap (kbd "C-M-0") 'centered-cursor-reset-position-manually)
+
+
+;; (global-set-key (kbd "<f5>") 'keyboard-escape-quit) This is not the way to bind a command of this kind
 (define-key key-translation-map (kbd "C-;") (kbd "C-u"))
+(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
 (define-key key-translation-map (kbd "C-u") (kbd "C-p"))
 
 

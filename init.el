@@ -78,7 +78,6 @@
     dashboard
     hide-mode-line
     live-py-mode
-    centered-cursor-mode
     emacsql-sqlite
     emacsql-sqlite3
     bind-key
@@ -86,6 +85,7 @@
     ace-jump-mode
     ace-window
     hydra
+    centaur-tabs
     )
   )
 (mapc #';; install all packages in list
@@ -101,8 +101,11 @@
 (require 'keys)
 ;; Load all functions
 (require 'functions)
-;; Load the mapped ryo-modal
+;; Load the maped ryo-modal
 (require 'MyMy-mode)
+(require 'centered-cursor-mode)
+
+;; (require 'org-protocol)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;START;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -141,6 +144,24 @@
 ;; (desktop-save-mode)
 ;; optional: automatically load previous session on startup
 ;; (desktop-read)
+
+
+(use-package eaf
+  :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
+  :init
+  (use-package epc :defer t :ensure t)
+  (use-package ctable :defer t :ensure t)
+  (use-package deferred :defer t :ensure t)
+  (use-package s :defer t :ensure t)
+  :custom
+  (eaf-browser-continue-where-left-off t)
+  :config
+  (eaf-setq eaf-browser-enable-adblocker "true")
+  (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
+  (eaf-bind-key take_photo "p" eaf-camera-keybinding)
+  (eaf-bind-key nil "M-q" eaf-browser-keybinding) ;; unbind, see more in the Wiki
+  )
 
 
 (use-package elpy
@@ -185,6 +206,8 @@
   )
 (use-package lsp-mode
   :ensure t
+  :init
+  (setq lsp-keymap-prefix "s-m")
   :config
   (lsp-register-custom-settings
    '(("pyls.plugins.pyls_mypy.enabled" t t)
@@ -378,7 +401,7 @@
      ("CLASS" . (:foreground "purple" :weight bold))
      ))
   (org-todo-keywords
-   '((sequence "TODO" "|" "DONE")
+   '((sequence "TODO" "DOING" "|" "DONE")
      (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
      (sequence "CLASS" "|")
      (sequence "CANCELED")))
@@ -391,6 +414,10 @@
       )
      ("qi" "Queue Task Doing" entry (file+headline "~/Dropbox (Maestral)/Creativè/notebook.org" "=What I'm Doing Now=")
       "* %?\n %i" :clock-in t :prepend t
+      )
+     ("l" "list")
+     ("ls" "list song" entry (file+headline "~/Dropbox (Maestral)/Creativè/notebook.org" "List songs")
+      "* [[%x][%?]]"
       )
      ("t" "Simple Todo")
      ("ts" "Todo Scheduled" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
@@ -405,6 +432,13 @@
      ("td" "Todo Daily" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Daily")
       "* TODO %?\n    SCHEDULED: <%<%Y-%m-%d %a> ++1d/2d>\n    :PROPERTIES:\n    :STYLE:    habit\n    :END:\n"
       )
+     ("k" "Japanese")
+     ("kk" "Kanji" entry (file+headline "~/Dropbox (Maestral)/Creativè/Japanese/kanji.org" "Kanji Bin")
+      "* %?\n#TODO\nMeaning: \nKun: \nOn: \n"
+      )
+     ("kw" "Word" entry (file+headline "~/Dropbox (Maestral)/Creativè/Japanese/words.org" "Word Bin")
+      "* %?\n#TODO\nMeaning: \nReading: \nType: "
+      )
      ))
   (org-format-latex-options '(plist-put org-format-latex-options :scale 2.0 :background auto :foreground "white"))
   (org-highlight-latex-and-related '(latex script entities))
@@ -417,9 +451,7 @@
   (org-mode . auto-fill-mode)
   ;; (org-mode . electric-operator-mode)
   (org-mode
-   . (lambda () (setq-local fill-column 120
-                            tab-width 2
-                            fill-column 80
+   . (lambda () (setq-local tab-width 2
                             indent-tabs-mode nil
                             ispell-dictionary "spanish"
                             python-shell-interpreter "python3"
@@ -525,6 +557,26 @@
               (("C-c n I" . org-roam-insert-immediate))
               )
   )
+(use-package anki-editor
+  :ensure t
+  :config
+  (setq anki-editor--ox-anki-html-backend
+        (if anki-editor-use-math-jax
+            (org-export-create-backend
+             :parent 'html
+             :transcoders '((latex-fragment . anki-editor--ox-latex-for-mathjax)
+                            (latex-environment . anki-editor--ox-latex-for-mathjax)
+                            (paragraph . strip-<p>-html)
+                            ))
+          (org-export-create-backend
+           :parent 'html
+           :transcoders '((latex-fragment . anki-editor--ox-latex)
+                          (latex-environment . anki-editor--ox-latex)
+                          (paragraph . strip-<p>-html)
+                          ))))
+  :hook
+  (org-mode . anki-editor-mode)
+  )
 (use-package projectile
   :ensure t
   :diminish projectile-mode
@@ -575,7 +627,7 @@
   :ensure t
   :init
   ;; It's just that i like the phrase
-  (setq dashboard-banner-logo-title "Welcome back, legend")
+  (setq dashboard-banner-logo-title "Welcome back, legend 800 Japanese words await you")
   ;; Set the banner
   ;; (setq dashboard-startup-banner [VALUE])
   (setq dashboard-set-footer nil)
@@ -621,18 +673,80 @@
   :hook
   ((after-init) . nyan-mode)
   )
-(use-package buffer-flip
-  :ensure t
-  :bind  (("C-<tab>" . buffer-flip)
-          ("C-S-<iso-lefttab>" . buffer-flip-backward)
-          :map buffer-flip-map
-          ("C-<tab>" .   buffer-flip-forward)
-          ("C-S-<iso-lefttab>" . buffer-flip-backward)
-          ("M-ESC" .     buffer-flip-abort))
+(use-package centaur-tabs
+  :demand
   :config
-  (setq buffer-flip-skip-patterns
-        '("^\\*helm\\b"
-          "^\\*swiper\\*$")))
+  (centaur-tabs-mode t)
+  (centaur-tabs-change-fonts "Fantasque Sans Mono" 160)
+  (setq centaur-tabs-style "bar"
+        centaur-tabs-set-bar 'over
+        centaur-tabs-set-icons t
+        centaur-tabs-set-close-button nil
+        centaur-tabs-cycle-scope 'tabs
+        centaur-tabs-show-new-tab-button nil
+        centaur-tabs-label-fixed-length 12
+        )
+  (defun centaur-tabs-buffer-groups ()
+    "`centaur-tabs-buffer-groups' control buffers' group rules.
+
+ Group centaur-tabs with mode if buffer is derived from `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
+ All buffer name start with * will group to \"Emacs\".
+ Other buffer group by `centaur-tabs-get-group-name' with project name."
+    (list
+     (cond
+      ;; ((not (eq (file-remote-p (buffer-file-name)) nil))
+      ;; "Remote")
+      ((or (string-equal "*" (substring (buffer-name) 0 1))
+           (memq major-mode '(magit-process-mode
+                              magit-status-mode
+                              magit-diff-mode
+                              magit-log-mode
+                              magit-file-mode
+                              magit-blob-mode
+                              magit-blame-mode
+                              )))
+       "Emacs")
+      ((or (derived-mode-p 'prog-mode)
+           (memq major-mode '(org-mode
+                              org-agenda-clockreport-mode
+                              org-src-mode
+                              org-agenda-mode
+                              org-beamer-mode
+                              org-indent-mode
+                              org-bullets-mode
+                              org-cdlatex-mode
+                              org-agenda-log-mode
+                              diary-mode)))
+       "Editing")
+      ((derived-mode-p 'dired-mode)
+       "Dired")
+      ((memq major-mode '(helpful-mode
+                          help-mode))
+       "Help")
+      (t
+       (centaur-tabs-get-group-name (current-buffer))))))
+  :bind
+  ("C-S-<iso-lefttab>" . centaur-tabs-backward)
+  ("C-<tab>" . centaur-tabs-forward)
+  ("C-z" . centaur-tabs-backward-group)
+  ("C-S-z" . centaur-tabs-forward-group)
+  )
+;; (use-package anki
+;;   :defer t
+;;   :load-path "~/.emacs.d/lisp/anki/"
+;;   :init
+;;   (add-hook 'anki-mode-hook #'shrface-mode)
+;;   (add-hook 'anki-card-mode-hook #'shrface-mode)
+;;   (autoload 'anki "anki")
+;;   (autoload 'anki-browser "anki")
+;;   (autoload 'anki-list-decks "anki")
+;;   :config
+;;   ;; (require 'shrface) ; If you use shrface, require it here
+;;   (setq anki-shr-rendering-functions (append anki-shr-rendering-functions shr-external-rendering-functions))
+;;   (setq sql-sqlite-program "/usr/bin/sqlite3")
+;;   ;; Set up the collection directory, which should contain a file - collection.anki2 and a folder - collection.media
+;;   (setq anki-collection-dir "/Users/chandamon/Library/Application Support/Anki2/User 1")
+;;   )
 (use-package which-key ;; Useful to tell what is the next command that i can do
   :ensure t
   :init
@@ -661,7 +775,7 @@
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (setq default-buffer-file-coding-system 'utf-8)
-(setq default-fill-column 80)
+(setq default-fill-column 74)
 (add-to-list 'golden-ratio-extra-commands 'ace-window)
 (setq highlight-nonselected-windows t)
 (setq use-dialog-box nil) ; Text-based options are better
@@ -676,6 +790,7 @@
 (setq comp-async-report-warnings-errors nil)
 (setq initial-scratch-message "\
 # This buffer is for notes you don't want to save, and for Python code.")
+(setq default-input-method "japanese-mozc")
 (setq-default tab-always-indent 'complete)
 (setq-default whitespace-line-column 1000)
 (setq-default cursor-type '(hbar . 3)) ;; Change cursor to a bar
@@ -703,6 +818,7 @@
 (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
 (setq auto-save-default nil)
 (setq sentence-end-double-space nil)
+(setq sgml-quick-keys 'close)
 (set-frame-parameter (selected-frame) 'buffer-predicate
                      (lambda (buf) (not (string-match-p "^*" (buffer-name buf)))))
 
@@ -863,7 +979,6 @@
     (if (not (minibufferp (current-buffer)))
         (ryo-modal-mode t))))
 
-
 ;; (setq python-shell-interpreter "jupyter"
 ;;       python-shell-interpreter-args "console --simple-prompt"
 ;;       python-shell-prompt-detect-failure-warning nil)
@@ -909,8 +1024,8 @@
 
 
 
-;; Init.el ends here
 (ryo-modal-global-mode t)
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
+;; Init.el ends here
