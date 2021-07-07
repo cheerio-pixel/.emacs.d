@@ -111,6 +111,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;START;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Freely change the font
 ;; Set the font
 (custom-set-faces
  '(default
@@ -119,7 +120,7 @@
                :foundry "outline"
                :slant normal
                :weight normal
-               :height 120
+               :height 130
                :width normal
                )))))
 
