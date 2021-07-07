@@ -168,6 +168,8 @@
   :hook
   (clojure-mode . cider-mode)
   )
+(use-package clojure-mode
+  :ensure t)
 (use-package elpy
   :bind (:map python-mode-map
               ("C-c C-q" . jupyter-eval-buffer)
