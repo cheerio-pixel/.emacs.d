@@ -230,7 +230,7 @@ selected line."
   "Replace the next line with kill ring."
   (interactive)
   (save-excursion
-    (next-line)
+    (forward-line)
     (beginning-of-line)
     (delete-line 1)
     (yank)
@@ -269,11 +269,6 @@ This command assumes point is not in a string or comment."
   (switch-to-buffer (get-buffer-create "*scratch*"))
   (org-mode)
   )
-
-(defun my-god-mode-update-cursor ()
-  (setq cursor-type (if (or god-local-mode buffer-read-only)
-                        'beam
-                      '(hbar . 3))))
 
 ;;;;;                   AVY
 (defun avy-goto-word-crt-line ()

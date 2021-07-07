@@ -90,6 +90,7 @@
 (global-set-key (kbd "C-b") 'switch-to-last-buffer)
 (global-set-key (kbd "C-f") 'helm-mini)
 (global-set-key (kbd "C-M-f") 'helm-M-x)
+(global-set-key (kbd "M-e") 'hippie-expand)
 
 (define-key centered-cursor-keymap (kbd "C-M--") 'centered-cursor-raise-position-manually)
 (define-key centered-cursor-keymap (kbd "C-M-+") 'centered-cursor-lower-position-manually)

@@ -55,6 +55,7 @@
      ("i" org-roam-insert)
      ("I" org-roam-insert-immediate)
      ("g" org-roam-graph)
+     ("t" org-roam-tag-add)
      ("c" org-roam-dailies-capture-today)
      ("C"
       (("f" org-roam-dailies-find-today)
@@ -93,6 +94,7 @@
    ("gn" scroll-up)
    )
   (ryo-modal-keys ;;; Avy
+   ("I" avy-goto-word-1)
    ("i"
     (("y" avy-goto-char)
      ("u" avy-goto-char-2)
@@ -180,6 +182,13 @@
   (ryo-modal-keys
    (">>" centaur-tabs-move-current-tab-to-right)
    ("<<" centaur-tabs-move-current-tab-to-left)
+   ("O"
+    (("k"
+      (("m" direx:jump-to-directory)
+       )
+      )
+     )
+    )
    ("o"
     (("l" helm-locate)
      ("k"

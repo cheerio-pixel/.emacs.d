@@ -54,7 +54,6 @@
     smartparens
     smart-yank
     nyan-mode
-    god-mode
     aggressive-indent
     dracula-theme
     ag
@@ -86,6 +85,7 @@
     ace-window
     hydra
     centaur-tabs
+    cider
     )
   )
 (mapc #';; install all packages in list
@@ -103,6 +103,7 @@
 (require 'functions)
 ;; Load the maped ryo-modal
 (require 'MyMy-mode)
+
 (require 'centered-cursor-mode)
 
 ;; (require 'org-protocol)
@@ -118,7 +119,7 @@
                :foundry "outline"
                :slant normal
                :weight normal
-               :height 160
+               :height 120
                :width normal
                )))))
 
@@ -146,24 +147,27 @@
 ;; (desktop-read)
 
 
-(use-package eaf
-  :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
-  :init
-  (use-package epc :defer t :ensure t)
-  (use-package ctable :defer t :ensure t)
-  (use-package deferred :defer t :ensure t)
-  (use-package s :defer t :ensure t)
-  :custom
-  (eaf-browser-continue-where-left-off t)
-  :config
-  (eaf-setq eaf-browser-enable-adblocker "true")
-  (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
-  (eaf-bind-key take_photo "p" eaf-camera-keybinding)
-  (eaf-bind-key nil "M-q" eaf-browser-keybinding) ;; unbind, see more in the Wiki
+;; (use-package eaf
+;;   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
+;;   :init
+;;   (use-package epc :defer t :ensure t)
+;;   (use-package ctable :defer t :ensure t)
+;;   (use-package deferred :defer t :ensure t)
+;;   (use-package s :defer t :ensure t)
+;;   :custom
+;;   (eaf-browser-continue-where-left-off t)
+;;   :config
+;;   (eaf-setq eaf-browser-enable-adblocker "true")
+;;   (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+;;   (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
+;;   (eaf-bind-key take_photo "p" eaf-camera-keybinding)
+;;   (eaf-bind-key nil "M-q" eaf-browser-keybinding) ;; unbind, see more in the Wiki
+;;   )
+(use-package cider
+  :ensure t
+  :hook
+  (clojure-mode . cider-mode)
   )
-
-
 (use-package elpy
   :bind (:map python-mode-map
               ("C-c C-q" . jupyter-eval-buffer)
@@ -260,7 +264,7 @@
   (setq company-tooltip-align-annotations t)
   (add-to-list 'company-frontends '(company-pseudo-tooltip-frontend
                                     company-echo-metadata-frontend))
-  (add-to-list 'company-backends #'company-tabnine)
+  ;; (add-to-list 'company-backends #'company-tabnine)
   (define-key yas-minor-mode-map "\C-l" 'yas-expand)
   (define-key yas-keymap "\C-l" 'yas-next-field-or-maybe-expand)
   (dolist (keymap (list yas-minor-mode-map yas-keymap))
@@ -285,18 +289,6 @@
          :map flycheck-mode-map
          ("M-n" . flycheck-next-error)
          ("M-u" . flycheck-previous-error))
-  )
-;;;;;                   MODAL CORNER
-(use-package god-mode
-  :ensure t
-  :init
-  (setq god-exempt-major-modes nil)
-  (setq god-exempt-predicates nil)
-  :bind (("<pause>" . god-mode-all)
-         )
-  :hook(((god-mode-enabled) . my-god-mode-update-cursor)
-        ((god-mode-disabled) . my-god-mode-update-cursor)
-        )
   )
 ;;;;;                   HELM MODE
 (use-package helm
@@ -330,6 +322,24 @@
   )
 (use-package magit
   :ensure t)
+(use-package ispell
+  ;; https://200ok.ch/posts/2020-08-22_setting_up_spell_checking_with_multiple_dictionaries.html
+  :config
+  (setq ispell-program-name "hunspell")
+  ;; Configure German, Swiss German, and two variants of English.
+  (setq ispell-dictionary "en_US,es_ES")
+  ;; ispell-set-spellchecker-params has to be called
+  ;; before ispell-hunspell-add-multi-dic will work
+  (ispell-set-spellchecker-params)
+  (ispell-hunspell-add-multi-dic "en_US,es_ES")
+  ;; For saving words to the personal dictionary, don't infer it from
+  ;; the locale, otherwise it would save to ~/.hunspell_de_DE.
+  (setq ispell-personal-dictionary "~/Dropbox (Maestral)/.hunspell_personal")
+  ;; The personal dictionary file has to exist, otherwise hunspell will
+  ;; silently not use it.
+  (unless (file-exists-p ispell-personal-dictionary)
+    (write-region "" nil ispell-personal-dictionary nil 0))
+  )
 (use-package org-mode
   :init
   (setq org-modules '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m))
@@ -369,6 +379,7 @@
   ;; (org-latex-pdf-process
   ;;  '("xelatex -interaction nonstopmode %f"
   ;;    "xelatex -interaction nonstopmode %f"))
+  (org-ellipsis "⤵")
   (org-log-done t)
   (org-hide-emphasis-markers t)
   (org-refile-targets '((nil :maxlevel . 2)))
@@ -404,7 +415,7 @@
    '((sequence "TODO" "DOING" "|" "DONE")
      (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
      (sequence "CLASS" "|")
-     (sequence "CANCELED")))
+     (sequence "CANCELLED")))
   (org-capture-templates
    ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
    ;; https://orgmode.org/manual/Template-elements.html#Template-elements
@@ -453,7 +464,6 @@
   (org-mode
    . (lambda () (setq-local tab-width 2
                             indent-tabs-mode nil
-                            ispell-dictionary "spanish"
                             python-shell-interpreter "python3"
                             )))
   )
@@ -463,7 +473,7 @@
   :defer t
   :init
   ;; Change default prefix key; needs to be set before loading org-journal
-  (setq org-journal-prefix-key "C-c j")
+  (setq org-journal-prefix-key "C-c j-")
   :config
   (setq org-journal-dir "~/Dropbox (Maestral)/Creativè/journal/"
         org-journal-date-format "%A, %d %B %Y")
@@ -480,10 +490,10 @@
   (after-init . org-roam-mode)
   (after-init . winner-mode)
   :custom
+  (org-roam-graph-viewer "/usr/bin/google-chrome-stable")
   (org-roam-graph-exclude-matcher '("daily"))
   (org-roam-graph-node-extra-config
    '(("color" . "skyblue")))
-  (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
   (org-roam-completion-everywhere t)
   ;; Daily notes
   (org-roam-dailies-directory "capture")
@@ -510,15 +520,21 @@
       :olp ("Code Snippet")
       )
      ("c" "Programming")
+     ("cc" "Python" entry
+      #'org-roam-capture--get-point
+      "* %?\n"
+      :file-name "capture/capture"
+      :head "#+title: Note\n\n"
+      :olp ("Code General"))
      ("cp" "Python" entry
       #'org-roam-capture--get-point
-      "* %x \n"
+      "* %?%x \n"
       :file-name "capture/capture"
       :head "#+title: Note\n\n"
       :olp ("Code"))
      ("t" "Magnum Opus" entry
       #'org-roam-capture--get-point
-      "* %? %^g\n"
+      "* %?\n"
       :file-name "capture/capture"
       :head "#+title: Note\n\n"
       :olp ("Magnum Opus")
@@ -544,7 +560,30 @@
       :head "#+title: Note\n\n"
       :olp ("Phone")
       )
+     ("y" "Lists" entry
+      #'org-roam-capture--get-point
+      "* %? \n"
+      :file-name "capture/capture"
+      :head "#+title: Note\n\n"
+      :olp ("Lists")
+      )
+     ("j" "Japanese")
+     ("jk" "Japanese Knowledge" entry ;; This include but not limited to: grammar, use case
+      #'org-roam-capture--get-point
+      "* Knowledge\n%?\n"
+      :file-name "capture/capture"
+      :head "#+title: Note\n\n"
+      :olp ("Japanese")
+      )
+     ("js" "Japanese Sentences" entry
+      #'org-roam-capture--get-point
+      "* Sentence\n%?\n"
+      :file-name "capture/capture"
+      :head "#+title: Note\n\n"
+      :olp ("Japanese")
+      )
      ))
+  (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
   :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
@@ -556,6 +595,12 @@
               (("C-c n i" . org-roam-insert))
               (("C-c n I" . org-roam-insert-immediate))
               )
+  )
+(use-package deft
+  :ensure t
+  :custom
+  (deft-extensions '("org"))
+  (deft-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
   )
 (use-package anki-editor
   :ensure t
@@ -686,6 +731,8 @@
         centaur-tabs-show-new-tab-button nil
         centaur-tabs-label-fixed-length 12
         )
+  (setq uniquify-separator "/"
+        uniquify-buffer-name-style 'forward)
   (defun centaur-tabs-buffer-groups ()
     "`centaur-tabs-buffer-groups' control buffers' group rules.
 
@@ -757,7 +804,6 @@
   :config
   (push '((nil . "ryo:.*:") . (nil . "")) which-key-replacement-alist)
   (which-key-mode)
-  (which-key-enable-god-mode-support)
   )
 (use-package expand-region
   :ensure t
@@ -955,10 +1001,12 @@
 (add-hook 'prog-mode
           (lambda()
             (auto-fill-mode t)
+            (rainbow-delimiters-mode)
             )
           )
 (add-hook 'TeX-after-compilation-finished-functions
           #'TeX-revert-document-buffer)
+(add-hook 'java-mode-hook #'lsp)
 
 (define-minor-mode mymy-mode
   "Define all keys to have a preference to override others"
