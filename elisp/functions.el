@@ -5,6 +5,39 @@
 (require 'cl-lib)
 
 
+;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Frames.html#Frames
+;; https://www.reddit.com/r/emacs/comments/h7ny99/org_mode_agenda_desktop_widget/fumxe5l/?utm_source=reddit&utm_medium=web2x&context=3
+(defvar my-agenda-frame nil)
+(defun my-agenda-make ()
+  (interactive)
+  (setq my-agenda-frame
+        (make-frame  '(;(display . ":0")
+                       (visibility . t)
+                                        ;(window-system . x)
+                       (minibuffer . nil)
+                       (z-group . below)
+                       (skip-taskbar . t)
+                       (vertical-scroll-bars . nil)
+                       (horizontal-scroll-bars . nil)
+                       (left-fringe . nil)
+                       (right-fringe . nil)
+                       (undecorated . t)
+                       (unsplittable . t)
+
+                       (no-accept-focus . t)
+                       (no-focus-on-map . t)
+                       (top . 10)
+                       (left . 10) 
+                       (width . (text-pixels . 480))
+                       (height . (text-pixels . 640)))))
+  (setq focus-in-hook 'ignore)
+  (setq mode-line-format nil))
+
+(defun my-agenda-remove ()
+  (interactive)
+  (delete-frame my-agenda-frame)
+  (setq my-agenda-frame nil))
+
 (defun elpy-goto-definition-or-rgrep ()
   "Go to the definition of the symbol at point, if found. Otherwise, run `elpy-rgrep-symbol'."
   (interactive)
@@ -42,6 +75,37 @@
       (org-display-inline-images nil nil beg end)
     (org-toggle-inline-images)))
 
+(defun yequake-org-roam-dailies-capture-today (&optional goto)
+  "Call `org-roam-dailies-capture-today' in a Yequake frame.
+Adds a function to `org-capture-after-finalize-hook' that closes
+the recently toggled Yequake frame and removes itself from the
+hook.
+
+Note: if another Yequake frame is toggled before the capture is
+finalized, when the capture is finalized, the wrong Yequake frame
+will be toggled."
+  (let* ((remove-hook-fn (lambda ()
+                           (remove-hook 'org-capture-after-finalize-hook #'yequake-retoggle))))
+    (add-hook 'org-capture-after-finalize-hook remove-hook-fn)
+    (add-hook 'org-capture-after-finalize-hook #'yequake-retoggle)
+    ;; MAYBE: Propose an `org-capture-switch-buffer-fn' variable that could be rebound here.
+
+    ;; NOTE: We override `org-switch-to-buffer-other-window' because
+    ;; it always uses `switch-to-buffer-other-window', and we want to
+    ;; display the template menu and capture buffer in the existing
+    ;; window rather than splitting the frame.
+    (cl-letf* (((symbol-function #'org-switch-to-buffer-other-window)
+                (symbol-function #'switch-to-buffer)))
+      (condition-case nil
+          (progn
+            (org-roam-dailies-capture-today goto)
+            ;; Be sure to return the "CAPTURE-" buffer, which is the current
+            ;; buffer at this point.
+            (current-buffer))
+        ((error quit)
+         ;; Capture aborted: remove the hook and hide the capture frame.
+         (remove-hook 'org-capture-after-finalize-hook #'yequake-retoggle)
+         (yequake-retoggle))))))
 
 (defvar killed-file-list nil
   "List of recently killed files.")
