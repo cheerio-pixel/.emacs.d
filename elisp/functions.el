@@ -4,6 +4,20 @@
 (require 'subr-x)
 (require 'cl-lib)
 
+;; https://emacs.stackexchange.com/questions/35417/how-to-insert-strings-from-a-string-list-in-one-file-into-another-file-with-a-h
+(defun mymy-common-numbers ()
+  (interactive)
+  (helm :sources
+        (helm-build-in-file-source "Strings"
+            "~/Dropbox (Maestral)/Creativè/Common-numbers.txt"
+          :action
+          '(("Insert vertically" .
+             (lambda (_candidate)
+               (insert (mapconcat #'identity (helm-marked-candidates) "\n"))))
+            ("Insert horizontally" .
+             (lambda (_candidate)
+               (insert (mapconcat #'identity (helm-marked-candidates) " "))))))))
+
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Frames.html#Frames
 ;; https://www.reddit.com/r/emacs/comments/h7ny99/org_mode_agenda_desktop_widget/fumxe5l/?utm_source=reddit&utm_medium=web2x&context=3
@@ -605,7 +619,9 @@ If ARG is zero, delete current line but exclude the trailing newline."
         (face-remap-set-base 'hl-line
                              (face-all-attributes 'hl-line-inactive))))))
                                         ;Here ends what i have behind me
-(defun split-window-sensibly-prefer-horizontal (&optional window)
+
+
+(defun split-window-sensibly-prefer-horizontal (&optional window) ;; Important
   "Based on split-window-sensibly, but designed to prefer a horizontal split,
 i.e. windows tiled side-by-side."
   (let ((window (or window (selected-window))))
