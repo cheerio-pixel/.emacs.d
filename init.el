@@ -1019,13 +1019,12 @@
 (add-hook 'prog-mode
           (lambda()
             (auto-fill-mode t)
-            (rainbow-delimiters-mode)
+            (rainbow-delimiters-mode t)
             )
           )
 (add-hook 'TeX-after-compilation-finished-functions
           #'TeX-revert-document-buffer)
 (add-hook 'java-mode-hook #'lsp)
-
 (define-minor-mode mymy-mode
   "Define all keys to have a preference to override others"
   :init-value nil
