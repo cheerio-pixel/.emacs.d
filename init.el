@@ -425,10 +425,10 @@
   (org-pomodoro-short-break-length 5)
   (org-pomodoro-long-break-length 15)
   (org-startup-folded t)
-  (org-default-notes-file "~/Dropbox (Maestral)/Creativè/agenda")
-  (org-agenda-files '("~/Dropbox (Maestral)/Creativè/"))
+  (org-default-notes-file "~/Dropbox (Maestral)/Creativè/agenda.org")
+  (org-agenda-files '("~/Dropbox (Maestral)/Creativè/Notebook/"))
   (org-todo-keyword-faces
-   '(("CANCELED" . (:foreground "red" :weight bold))
+   '(("CANCELLED" . (:foreground "red" :weight bold))
      ("CLASS" . (:foreground "purple" :weight bold))
      ))
   (org-todo-keywords
@@ -504,8 +504,27 @@
   (org-superstar-configure-like-org-bullets)
   (setq org-superstar-headline-bullets-list '(?◉ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄ ?⁋))
   )
+;; Migration to org roam v2
+;; (use-package org-roam-server
+;;   :ensure t
+;;   :config
+;;   (setq org-roam-server-host "127.0.0.1"
+;;         org-roam-server-port 8080
+;;         org-roam-server-authenticate nil
+;;         org-roam-server-export-inline-images t
+;;         org-roam-server-serve-files nil
+;;         org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
+;;         org-roam-server-network-poll t
+;;         org-roam-server-network-arrows nil
+;;         org-roam-server-network-label-truncate t
+;;         org-roam-server-network-label-truncate-length 60
+;;         org-roam-server-network-label-wrap-length 20))
+
 (use-package org-roam
   :ensure t
+  :config
+  (add-hook 'org-open-at-point-functions
+            #'org-roam-open-at-point nil)
   :hook
   (after-init . org-roam-mode)
   (after-init . winner-mode)
@@ -515,8 +534,10 @@
   (org-roam-graph-node-extra-config
    '(("color" . "skyblue")))
   (org-roam-completion-everywhere t)
+  (org-roam-buffer-window-parameters '((no-delete-other-windows . t)))
   ;; Daily notes
   (org-roam-dailies-directory "capture")
+  (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
   (org-roam-dailies-capture-templates
    '(("d" "default" entry
       #'org-roam-capture--get-point
@@ -546,12 +567,6 @@
       :file-name "capture/capture"
       :head "#+title: Note\n\n"
       :olp ("Code General"))
-     ("cp" "Python" entry
-      #'org-roam-capture--get-point
-      "* %?%x \n"
-      :file-name "capture/capture"
-      :head "#+title: Note\n\n"
-      :olp ("Code"))
      ("t" "Magnum Opus" entry
       #'org-roam-capture--get-point
       "* %?\n"
@@ -603,7 +618,6 @@
       :olp ("Japanese")
       )
      ))
-  (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
   :bind (:map org-roam-mode-map
               (("C-c n l" . org-roam)
                ("C-c n f" . org-roam-find-file)
@@ -621,6 +635,7 @@
   :custom
   (deft-extensions '("org"))
   (deft-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
+  (deft-recursive t)
   )
 (use-package anki-editor
   :ensure t
@@ -830,6 +845,19 @@
   )
 (use-package change-inner
   :ensure t)
+(use-package yequake
+  :ensure t
+  :custom
+  (yequake-frames
+   '(("org-roam-dailies-capture-today"
+      (buffer-fns . (yequake-org-roam-dailies-capture-today))
+      (width . 0.75)
+      (height . 0.5)
+      (alpha . 0.80)
+      (frame-parameters . ((undecorated . t)
+                           (skip-taskbar . t)
+                           (sticky . t))))))
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;DEFAULT;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
