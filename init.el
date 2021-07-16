@@ -1,5 +1,5 @@
 ;; Launch the debugger with a stacktrace if someshing goes wrong
-;; Godammit, it can be annoying
+;; Goddammit, it can be annoying
 ;; (setq debug-on-error t)
 
 (require 'package)
@@ -86,6 +86,11 @@
     hydra
     centaur-tabs
     cider
+    org-roam
+    csv-mode
+    pdf-tools
+    haskell-mode
+    lsp-haskell
     )
   )
 (mapc #';; install all packages in list
@@ -107,6 +112,7 @@
 (require 'centered-cursor-mode)
 
 ;; (require 'org-protocol)
+(require 'org-roam-protocol)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;START;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
