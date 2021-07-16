@@ -175,6 +175,12 @@
   :hook
   (clojure-mode . cider-mode)
   )
+(use-package haskell-mode
+  :ensure t
+  :hook
+  (haskell-mode . lsp)
+  (haskell-literate-mode . lsp)
+  )
 (use-package clojure-mode
   :ensure t)
 (use-package elpy
