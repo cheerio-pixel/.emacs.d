@@ -354,6 +354,11 @@
   (setq org-modules '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m))
   (setq org-clock-string-limit 25)
   (setq spaceline-org-clock-format-function 'dwim/org-clock-get-string)
+  (define-key org-mode-map (kbd "C-j") 'nil)
+  (define-key org-mode-map (kbd "C-j") (lambda (count)
+					                     (interactive "p")
+					                     (insert-char #x30 count)
+					                     ))
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((R . t)
@@ -482,7 +487,7 @@
   :defer t
   :init
   ;; Change default prefix key; needs to be set before loading org-journal
-  (setq org-journal-prefix-key "C-c j-")
+  (setq org-journal-prefix-key "C-c j")
   :config
   (setq org-journal-dir "~/Dropbox (Maestral)/Creativè/journal/"
         org-journal-date-format "%A, %d %B %Y")
@@ -628,8 +633,6 @@
                           (latex-environment . anki-editor--ox-latex)
                           (paragraph . strip-<p>-html)
                           ))))
-  :hook
-  (org-mode . anki-editor-mode)
   )
 (use-package projectile
   :ensure t
