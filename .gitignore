@@ -1,13 +1,15 @@
 auto-save-list/
-url/
-transient/
-persp/
-backups/
 auto-save-list/
+ac-comphist.dat
+/bookmarks
+/bookmarks.txt
+backups/
 elpa/
 eshell/
 elpy/
-ac-comphist.dat
+url/
+transient/
+persp/
 history
 org-roam.db
 tramp.txt
@@ -15,6 +17,4 @@ recentf
 projectile-bookmarks.eld
 projectile.cache
 tramp
-/bookmarks
 /.org-id-locations
-/bookmarks.txt
