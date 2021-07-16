@@ -26,8 +26,6 @@
   (ryo-modal-keys
    ("C-\\" toggle-input-method :exit 1)
    ("gr" golden-ratio-mode)
-   ("gs" org-sidebar-tree)
-   ("gt" org-sidebar-tree-toggle)
    ("gd" remember)
    ("gD" remember-notes)
    ("gy" yas-visit-snippet-file)

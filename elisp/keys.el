@@ -36,11 +36,9 @@
 (global-unset-key (kbd "M-o"))
 
 
-;;;;;                   SET KEY
+;;;;;                   set KEY
 (global-set-key (kbd "C-t") 'point-to-register)
 (global-set-key (kbd "C-S-t") 'jump-to-register)
-
-(global-set-key (kbd "C-p") 'previous-line)
 
 (global-set-key (kbd "C-o") 'smart-open-line)
 
@@ -48,10 +46,10 @@
 (global-set-key (kbd "S-C-<right>") 'enlarge-window-horizontally)
 (global-set-key (kbd "S-C-<down>") 'shrink-window)
 (global-set-key (kbd "S-C-<up>") 'enlarge-window)
-(global-set-key (kbd "S-<left>") 'windmove-left)
-(global-set-key (kbd "S-<up>") 'windmove-up)
-(global-set-key (kbd "S-<down>") 'windmove-down)
-(global-set-key (kbd "S-<right>") 'windmove-right)
+;; (global-set-key (kbd "S-<left>") 'windmove-left)
+;; (global-set-key (kbd "S-<up>") 'windmove-up)
+;; (global-set-key (kbd "S-<down>") 'windmove-down)
+;; (global-set-key (kbd "S-<right>") 'windmove-right)
 
 (global-set-key (kbd "<Scroll_Lock>") 'eval-buffer)
 (global-set-key (kbd "M-<Scroll_Lock>") 'eval-region)
@@ -81,16 +79,17 @@
 (global-set-key (kbd "C-c m c") 'mc/edit-lines)
 
 (global-set-key (kbd "C-a") 'smarter-move-beginning-of-line)
-(global-set-key (kbd "C-M-z") 'zen-mode)
 (global-set-key (kbd "C-M-,") 'company-capf)
 (global-set-key (kbd "C-M-e") 'company-complete)
 (global-set-key (kbd "C-c y y") 'yas-insert-snippet)
-(global-set-key (kbd "<f7>") 'org-capture)
 ;; Rare bindings
-(global-set-key (kbd "C-b") 'switch-to-last-buffer)
-(global-set-key (kbd "C-f") 'helm-mini)
-(global-set-key (kbd "C-M-f") 'helm-M-x)
+;;;; Uninstalled eaf
+;; (global-set-key (kbd "C-b") 'switch-to-last-buffer)
+;; (global-set-key (kbd "C-f") 'helm-mini)
+;; (global-set-key (kbd "C-M-f") 'helm-M-x)
 (global-set-key (kbd "M-e") 'hippie-expand)
+(global-set-key (kbd "M-n") 'dabbrev-expand)
+
 
 (define-key centered-cursor-keymap (kbd "C-M--") 'centered-cursor-raise-position-manually)
 (define-key centered-cursor-keymap (kbd "C-M-+") 'centered-cursor-lower-position-manually)
@@ -99,9 +98,13 @@
 
 
 ;; (global-set-key (kbd "<f5>") 'keyboard-escape-quit) This is not the way to bind a command of this kind
-(define-key key-translation-map (kbd "C-;") (kbd "C-u"))
-(define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+
+;; It provokes Meta to behave like C-g in the terminal
+;; (define-key key-translation-map (kbd "ESC") (kbd "C-g"))
+(define-key key-translation-map (kbd "C-p") (kbd "C-u"))
 (define-key key-translation-map (kbd "C-u") (kbd "C-p"))
+
+;; (define-key key-translation-map (kbd "") (kbd ""))
 
 
 
