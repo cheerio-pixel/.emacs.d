@@ -362,9 +362,9 @@
   (setq spaceline-org-clock-format-function 'dwim/org-clock-get-string)
   (define-key org-mode-map (kbd "C-j") 'nil)
   (define-key org-mode-map (kbd "C-j") (lambda (count)
-					                     (interactive "p")
-					                     (insert-char #x30 count)
-					                     ))
+                                         (interactive "p")
+                                         (insert-char #x30 count)
+                                         ))
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((R . t)
@@ -385,6 +385,7 @@
   :config
   (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
   (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags . helm-org-completing-read-tags))
+  (wrap-region-add-wrapper "*" "*" nil 'org-mode)
   :custom
   ;; org-default-notes-file "~/task-of-the-day.org"
   ;; org-default-notes-file "~/org-mode/class-note-taking.org"
@@ -527,7 +528,6 @@
   :hook
   (after-init . org-roam-mode)
   (after-init . winner-mode)
-  (org-mode . nroam-mode)
   :custom
   (org-roam-graph-viewer "/usr/bin/google-chrome-stable")
   (org-roam-graph-exclude-matcher '("daily"))
@@ -539,12 +539,13 @@
   (org-roam-dailies-directory "capture")
   (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
   (org-roam-dailies-capture-templates
-   '(("d" "default" entry
-      #'org-roam-capture--get-point
-      "* %?"
-      :file-name "capture/capture"
-      :head "#+title: Note\n\n"
-      :olp ("Default note"))
+   '(;; Example
+     ;; ("d" "default" entry
+     ;;  #'org-roam-capture--get-point
+     ;;  "* %?"
+     ;;  :file-name "capture/capture"
+     ;;  :head "#+title: Note\n\n"
+     ;;  :olp ("Default note"))
      ("f" "Findings" entry
       #'org-roam-capture--get-point
       "* %?\n"
@@ -552,21 +553,6 @@
       :head "#+title: Note\n\n"
       :olp ("Findings")
       )
-     ("s" "Code Snippet")
-     ("sp" "Python" entry
-      #'org-roam-capture--get-point
-      "* %?\n#+BEGIN_SRC python\n%x\n#+END_SRC"
-      :file-name "capture/capture"
-      :head "#+title: Note\n\n"
-      :olp ("Code Snippet")
-      )
-     ("c" "Programming")
-     ("cc" "Python" entry
-      #'org-roam-capture--get-point
-      "* %?\n"
-      :file-name "capture/capture"
-      :head "#+title: Note\n\n"
-      :olp ("Code General"))
      ("t" "Magnum Opus" entry
       #'org-roam-capture--get-point
       "* %?\n"
@@ -574,26 +560,12 @@
       :head "#+title: Note\n\n"
       :olp ("Magnum Opus")
       )
-     ("l" "Links" entry
-      #'org-roam-capture--get-point
-      "* [[%x][%?]]\n"
-      :file-name "capture/capture"
-      :head "#+title: Note\n\n"
-      :olp ("Links")
-      )
      ("o" "Ocurrence" entry
       #'org-roam-capture--get-point
       "* %?\n"
       :file-name "capture/capture"
       :head "#+title: Note\n\n"
       :olp ("Ocurrence")
-      )
-     ("p" "Phone" entry
-      #'org-roam-capture--get-point
-      "* %x \n"
-      :file-name "capture/capture"
-      :head "#+title: Note\n\n"
-      :olp ("Phone")
       )
      ("y" "Lists" entry
       #'org-roam-capture--get-point
@@ -616,6 +588,9 @@
       :file-name "capture/capture"
       :head "#+title: Note\n\n"
       :olp ("Japanese")
+      )
+     ("p" "Projects" entry (file+headline "~/Dropbox (Maestral)/Creativè/org-roam/Projects/20210715113548-projects.org" "Stack <<=")
+      "* TODO %?\n" :prepend t
       )
      ))
   :bind (:map org-roam-mode-map
@@ -856,7 +831,17 @@
       (alpha . 0.80)
       (frame-parameters . ((undecorated . t)
                            (skip-taskbar . t)
-                           (sticky . t))))))
+                           (sticky . t))))
+     ;; Migrate =Task Management= To projects
+     ;; ("org-capture"
+     ;;  (buffer-fns . (yequake-org-capture))
+     ;;  (width . 0.75)
+     ;;  (height . 0.5)
+     ;;  (alpha . 0.80)
+     ;;  (frame-parameters . ((undecorated . t)
+     ;;                       (skip-taskbar . t)
+     ;;                       (sticky . t))))
+     ))
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1043,6 +1028,7 @@
             (mymy-global-mode t)
             (yas-global-mode t)
             (global-undo-tree-mode)
+            (wrap-region-global-mode t)
             ))
 (add-hook 'prog-mode
           (lambda()

@@ -1,3 +1,2 @@
 #+TITLE:My emacs config direrctory
-Just a little side note for me , think before you change in github
-other wise you'll mess up everything in local.
+
