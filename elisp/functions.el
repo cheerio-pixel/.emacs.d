@@ -1,8 +1,34 @@
-(provide 'functions)
 (require 'avy)
 (require 'elpy)
 (require 'subr-x)
 (require 'cl-lib)
+
+
+(defun org-hide-properties ()
+  "Hide all org-mode headline property drawers in buffer. Could be slow if it has a lot of overlays."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward
+            "^ *:properties:\n\\( *:.+?:.*\n\\)+ *:end:\n" nil t)
+      (let ((ov_this (make-overlay (match-beginning 0) (match-end 0))))
+        (overlay-put ov_this 'display "")
+        (overlay-put ov_this 'hidden-prop-drawer t))))
+  (put 'org-toggle-properties-hide-state 'state 'hidden))
+
+(defun org-show-properties ()
+  "Show all org-mode property drawers hidden by org-hide-properties."
+  (interactive)
+  (remove-overlays (point-min) (point-max) 'hidden-prop-drawer t)
+  (put 'org-toggle-properties-hide-state 'state 'shown))
+
+(defun org-toggle-properties ()
+  "Toggle visibility of property drawers."
+  (interactive)
+  (if (eq (get 'org-toggle-properties-hide-state 'state) 'hidden)
+      (org-show-properties)
+    (org-hide-properties)))
+
 
 ;; https://emacs.stackexchange.com/questions/35417/how-to-insert-strings-from-a-string-list-in-one-file-into-another-file-with-a-h
 (defun mymy-common-numbers ()
@@ -18,39 +44,44 @@
              (lambda (_candidate)
                (insert (mapconcat #'identity (helm-marked-candidates) " "))))))))
 
-
-;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Frames.html#Frames
-;; https://www.reddit.com/r/emacs/comments/h7ny99/org_mode_agenda_desktop_widget/fumxe5l/?utm_source=reddit&utm_medium=web2x&context=3
-(defvar my-agenda-frame nil)
-(defun my-agenda-make ()
+(defun org-roam-node-insert-immediate (&optional filter-fn)
+  "Find an Org-roam node and insert (where the point is) an \"id:\" link to it.
+FILTER-FN is a function to filter out nodes: it takes an `org-roam-node',
+and when nil is returned the node will be filtered out."
   (interactive)
-  (setq my-agenda-frame
-        (make-frame  '(;(display . ":0")
-                       (visibility . t)
-                                        ;(window-system . x)
-                       (minibuffer . nil)
-                       (z-group . below)
-                       (skip-taskbar . t)
-                       (vertical-scroll-bars . nil)
-                       (horizontal-scroll-bars . nil)
-                       (left-fringe . nil)
-                       (right-fringe . nil)
-                       (undecorated . t)
-                       (unsplittable . t)
-
-                       (no-accept-focus . t)
-                       (no-focus-on-map . t)
-                       (top . 10)
-                       (left . 10) 
-                       (width . (text-pixels . 480))
-                       (height . (text-pixels . 640)))))
-  (setq focus-in-hook 'ignore)
-  (setq mode-line-format nil))
-
-(defun my-agenda-remove ()
-  (interactive)
-  (delete-frame my-agenda-frame)
-  (setq my-agenda-frame nil))
+  (unwind-protect
+      ;; Group functions together to avoid inconsistent state on quit
+      (atomic-change-group
+        (let* (region-text
+               beg end
+               (_ (when (region-active-p)
+                    (setq beg (set-marker (make-marker) (region-beginning)))
+                    (setq end (set-marker (make-marker) (region-end)))
+                    (setq region-text (org-link-display-format (buffer-substring-no-properties beg end)))))
+               (node (org-roam-node-read region-text filter-fn))
+               (description (or region-text
+                                (org-roam-node-title node))))
+          (if (org-roam-node-id node)
+              (progn
+                (when region-text
+                  (delete-region beg end)
+                  (set-marker beg nil)
+                  (set-marker end nil))
+                (insert (org-link-make-string
+                         (concat "id:" (org-roam-node-id node))
+                         description)))
+            (org-roam-capture-
+             :node node
+             :props (append
+                     (when (and beg end)
+                       (list :region (cons beg end)))
+                     (list :insert-at (point-marker)
+                           :link-description description
+                           :finalize 'insert-link)))
+            (org-capture-finalize)
+            )))
+    (deactivate-mark))
+  )
 
 (defun elpy-goto-definition-or-rgrep ()
   "Go to the definition of the symbol at point, if found. Otherwise, run `elpy-rgrep-symbol'."
@@ -91,13 +122,13 @@
 
 (defun yequake-org-roam-dailies-capture-today (&optional goto)
   "Call `org-roam-dailies-capture-today' in a Yequake frame.
-Adds a function to `org-capture-after-finalize-hook' that closes
-the recently toggled Yequake frame and removes itself from the
-hook.
+  Adds a function to `org-capture-after-finalize-hook' that closes
+  the recently toggled Yequake frame and removes itself from the
+  hook.
 
-Note: if another Yequake frame is toggled before the capture is
-finalized, when the capture is finalized, the wrong Yequake frame
-will be toggled."
+  Note: if another Yequake frame is toggled before the capture is
+  finalized, when the capture is finalized, the wrong Yequake frame
+  will be toggled."
   (let* ((remove-hook-fn (lambda ()
                            (remove-hook 'org-capture-after-finalize-hook #'yequake-retoggle))))
     (add-hook 'org-capture-after-finalize-hook remove-hook-fn)
@@ -126,7 +157,7 @@ will be toggled."
 
 (defun add-file-to-killed-file-list ()
   "If buffer is associated with a file name, add that file to the
-`killed-file-list' when killing the buffer."
+  `killed-file-list' when killing the buffer."
   (when buffer-file-name
     (push buffer-file-name killed-file-list)))
 
@@ -139,7 +170,7 @@ will be toggled."
     (find-file (pop killed-file-list))))
 (defun reopen-killed-file-fancy ()
   "Pick a file to revisit from a list of files killed during this
-Emacs session."
+  Emacs session."
   (interactive)
   (if killed-file-list
       (let ((file (completing-read "Reopen killed file: " killed-file-list
@@ -239,8 +270,8 @@ Emacs session."
 (defun avy-delete-region (arg)
   "Select two lines and delete the region between them.
 
-The window scope is determined by `avy-all-windows' or
-`avy-all-windows-alt' when ARG is non-nil."
+  The window scope is determined by `avy-all-windows' or
+  `avy-all-windows-alt' when ARG is non-nil."
   (interactive "P")
   (let ((initial-window (selected-window)))
     (avy-with avy-delete-region
@@ -271,7 +302,7 @@ The window scope is determined by `avy-all-windows' or
 (defun dwim/org-clock-get-string ()
   (let ((clock-string (org-clock-get-clock-string))
         (help-text "Org mode clock is running.\nmouse-1 shows a \
-menu\nmouse-2 will jump to task"))
+  menu\nmouse-2 will jump to task"))
     (if (and (> org-clock-string-limit 0)
              (> (length clock-string) org-clock-string-limit))
         (propertize
@@ -282,17 +313,17 @@ menu\nmouse-2 will jump to task"))
 (defun avy-delete-whole-line (arg)
   "Select line and delete the whole selected line.
 
-With a numerical prefix ARG, delete ARG line(s) starting from the
-selected line.  If ARG is negative, delete backward.
+  With a numerical prefix ARG, delete ARG line(s) starting from the
+  selected line.  If ARG is negative, delete backward.
 
-If ARG is zero, delete the selected line but exclude the trailing
-newline.
+  If ARG is zero, delete the selected line but exclude the trailing
+  newline.
 
-\\[universal-argument] 3 \\[avy-kil-whole-line] delete three lines
-starting from the selected line.  \\[universal-argument] -3
+  \\[universal-argument] 3 \\[avy-kil-whole-line] delete three lines
+  starting from the selected line.  \\[universal-argument] -3
 
-\\[avy-delete-whole-line] delete three lines backward including the
-selected line."
+  \\[avy-delete-whole-line] delete three lines backward including the
+  selected line."
   (interactive "P")
   (let ((initial-window (selected-window)))
     (avy-with avy-delete-whole-line
@@ -323,14 +354,14 @@ selected line."
   )
 (defun insert-quotes (&optional arg)
   "Enclose following ARG sexps in string.
-Leave point after open-paren.
-A negative ARG encloses the preceding ARG sexps instead.
-No argument is equivalent to zero: just insert `\"\"' and leave point between.
-If `string-require-spaces' is non-nil, this command also inserts a space
-before and after, depending on the surrounding characters.
-If region is active, insert enclosing characters at region boundaries.
+  Leave point after open-paren.
+  A negative ARG encloses the preceding ARG sexps instead.
+  No argument is equivalent to zero: just insert `\"\"' and leave point between.
+  If `string-require-spaces' is non-nil, this command also inserts a space
+  before and after, depending on the surrounding characters.
+  If region is active, insert enclosing characters at region boundaries.
 
-This command assumes point is not in a string or comment."
+  This command assumes point is not in a string or comment."
   (interactive "P")
   (insert-pair arg ?\" ?\"))
 
@@ -362,9 +393,9 @@ This command assumes point is not in a string or comment."
 (defun avy-org-same-level (&optional all)
   "Go to any org heading of the same level as the current one.
 
-By default, choices are limited to headings under common
-subheading, but if called with a prefix argument, will be
-buffer-global."
+  By default, choices are limited to headings under common
+  subheading, but if called with a prefix argument, will be
+  buffer-global."
   (interactive "P")
   (let ((org-level (org-current-level)))
     (avy--generic-jump
@@ -386,9 +417,9 @@ buffer-global."
   "Go to any org heading one level above the current one.
 
 
-By default, choices are limited to headings under common
-subheading, but if called with a prefix argument, will be
-buffer-global."
+  By default, choices are limited to headings under common
+  subheading, but if called with a prefix argument, will be
+  buffer-global."
   (interactive "P")
   (let ((org-level (org-current-level)))
     (if (= org-level 1)
@@ -411,9 +442,9 @@ buffer-global."
 (defun avy-org-child-level (&optional all)
   "Go to any org heading one level below the current one.
 
-By default, choices are limited to headings under common
-subheading, but if called with a prefix argument, will be
-buffer-global."
+  By default, choices are limited to headings under common
+  subheading, but if called with a prefix argument, will be
+  buffer-global."
   (interactive "P")
   (if (save-excursion (org-goto-first-child))
       (let ((org-level (org-current-level)))
@@ -446,12 +477,12 @@ buffer-global."
 
 (defun smarter-move-beginning-of-line (arg)
   "Move point back to indentation of beginning of line.
-Move point to the first non-whitespace character on this line.
-If point is already there, move to the beginning of the line.
-Effectively toggle between the first non-whitespace character and
-the beginning of the line.
-If ARG is not nil or 1, move forward ARG - 1 lines first.  If
-point reaches the beginning or end of the buffer, stop there."
+  Move point to the first non-whitespace character on this line.
+  If point is already there, move to the beginning of the line.
+  Effectively toggle between the first non-whitespace character and
+  the beginning of the line.
+  If ARG is not nil or 1, move forward ARG - 1 lines first.  If
+  point reaches the beginning or end of the buffer, stop there."
   (interactive "^p")
   (setq arg (or arg 1))
   ;; Move lines first
@@ -469,7 +500,7 @@ point reaches the beginning or end of the buffer, stop there."
 
 (defun smart-open-line ()
   "Insert an empty line after the current line.
-Position the cursor at its beginning, according to the current mode."
+  Position the cursor at its beginning, according to the current mode."
   (interactive)
   (move-end-of-line nil)
   (newline-and-indent))
@@ -541,32 +572,32 @@ Position the cursor at its beginning, according to the current mode."
 ;;;;;DELETE FUNCTIONS
 (defun backward-delete-word (arg)
   "Delete characters backward until encountering the beginning of a word.
-With argument ARG, do this that many times."
+  With argument ARG, do this that many times."
   (interactive "p")
   (delete-region (point) (progn (backward-word arg) (point))))
 (defun delete-word (arg)
   "Delete characters forwards until encountering the beginning of a word.
-   With argument ARG, do this that many times."
+  With argument ARG, do this that many times."
   (interactive "p")
   (delete-region (point) (progn (forward-word arg) (point))))
 
 (defun backward-delete-line (arg)
   "Delete (not kill) the current line, backwards from cursor.
-   With argument ARG, do this that many times."
+  With argument ARG, do this that many times."
   (interactive "p")
   (delete-region (point) (progn (beginning-of-visual-line arg) (point))))
 
 (defun delete-line (arg)
   "Delete (not kill) the current line, forwards from cursor.
-   With argument ARG, do this that many times."
+  With argument ARG, do this that many times."
   (interactive "p")
   (delete-region (point) (progn (end-of-visual-line arg) (point))))
 (defun my-delete-whole-line (&optional arg)
   "Delete current line.
-With prefix ARG, delete that many lines starting from the current line.
-If ARG is negative, delete backward.  Also delete the preceding newline.
-\(This is meant to make \\[repeat] work well with negative arguments.)
-If ARG is zero, delete current line but exclude the trailing newline."
+  With prefix ARG, delete that many lines starting from the current line.
+  If ARG is negative, delete backward.  Also delete the preceding newline.
+  \(This is meant to make \\[repeat] work well with negative arguments.)
+  If ARG is zero, delete current line but exclude the trailing newline."
   (interactive "p")
   (or arg (setq arg 1))
   (if (and (> arg 0) (eobp) (save-excursion (forward-visible-line 0) (eobp)))
@@ -600,10 +631,10 @@ If ARG is zero, delete current line but exclude the trailing newline."
     (modify-syntax-entry ?{ "." st)  ;; { = punctuation
     (modify-syntax-entry ?} "." st)  ;; } = punctuation
     (modify-syntax-entry ?\" "." st) ;; " = punctuation
-    (modify-syntax-entry ?\\ "_" st) ;; \ = symbol
-    (modify-syntax-entry ?\$ "_" st) ;; $ = symbol
-    (modify-syntax-entry ?\% "_" st) ;; % = symbol
-    st)
+  (modify-syntax-entry ?\\ "_" st) ;; \ = symbol
+  (modify-syntax-entry ?\$ "_" st) ;; $ = symbol
+  (modify-syntax-entry ?\% "_" st) ;; % = symbol
+  st)
   "Syntax table used while executing custom movement functions.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -810,3 +841,4 @@ i.e. windows tiled side-by-side."
          (and (bolp) (eolp))
          (equal arg '(4)))
         (delete-forward-char 1))) )))
+(provide 'functions)

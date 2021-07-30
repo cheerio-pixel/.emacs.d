@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: nofold
+# key: <n
+# --
+
+#+STARTUP: nofold

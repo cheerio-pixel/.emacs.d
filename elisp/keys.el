@@ -1,4 +1,3 @@
-(provide 'keys)
 (require 'centered-cursor-mode)
 (global-set-key (kbd "C-M-y") 'duplicate-current-line);; Duplicate line
 (global-set-key (kbd "C-S-e") 'forward-word)
@@ -95,6 +94,9 @@
 (define-key centered-cursor-keymap (kbd "C-M-=") 'centered-cursor-lower-position-manually)
 (define-key centered-cursor-keymap (kbd "C-M-0") 'centered-cursor-reset-position-manually)
 
+(global-unset-key (kbd "C-d"))
+(global-set-key (kbd "C-d i") 'straight-use-package)
+(global-set-key (kbd "C-d g") 'straight-get-recipe)
 
 ;; (global-set-key (kbd "<f5>") 'keyboard-escape-quit) This is not the way to bind a command of this kind
 
@@ -112,3 +114,4 @@
 ;;   (lambda ()
 ;;     (interactive)
 ;;     (mapc #'find-file (reverse (dired-get-marked-files)))))
+(provide 'keys)

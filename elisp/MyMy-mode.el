@@ -29,6 +29,7 @@
    ("gd" remember)
    ("gD" remember-notes)
    ("gy" yas-visit-snippet-file)
+   ("Gy" yas-insert-snippet)
    ("/" undo)
    ("p" keyboard-quit)
    ("," ryo-modal-repeat)
@@ -47,22 +48,15 @@
      )
     )
    ("S"
-    (("l" org-roam)
-     ("f" org-roam-find-file)
-     ("F" org-roam-jump-to-index)
-     ("i" org-roam-insert)
-     ("I" org-roam-insert-immediate)
+    (("l" org-roam-buffer-toggle)
+     ("f" org-roam-node-find)
+     ("i" org-roam-node-insert)
+     ("I" org-roam-node-insert-immediate)
      ("g" org-roam-graph)
      ("t" org-roam-tag-add)
      ("c" org-roam-dailies-capture-today)
-     ("C"
-      (("f" org-roam-dailies-find-today)
-       ("d" org-roam-dailies-find-date) ;; Tecnically obsolete
-       ("t" org-roam-dailies-find-directory)
-       )
-      )
-     ("r" org-roam-db-build-cache)
-     ;; ("r" revert-buffer-no-confirm)
+     ("o" org-id-get-create)
+     ("p" org-toggle-properties)
      )
     )
    ("Z"
@@ -222,10 +216,12 @@
       )
      ("w"
       (("f" ace-window)
-       ("s" split-window-below)
-       ("r" split-window-right)
+       ("r" split-window-below)
+       ("s" split-window-right)
        ("d" delete-window)
        ("a" delete-other-windows)
+       ("t" make-frame)
+       ("p" delete-frame)
        )
       :name "Windows"
       )
@@ -246,7 +242,8 @@
    ("O"
     (("c" org-capture)
      ("a" org-agenda)
-     ("u" org-clock-goto)
+     ("t" org-todo-list)
+     ("u" org-agenda-clock-goto)
      ("y" export-subtree-to-pdf)
      ("m"
       (("y" org-goto-tasks)
@@ -351,12 +348,12 @@
     )
    ("s"
     ;; here
-    (("a" org-archive-subtree)
-     ("A" org-toggle-archive-tag)
+    (;; ("a" org-agenda-archive-subtree)
+     ("A" org-agenda-toggle-archive-tag)
      ("p" er/mark-org-element)
      ("t" outline-up-heading)
      ("T" er/mark-org-parent)
-     ("g" org-goto)
+     ("g" org-agenda-goto)
      ("ne" org-narrow-to-element)
      ("nv" narrow-to-region)
      ("nw" widen)
@@ -381,10 +378,10 @@
    ("a" org-beginning-of-line)
    ("e" org-end-of-line)
    ("O"
-    (("o" org-clock-out)
-     ("i" org-clock-in)
-     ("r" org-refile)
-     ("e" org-clock-cancel)
+    (("o" org-agenda-clock-out)
+     ("i" org-agenda-clock-in)
+     ("r" org-agenda-refile)
+     ("e" org-agenda-clock-cancel)
      ("d" org-insert-drawer)
      )
     )
@@ -559,8 +556,8 @@
    "q f" :hydra
    '(hydra-fastmoving ()
                       "Generic fast moving"
-                      ("n" forward-sexp)
-                      ("u" backward-sexp)
+                      ("n" scroll-up)
+                      ("u" scroll-down)
                       ("U" ccm-scroll-down)
                       ("N" ccm-scroll-up)
                       ("]" forward-paragraph)

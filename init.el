@@ -1,118 +1,42 @@
-;; Launch the debugger with a stacktrace if someshing goes wrong
-;; Goddammit, it can be annoying
-;; (setq debug-on-error t)
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+;; Straight config
+(setq straight-use-package-by-default t)
+(setq straight-host-usernames
+      '((github . "cheerio-pixel"))
+      )
 
-(require 'package)
-(add-to-list 'package-archives
-             '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize) ;; Initialize all the packages
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
+
+(straight-use-package 'use-package)
 (eval-when-compile (require 'use-package))
+(use-package ryo-modal)
 
 (set-frame-parameter nil 'fullscreen 'fullboth) ; Fullscreen
 (setq redisplay-dont-pause t)
 (setq frame-resize-pixelwise t)
-;; (setq gc-cons-threshold 40000000) ; Garbage collector threshold: 40mb
 (setq gc-cons-threshold 100000000) ; Garbage collector threshold: 100mb
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
 (tool-bar-mode -1)   ; This is much easier
 (menu-bar-mode -1)   ; than needing to change
 (scroll-bar-mode -1) ; this in every OS
-(add-to-list 'package-archives
-             '("elpy" . "http://jorgenschaefer.github.io/packages/"))
-(unless package-archive-contents (package-refresh-contents)) ;; fetch the list of packages available
 (setq byte-compile-warnings '(not obsolete));; Cl warnings
-(defvar myPackages ;; define list of packages to install
-  '(elpy
-    use-package
-    company-jedi
-    company-quickhelp
-    pyenv-mode
-    elisp-slime-nav
-    py-autopep8
-    company-anaconda
-    anaconda-mode
-    pipenv
-    ;; poetry
-    ;; company-tabine
-    golden-ratio
-    ryo-modal
-    julia-mode
-    yasnippet-snippets
-    change-inner
-    expand-region
-    avy
-    ace-mc
-    helm-swoop
-    helm-descbinds
-    helm-projectile
-    helm-ag
-    which-key
-    spaceline
-    smartparens
-    smart-yank
-    nyan-mode
-    aggressive-indent
-    dracula-theme
-    ag
-    org-bullets
-    better-defaults
-    multiple-cursors
-    slime-company
-    rainbow-delimiters
-    flycheck
-    jupyter
-    with-editor
-    electric-operator
-    direx
-    all-the-icons ;; Spaceline
-    imenu-list
-    magit
-    selected
-    blacken
-    importmagic
-    undo-tree
-    dashboard
-    hide-mode-line
-    live-py-mode
-    emacsql-sqlite
-    emacsql-sqlite3
-    bind-key
-    yasnippet
-    ace-jump-mode
-    ace-window
-    hydra
-    centaur-tabs
-    cider
-    org-roam
-    csv-mode
-    pdf-tools
-    haskell-mode
-    lsp-haskell
-    )
-  )
-(mapc #';; install all packages in list
- (lambda
-   (package)
-   (unless
-       (package-installed-p package)
-     (package-install package)))
- myPackages)
 
 (add-to-list 'load-path "~/.emacs.d/elisp/")
 ;; Load all the keys that don't go to a use-packag
 (require 'keys)
-;; Load all functions
-(require 'functions)
-;; Load the maped ryo-modal
-(require 'MyMy-mode)
-
 (require 'centered-cursor-mode)
 
 ;; (require 'org-protocol)
-(require 'org-roam-protocol)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;START;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -134,24 +58,30 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;MODES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(use-package dracula-theme
+  :config
+  (load-theme 'dracula t)
+  )
 ;; (load-theme 'doom-city-lights t)
-(load-theme 'dracula t)
 ;; (load-theme 'monokai-pro t)
-(projectile-mode t)
-(show-smartparens-global-mode t)
-(smartparens-global-mode t)
+(use-package smartparens
+  :config
+  (sp-local-pair '(emacs-lisp-mode clojure-mode cider-mode) "'" "'" :actions nil)
+  (show-smartparens-global-mode t)
+  (smartparens-global-mode t)
+  )
 (global-hl-line-mode t)
 (global-centered-cursor-mode t)
 (global-whitespace-mode t)
+(use-package golden-ratio)
 (golden-ratio-mode t)
 (xterm-mouse-mode t)
 (savehist-mode t)
+(use-package spaceline)
 (spaceline-emacs-theme t)
+(use-package pdf-tools)
 (pdf-tools-install)
 (save-place-mode)
-;; (desktop-save-mode)
-;; optional: automatically load previous session on startup
-;; (desktop-read)
 
 
 ;; (use-package eaf
@@ -171,19 +101,21 @@
 ;;   (eaf-bind-key nil "M-q" eaf-browser-keybinding) ;; unbind, see more in the Wiki
 ;;   )
 (use-package cider
-  :ensure t
+  :straight t
   :hook
   (clojure-mode . cider-mode)
+  (cider-repl-mode . aggressive-indent-mode)
   )
 (use-package haskell-mode
-  :ensure t
+  :straight t
   :hook
   (haskell-mode . lsp)
   (haskell-literate-mode . lsp)
   )
 (use-package clojure-mode
-  :ensure t)
+  :straight t)
 (use-package elpy
+  :straight t
   :bind (:map python-mode-map
               ("C-c C-q" . jupyter-eval-buffer)
               ("C-c C-j" . jupyter-run-repl)
@@ -192,7 +124,6 @@
   :init (with-eval-after-load 'python (elpy-enable))
   :hook
   (python-mode . anaconda-mode)
-  (python-mode . rainbow-delimiters-mode)
   (python-mode . highlight-indentation-mode)
   (python-mode . electric-operator-mode)
   (python-mode . hs-minor-mode)
@@ -213,7 +144,7 @@
   (setq
    python-shell-interpreter "ipython"
    python-shell-interpreter-args "--colors=Linux --profile=default
- --simple-prompt -i"
+--simple-prompt -i"
    python-shell-prompt-regexup "In \\[[0-9]+\\]: "
    python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
    python-shell-completion-setup-code
@@ -224,7 +155,7 @@
    "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
   )
 (use-package lsp-mode
-  :ensure t
+  :straight t
   :init
   (setq lsp-keymap-prefix "s-m")
   :config
@@ -252,7 +183,7 @@
                 lsp-ui-doc-use-childframe t)
   :commands lsp-ui-mode)
 (use-package company-jedi
-  :ensure t
+  :straight t
   :hook (python-mode . enable-jedi)
   :config (setq jedi:complete-on-dot t)
   )
@@ -263,11 +194,26 @@
    pipenv-projectile-after-switch-function
    #'pipenv-projectile-after-switch-extended)
   )
+(use-package rainbow-delimiters
+  :straight t
+  :hook
+  (prog-mode . rainbow-delimiters-mode)
+  )
 (use-package blacken
   :hook (python-mode . blacken-mode)
   :config
   (setq blacken-line-length 79))
+(use-package wrap-region
+  :straight (wrap-region :type git :host github :repo "rejeep/wrap-region.el" :fork t)
+  )
 (use-package company
+  :straight t
+  :bind (
+         :map company-active-map
+         ("ESC" . company-abort)
+         ("C-SPC" . company-select-next-or-abort)
+         ("C-S-SPC" . company-select-previous-or-abort)
+         )
   :config
   (setq company-idle-delay 1)
   (setq company-dabbrev-downcase nil)
@@ -277,22 +223,27 @@
   (setq company-require-match nil)
   (setq company-show-numbers t)
   (setq company-tooltip-align-annotations t)
-  (add-to-list 'company-frontends '(company-pseudo-tooltip-frontend
-                                    company-echo-metadata-frontend))
+  (setq company-frontends
+        '(company-pseudo-tooltip-unless-just-one-frontend
+          company-preview-if-just-one-frontend
+          company-echo-metadata-frontend
+          company-pseudo-tooltip-frontend
+          ))
   ;; (add-to-list 'company-backends #'company-tabnine)
-  (define-key yas-minor-mode-map "\C-l" 'yas-expand)
-  (define-key yas-keymap "\C-l" 'yas-next-field-or-maybe-expand)
-  (dolist (keymap (list yas-minor-mode-map yas-keymap))
-    (define-key keymap (kbd "TAB") nil)
-    (define-key keymap [(tab)] nil))
   (define-key company-active-map (kbd "TAB") 'company-select-next)
   (define-key company-active-map (kbd "<backtab>") 'company-select-previous)
-  (define-key company-active-map (kbd "RET") nil)
-  (global-company-mode)
   (company-tng-mode)
+  (global-company-mode)
+  )
+(use-package elisp-slime-nav
+  :ensure t)
+(use-package aggressive-indent
+  :hook
+  (emacs-lisp-mode . aggressive-indent-mode)
+  (clojure-mode . aggressive-indent-mode)
   )
 (use-package company-quickhelp
-  :ensure t
+  :straight t
   :init
   (eval-after-load 'company
     '(define-key company-active-map (kbd "C-c h") #'company-quickhelp-manual-begin))
@@ -307,8 +258,8 @@
   )
 ;;;;;                   HELM MODE
 (use-package helm
-  :ensure t
-  :ensure helm-swoop
+  :straight t
+  :straight helm-swoop
   :diminish helm-mode
   :bind (("M-x" . helm-M-x)
          ("C-x b" . helm-mini)
@@ -336,7 +287,7 @@
   (helm-mode)
   )
 (use-package magit
-  :ensure t)
+  :straight t)
 (use-package ispell
   ;; https://200ok.ch/posts/2020-08-22_setting_up_spell_checking_with_multiple_dictionaries.html
   :config
@@ -355,16 +306,101 @@
   (unless (file-exists-p ispell-personal-dictionary)
     (write-region "" nil ispell-personal-dictionary nil 0))
   )
-(use-package org-mode
+(use-package hydra
+  :straight t
+  :config
+  (defhydra hydra-straight-helper (:hint nil)
+    "
+_c_heck all       |_f_etch all     |_m_erge all      |_n_ormalize all   |p_u_sh all
+_C_heck package   |_F_etch package |_M_erge package  |_N_ormlize package|p_U_sh package
+----------------^^+--------------^^+---------------^^+----------------^^+------------||_q_uit||
+_r_ebuild all     |_p_ull all      |_v_ersions freeze|_w_atcher start   |_g_et recipe
+_R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_ build"
+    ("c" straight-check-all)
+    ("C" straight-check-package)
+    ("r" straight-rebuild-all)
+    ("R" straight-rebuild-package)
+    ("f" straight-fetch-all)
+    ("F" straight-fetch-package)
+    ("p" straight-pull-all)
+    ("P" straight-pull-package)
+    ("m" straight-merge-all)
+    ("M" straight-merge-package)
+    ("n" straight-normalize-all)
+    ("N" straight-normalize-package)
+    ("u" straight-push-all)
+    ("U" straight-push-package)
+    ("v" straight-freeze-versions)
+    ("V" straight-thaw-versions)
+    ("w" straight-watcher-start)
+    ("W" straight-watcher-quit)
+    ("g" straight-get-recipe)
+    ("e" straight-prune-build)
+    ("q" nil))
+  (defhydra hydra-dired (:hint nil :color pink)
+    "
+_+_ mkdir          _v_iew           _m_ark             _(_ details        _i_nsert-subdir    wdired
+_C_opy             _O_ view other   _U_nmark all       _)_ omit-mode      _$_ hide-subdir    C-x C-q : edit
+_D_elete           _o_pen other     _u_nmark           _l_ redisplay      _w_ kill-subdir    C-c C-c : commit
+_R_ename           _M_ chmod        _t_oggle           _g_ revert buf     _e_ ediff          C-c ESC : abort
+_Y_ rel symlink    _G_ chgrp        _E_xtension mark   _s_ort             _=_ pdiff
+_S_ymlink          ^ ^              _F_ind marked      _._ toggle hydra   \\ flyspell
+_r_sync            ^ ^              ^ ^                ^ ^                _?_ summary
+_z_ compress-file  _A_ find regexp
+_Z_ compress       _Q_ repl regexp
+
+T - tag prefix
+"
+    ("\\" dired-do-ispell)
+    ("(" dired-hide-details-mode)
+    (")" dired-omit-mode)
+    ("+" dired-create-directory)
+    ("=" diredp-ediff)         ;; smart diff
+    ("?" dired-summary)
+    ("$" diredp-hide-subdir-nomove)
+    ("A" dired-do-find-regexp)
+    ("C" dired-do-copy)        ;; Copy all marked files
+    ("D" dired-do-delete)
+    ("E" dired-mark-extension)
+    ("e" dired-ediff-files)
+    ("F" dired-do-find-marked-files)
+    ("G" dired-do-chgrp)
+    ("g" revert-buffer)        ;; read all directories again (refresh)
+    ("i" dired-maybe-insert-subdir)
+    ("l" dired-do-redisplay)   ;; relist the marked or singel directory
+    ("M" dired-do-chmod)
+    ("m" dired-mark)
+    ("O" dired-display-file)
+    ("o" dired-find-file-other-window)
+    ("Q" dired-do-find-regexp-and-replace)
+    ("R" dired-do-rename)
+    ("r" dired-do-rsynch)
+    ("S" dired-do-symlink)
+    ("s" dired-sort-toggle-or-edit)
+    ("t" dired-toggle-marks)
+    ("U" dired-unmark-all-marks)
+    ("u" dired-unmark)
+    ("v" dired-view-file)      ;; q to exit, s to search, = gets line #
+    ("w" dired-kill-subdir)
+    ("Y" dired-do-relsymlink)
+    ("z" diredp-compress-this-file)
+    ("Z" dired-do-compress)
+    ("q" nil)
+    ("." nil :color blue))
+  (define-key dired-mode-map "." 'hydra-dired/body)
+  (global-set-key (kbd "C-d t") 'hydra-straight-helper/body)
+  (global-set-key (kbd "C-d C-t") 'hydra-straight-helper/body)
+  )
+(use-package git-auto-commit-mode)
+(use-package lsp-haskell)
+(use-package org
+  :straight t
+  :straight org-super-agenda
   :init
-  (setq org-modules '(ol-bbdb ol-bibtex ol-docview ol-eww ol-gnus org-habit ol-info ol-irc ol-mhe ol-rmail ol-w3m))
   (setq org-clock-string-limit 25)
   (setq spaceline-org-clock-format-function 'dwim/org-clock-get-string)
-  (define-key org-mode-map (kbd "C-j") 'nil)
-  (define-key org-mode-map (kbd "C-j") (lambda (count)
-                                         (interactive "p")
-                                         (insert-char #x30 count)
-                                         ))
+  (require 'ob-clojure)
+  (setq org-babel-clojure-backend 'cider)
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((R . t)
@@ -381,8 +417,15 @@
      (ruby . t)
      (screen . nil)
      (sql . nil)
-     (sqlite . t)))
+     (sqlite . t)
+     (clojure . t)
+     ))
   :config
+  (define-key org-mode-map (kbd "C-j") 'nil)
+  (define-key org-mode-map (kbd "C-j") (lambda (count)
+                                         (interactive "p")
+                                         (insert-char #x30 count)
+                                         ))
   (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
   (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags . helm-org-completing-read-tags))
   (wrap-region-add-wrapper "*" "*" nil 'org-mode)
@@ -402,7 +445,7 @@
   ;;    "xelatex -interaction nonstopmode %f"))
   (org-ellipsis "⤵")
   (org-log-done t)
-  (org-hide-emphasis-markers t)
+  ;; (org-hide-emphasis-markers t)
   (org-refile-targets '((nil :maxlevel . 2)))
   (org-catch-invisible-edits 'error)
   (org-special-ctrl-a/e t)
@@ -422,21 +465,38 @@
            ("+"
             (:strike-through t))
            )))
-  (org-pomodoro-length 25)
-  (org-pomodoro-short-break-length 5)
-  (org-pomodoro-long-break-length 15)
   (org-startup-folded t)
   (org-default-notes-file "~/Dropbox (Maestral)/Creativè/agenda.org")
-  (org-agenda-files '("~/Dropbox (Maestral)/Creativè/Notebook/"))
+  (org-agenda-files '("~/Dropbox (Maestral)/Creativè/org-roam/Projects/"))
   (org-todo-keyword-faces
    '(("CANCELLED" . (:foreground "red" :weight bold))
      ("CLASS" . (:foreground "purple" :weight bold))
+     ("NEXT" . (:foreground "blue" :weight bold))
+     ("DOING" . (:foreground "orange" :weight bold))
+     ("PROJECT" . (:foreground "white" :weight bold))
+     ("COMPLETED" . (:foreground "cyan" :weight bold))
      ))
   (org-todo-keywords
-   '((sequence "TODO" "DOING" "|" "DONE")
+   '((sequence "TODO" "NEXT" "DOING" "|" "DONE")
+     (sequence "PROJECT" "|" "COMPLETED" "CANCELLED")
      (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
      (sequence "CLASS" "|")
      (sequence "CANCELLED")))
+  (org-super-agenda-groups
+   '((:name "DOING"
+            :todo "DOING"
+            )
+     (:name "NEXT"
+            :todo "NEXT"
+            )
+     (:name "PROJECT"
+            :todo "PROJECT"
+            )
+     (:name "TODO"
+            :todo "TODO"
+            )
+     )
+   )
   (org-capture-templates
    ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
    ;; https://orgmode.org/manual/Template-elements.html#Template-elements
@@ -481,6 +541,7 @@
   (org-mode . org-indent-mode)
   (org-mode . flyspell-mode)
   (org-mode . auto-fill-mode)
+  (org-mode . org-super-agenda-mode)
   ;; (org-mode . electric-operator-mode)
   (org-mode
    . (lambda () (setq-local tab-width 2
@@ -490,7 +551,7 @@
   )
 ;; Why do i live, just to suffer?
 (use-package org-journal
-  :ensure t
+  :straight t
   :defer t
   :init
   ;; Change default prefix key; needs to be set before loading org-journal
@@ -500,120 +561,103 @@
         org-journal-date-format "%A, %d %B %Y")
   )
 (use-package org-superstar
-  :ensure t
+  :straight t
   :config
   (org-superstar-configure-like-org-bullets)
-  (setq org-superstar-headline-bullets-list '(?◉ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄ ?⁋))
+  (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄ ?⁋))
   )
-(use-package org-roam-server
-  :ensure t
-  :config
-  (setq org-roam-server-host "127.0.0.1"
-        org-roam-server-port 8080
-        org-roam-server-authenticate nil
-        org-roam-server-export-inline-images t
-        org-roam-server-serve-files nil
-        org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
-        org-roam-server-network-poll t
-        org-roam-server-network-arrows nil
-        org-roam-server-network-label-truncate t
-        org-roam-server-network-label-truncate-length 60
-        org-roam-server-network-label-wrap-length 20))
-
+(use-package csv-mode)
+(use-package yasnippet-snippets)
 (use-package org-roam
-  :ensure t
+  :straight t
+  :init
+  (setq org-roam-v2-ack t)
   :config
-  (add-hook 'org-open-at-point-functions
-            #'org-roam-open-at-point nil)
+  (org-roam-setup)
+  (require 'org-roam-protocol)
+  (find-file "~/Dropbox (Maestral)/Creativè/org-roam/2021-07-19-14-50-18-entries.org")
   :hook
-  (after-init . org-roam-mode)
   (after-init . winner-mode)
+  (org-mode . org-hide-properties)
   :custom
+  (org-roam-graph-executable "dot")
   (org-roam-graph-viewer "/usr/bin/google-chrome-stable")
-  (org-roam-graph-exclude-matcher '("daily"))
   (org-roam-graph-node-extra-config
-   '(("color" . "skyblue")))
+   '(("id"
+      ("style" . "bold,rounded,filled")
+      ("fillcolor" . "#000000")
+      ("color" . "#15FF00")
+      ("fontcolor" . "#00FFFF"))
+     )
+   )
+  ;; (org-roam-graph-extra-config '(("rankdir" . "LR")))
+  (org-roam-graph-extra-config '(("bgcolor" . "snow2"))) ;; https://graphviz.org/doc/info/colors.html
+  (org-roam-graph-edge-extra-config '(("dir" . "forward")))
+  (org-roam-graph-link-hidden-types '("file" "https" "fuzzy" "http"))
+  (org-roam-graph-shorten-titles 'wrap)
+  (org-roam-graph-max-title-length '15)
+  ;; Let's say that this is a temporary fix for the helm warping issue
+  (org-roam-node-display-template "${title:40} ${tags:20}")
   (org-roam-completion-everywhere t)
   (org-roam-buffer-window-parameters '((no-delete-other-windows . t)))
   ;; Daily notes
   (org-roam-dailies-directory "capture")
   (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
+  (org-roam-capture-templates
+   '(("d" "default" plain "%?" :if-new
+      (file+head "%<%Y-%m-%d-%H-%M-%S>-${slug}.org" "#+title: ${title}
+")
+      :unnarrowed t)))
   (org-roam-dailies-capture-templates
-   '(;; Example
-     ;; ("d" "default" entry
-     ;;  #'org-roam-capture--get-point
-     ;;  "* %?"
-     ;;  :file-name "capture/capture"
-     ;;  :head "#+title: Note\n\n"
-     ;;  :olp ("Default note"))
-     ("f" "Findings" entry
-      #'org-roam-capture--get-point
+   ;; Projects and resources
+   '(("m" "Magnum opus"entry
       "* %?\n"
-      :file-name "capture/capture"
-      :head "#+title: Note\n\n"
-      :olp ("Findings")
+      :if-new (file+olp "capture/capture"
+                        ("Magnum Opus")
+                        )
       )
-     ("t" "Magnum Opus" entry
-      #'org-roam-capture--get-point
+     ("f" "Findings" entry
       "* %?\n"
-      :file-name "capture/capture"
-      :head "#+title: Note\n\n"
-      :olp ("Magnum Opus")
+      :if-new (file+olp "capture/capture"
+                        ("Findings")
+                        )
       )
      ("o" "Ocurrence" entry
-      #'org-roam-capture--get-point
       "* %?\n"
-      :file-name "capture/capture"
-      :head "#+title: Note\n\n"
-      :olp ("Ocurrence")
+      :if-new (file+olp "capture/capture"
+                        ("Ocurrence")
+                        )
       )
-     ("y" "Lists" entry
-      #'org-roam-capture--get-point
-      "* %? \n"
-      :file-name "capture/capture"
-      :head "#+title: Note\n\n"
-      :olp ("Lists")
-      )
-     ("j" "Japanese")
-     ("jk" "Japanese Knowledge" entry ;; This include but not limited to: grammar, use case
-      #'org-roam-capture--get-point
-      "* Knowledge\n%?\n"
-      :file-name "capture/capture"
-      :head "#+title: Note\n\n"
-      :olp ("Japanese")
-      )
-     ("js" "Japanese Sentences" entry
-      #'org-roam-capture--get-point
-      "* Sentence\n%?\n"
-      :file-name "capture/capture"
-      :head "#+title: Note\n\n"
-      :olp ("Japanese")
-      )
-     ("p" "Projects" entry (file+headline "~/Dropbox (Maestral)/Creativè/org-roam/Projects/20210715113548-projects.org" "Stack <<=")
+     ("p" "Projects" entry
       "* TODO %?\n" :prepend t
+      :if-new (file+olp "~/Dropbox (Maestral)/Creativè/org-roam/Projects/20210715113548-projects.org"
+                        ("Layer: Projects" "Stack <<=")
+                        )
+      )
+     ("e" "English" entry
+      "* %?\n\n"
+      :if-new (file+olp "~/Dropbox (Maestral)/Creativè/org-roam/20210719135856-english.org"
+                        ("Dictionary")
+                        )
       )
      ))
-  :bind (:map org-roam-mode-map
-              (("C-c n l" . org-roam)
-               ("C-c n f" . org-roam-find-file)
-               ("C-c n g" . org-roam-graph)
-               ("C-c n c" . org-roam-dailies-capture-today)
-               ;; ("C-c n ")
-               )
-              :map org-mode-map
-              (("C-c n i" . org-roam-insert))
-              (("C-c n I" . org-roam-insert-immediate))
-              )
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n g" . org-roam-graph)
+         ("C-c n i" . org-roam-node-insert)
+         ("C-c n c" . org-roam-capture)
+         ;; Dailies
+         ("C-c n j" . org-roam-dailies-capture-today))
   )
 (use-package deft
-  :ensure t
+  :straight t
   :custom
   (deft-extensions '("org"))
   (deft-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
   (deft-recursive t)
   )
 (use-package anki-editor
-  :ensure t
+  :straight t
   :config
   (setq anki-editor--ox-anki-html-backend
         (if anki-editor-use-math-jax
@@ -631,7 +675,7 @@
                           ))))
   )
 (use-package projectile
-  :ensure t
+  :straight t
   :diminish projectile-mode
   :bind (("C-c p s" . 'projectile-switch-project)
          )
@@ -639,9 +683,11 @@
   (setq-default projectile-project-search-path '("~/Projects/"))
   (setq projectile-completion-system 'helm
         projectile-switch-project-action 'helm-projectile)
+  :hook
+  (after-init . projectile-mode)
   )
 (use-package spaceline
-  :ensure t
+  :straight t
   :init
   (spaceline-toggle-minor-modes-off)
   (spaceline-toggle-buffer-encoding-off)
@@ -662,7 +708,7 @@
   (spaceline-compile)
   )
 (use-package avy
-  :ensure t
+  :straight t
   :bind(("M-g g" . avy-goto-line)
         ("M-g M-g" . avy-goto-line)
         )
@@ -671,16 +717,22 @@
   (setq avy-keys '(?n ?e ?i ?k ?y ?m ?u ?c ?r ?s ?t))
   )
 (use-package ace-window
-  :ensure t
+  :straight t
   :custom
-  (aw-keys '(?n ?e ?i ?k ?y ?m ?u)))
-
+  (aw-keys '(?n ?e ?i ?o ?k ?m ?u ?y))
+  )
 ;;; Minor packages
+(use-package yasnippet
+  :bind (("C-l" . yas-expand)
+         )
+  )
 (use-package dashboard
-  :ensure t
+  :straight t
+  :straight all-the-icons page-break-lines
+  :defer
   :init
   ;; It's just that i like the phrase
-  (setq dashboard-banner-logo-title "Welcome back, legend 800 Japanese words await you")
+  (setq dashboard-banner-logo-title "Welcome back, legend. 800 Japanese words await you")
   ;; Set the banner
   ;; (setq dashboard-startup-banner [VALUE])
   (setq dashboard-set-footer nil)
@@ -688,15 +740,16 @@
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
   (setq dashboard-center-content t)
-  (setq dashboard-items '((recents  . 5)
-                          (bookmarks . 10)
-                          (projects . 5)
-                          ))
-  :config
-  (dashboard-setup-startup-hook)
-  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+  ;; (setq dashboard-items '((recents  . 5)
+  ;;                         (bookmarks . 10)
+  ;;                         (projects . 5)
+  ;;                         ))
+  :config ;; For now i'm going to try something
+  ;; (dashboard-setup-startup-hook)
+  ;; (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
   )
 (use-package undo-tree
+  :straight t
   :ryo
   ("q /" undo-tree-visualize)
   :bind
@@ -707,7 +760,7 @@
         ("U" . undo-tree-visualize-switch-branch-right)
         ))
 (use-package selected ;; Special keybindings when a region is active
-  :ensure t
+  :straight t
   ;; selected-<major-mode>-map for major mode specific keybindings
   ;; (setq selected-org-mode-map (make-sparse-keymap)) example org mode
   :commands selected-minor-mode
@@ -717,8 +770,10 @@
               ("q" . selected-off)
               ("w" . count-words-region))
   )
+(use-package ace-mc)
+(use-package direx)
 (use-package nyan-mode ;; Nyan, simple nyan
-  :ensure t
+  :straight t
   :diminish nyan-mode
   :init
   (setq nyan-animate-nyancat t)
@@ -803,7 +858,7 @@
 ;;   (setq anki-collection-dir "/Users/chandamon/Library/Application Support/Anki2/User 1")
 ;;   )
 (use-package which-key ;; Useful to tell what is the next command that i can do
-  :ensure t
+  :straight t
   :init
   (setq which-key-enable-extended-define-key t)
   (setq which-key-side-window-location 'bottom)
@@ -814,14 +869,14 @@
   (which-key-mode)
   )
 (use-package expand-region
-  :ensure t
+  :straight t
   :bind (("C-'" . er/expand-region)
          )
   )
 (use-package change-inner
-  :ensure t)
+  :straight t)
 (use-package yequake
-  :ensure t
+  :straight t
   :custom
   (yequake-frames
    '(("org-roam-dailies-capture-today"
@@ -832,16 +887,8 @@
       (frame-parameters . ((undecorated . t)
                            (skip-taskbar . t)
                            (sticky . t))))
-     ;; Migrate =Task Management= To projects
-     ;; ("org-capture"
-     ;;  (buffer-fns . (yequake-org-capture))
-     ;;  (width . 0.75)
-     ;;  (height . 0.5)
-     ;;  (alpha . 0.80)
-     ;;  (frame-parameters . ((undecorated . t)
-     ;;                       (skip-taskbar . t)
-     ;;                       (sticky . t))))
-     ))
+     )
+   )
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -852,11 +899,13 @@
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (setq default-buffer-file-coding-system 'utf-8)
-(setq default-fill-column 74)
 (add-to-list 'golden-ratio-extra-commands 'ace-window)
+(setq default-fill-column 74)
 (setq highlight-nonselected-windows t)
 (setq use-dialog-box nil) ; Text-based options are better
 (setq bidi-display-reordering nil)
+(setq font-lock-verbose nil)
+(setq byte-compile-verbose nil)
 (setq default-tab-width 4)
 (setq tab-width 4)
 (setq inhibit-compacting-font-caches t)
@@ -884,9 +933,6 @@
    ("#+begin_src"     . "Λ")
    ("#+end_src"       . "Λ")
    ("lambda"          . "λ")
-   ("[ ]" . "☐")
-   ("[X]" . "☑")
-   ("[-]" . "❍")
    ))
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 (setq delete-old-versions -1)
@@ -1011,17 +1057,15 @@
 
 (add-hook 'emacs-lisp-mode-hook
           (lambda()
-            (aggressive-indent-mode)
             (company-mode)
-            (rainbow-delimiters-mode)
             ))
 
 (add-hook 'csv-mode-hook
           'csv-align-mode
           )
 
-(add-hook 'post-command-hook ;Execute after a command
-          'hcz-set-cursor-color-according-to-mode)
+;; (add-hook 'post-command-hook ;Execute after a command
+;;           'hcz-set-cursor-color-according-to-mode)
 (add-hook 'after-init-hook
           (lambda()
             (which-function-mode t)
@@ -1033,7 +1077,6 @@
 (add-hook 'prog-mode
           (lambda()
             (auto-fill-mode t)
-            (rainbow-delimiters-mode t)
             )
           )
 (add-hook 'TeX-after-compilation-finished-functions
@@ -1102,9 +1145,12 @@
 
 
 
-
-(ryo-modal-global-mode t)
+;; Load all functions
+(require 'functions)
+;; ;; Load the maped ryo-modal
+(require 'MyMy-mode)
 (put 'upcase-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
+(ryo-modal-global-mode t)
 ;; Init.el ends here
