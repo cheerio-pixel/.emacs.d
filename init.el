@@ -83,7 +83,6 @@
 (pdf-tools-install)
 (save-place-mode)
 
-
 ;; (use-package eaf
 ;;   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
 ;;   :init
@@ -580,7 +579,7 @@ T - tag prefix
   (find-file "~/Dropbox (Maestral)/Creativè/org-roam/2021-07-19-14-50-18-entries.org")
   :hook
   (after-init . winner-mode)
-  (org-mode . org-hide-properties)
+  ;; (org-mode . org-hide-properties)
   :custom
   (org-roam-graph-executable "dot")
   (org-roam-graph-viewer "/usr/bin/google-chrome-stable")
