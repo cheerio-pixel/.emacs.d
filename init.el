@@ -581,19 +581,34 @@ T - tag prefix
   (after-init . winner-mode)
   ;; (org-mode . org-hide-properties)
   :custom
-  (org-roam-graph-executable "dot")
+  (org-roam-graph-filetype "svg")
+  (org-roam-graph-executable "dot") ;; Never use neato unless you are going to keep 100 notes or less
   (org-roam-graph-viewer "/usr/bin/google-chrome-stable")
   (org-roam-graph-node-extra-config
    '(("id"
       ("style" . "bold,rounded,filled")
       ("fillcolor" . "#000000")
       ("color" . "#15FF00")
-      ("fontcolor" . "#00FFFF"))
+      ("fontcolor" . "#00FFFF")
+      )
+     ("nodesep" . "0.5")
      )
    )
-  ;; (org-roam-graph-extra-config '(("rankdir" . "LR")))
-  (org-roam-graph-extra-config '(("bgcolor" . "snow2"))) ;; https://graphviz.org/doc/info/colors.html
-  (org-roam-graph-edge-extra-config '(("dir" . "forward")))
+  (org-roam-graph-edge-extra-config
+   '(("dir" . "forward")
+     ("weight" . "3")
+     )
+   )
+  (org-roam-graph-extra-config
+   '(("bgcolor" . "snow2") ;; https://graphviz.org/doc/info/colors.html
+     ;; ("rank" . "source")
+     ("ordering" . "out")
+     ("rankdir" . "TB") ;; TBLR Top Bottom Left Rigth
+     ("ranksep" . "1") ;; https://graphviz.org/docs/attrs/ranksep/
+     ("sep" . "4") ;; Always bigger than esep
+     ("esep" . "3") ;; https://graphviz.org/docs/attrs/esep/
+     )
+   )
   (org-roam-graph-link-hidden-types '("file" "https" "fuzzy" "http"))
   (org-roam-graph-shorten-titles 'wrap)
   (org-roam-graph-max-title-length '15)
