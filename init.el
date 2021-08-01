@@ -572,6 +572,7 @@ T - tag prefix
   :straight t
   :init
   (setq org-roam-v2-ack t)
+  (setq inhibit-startup-screen t)
   (setq initial-buffer-choice "~/Dropbox (Maestral)/Creativè/org-roam/2021-07-19-14-50-18-entries.org")
   :config
   (org-roam-setup)
