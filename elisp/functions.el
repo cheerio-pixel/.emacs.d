@@ -376,7 +376,7 @@ and when nil is returned the node will be filtered out."
   "create a scratch buffer"
   (interactive)
   (switch-to-buffer (get-buffer-create "*scratch*"))
-  (org-mode)
+  (lisp-interaction-mode)
   )
 
 ;;;;;                   AVY
