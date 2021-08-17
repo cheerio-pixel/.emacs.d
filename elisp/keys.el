@@ -69,7 +69,6 @@
 
 (global-set-key (kbd "C-q") 'backward-delete-word)
 (global-set-key (kbd "M-z") 'delete-region)
-(global-set-key (kbd "M-q") 'delete-line)
 (global-set-key (kbd "M-d") 'delete-word-or-whitespace)
 
 (global-set-key (kbd "C->") 'mc/mark-next-like-this)
