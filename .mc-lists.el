@@ -59,4 +59,5 @@
         rectangle-backward-char
         ryo-modal-global-mode
         ryo-modal-mode-all
+        sp-backward-delete-char
         ))
