@@ -12,6 +12,16 @@
   (interactive)
   (org-latex-export-to-pdf nil t nil nil nil)
   )
+(defun tmp-lispy-fix ()
+  (interactive)
+  (if ryo-modal-global-mode
+      (progn
+        (ryo-modal-global-mode 0)
+        (lispy-mode 1))
+    (ryo-modal-global-mode 1)
+    (lispy-mode -1)
+    )
+  )
 (use-package ryo-modal
   :ensure t
   :commands ryo-modal-mode
