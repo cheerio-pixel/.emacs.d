@@ -99,11 +99,39 @@
 ;;   (eaf-bind-key take_photo "p" eaf-camera-keybinding)
 ;;   (eaf-bind-key nil "M-q" eaf-browser-keybinding) ;; unbind, see more in the Wiki
 ;;   )
+(use-package lispy
+  :straight t
+  :defer t
+  :init
+  (setq lispy-compat '(edebug cider))
+  (defun lispy-undo ()
+    "Deactivate region and `undo'."
+    (interactive)
+    (when (region-active-p)
+      (deactivate-mark t))
+    (undo-tree-undo))
+  :config
+  (define-key lispy-mode-map (kbd "e") 'special-lispy-different)
+  :hook
+  (clojure-mode . lispy-mode)
+  (emacs-lisp-mode . lispy-mode))
+(use-package clj-refactor
+  :straight t
+  :defer
+  :init
+  (cljr-add-keybindings-with-prefix "C-c m")
+  :hook
+  (cider-mode . clj-refactor-mode)
+  )
 (use-package cider
   :straight t
+  :defer
   :hook
   (clojure-mode . cider-mode)
   (cider-repl-mode . aggressive-indent-mode)
+  (cider-repl-mode . subword-mode)
+  (cider-repl-mode . cider-company-enable-fuzzy-completion)
+  (cider-mode . cider-company-enable-fuzzy-completion)
   )
 (use-package haskell-mode
   :straight t
