@@ -48,6 +48,7 @@
    ("gD" remember-notes)
    ("gy" yas-visit-snippet-file)
    ("Gy" yas-insert-snippet)
+   ("gi" quoted-insert)
    ("/" undo)
    ("p" keyboard-quit)
    ("," ryo-modal-repeat)
