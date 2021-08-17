@@ -8,6 +8,7 @@
 (require 'yasnippet)
 (require 'csv-mode)
 (require 'centaur-tabs)
+
 (defun export-subtree-to-pdf()
   (interactive)
   (org-latex-export-to-pdf nil t nil nil nil)
@@ -20,6 +21,13 @@
         (lispy-mode 1))
     (ryo-modal-global-mode 1)
     (lispy-mode -1)
+    )
+  )
+(defun toggle-centaur-grouping ()
+  (interactive)
+  (if (eq centaur-tabs-buffer-groups-function 'centaur-tabs-projectile-buffer-groups)
+      (centaur-tabs-group-buffer-groups)
+    (centaur-tabs-group-by-projectile-project)
     )
   )
 (use-package ryo-modal
@@ -221,6 +229,7 @@
       )
      ("p" ;; Some commands are left
       (("s" projectile-switch-project)
+       ("t" toggle-centaur-grouping)
        )
       :name "Projectile"
       )
