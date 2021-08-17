@@ -332,6 +332,27 @@
    ("8" "M-8")
    ("9" "M-9")
    )
+  (defun cider-find-and-clear-repl-buffer ()
+    (interactive)
+    (cider-find-and-clear-repl-output t)
+    )
+  (defun cider-pprint-eval-defun-at-point-to-comment ()
+    (interactive)
+    (cider-pprint-eval-defun-at-point t))
+  (ryo-modal-major-mode-keys
+   'clojure-mode
+   ("S-SPC" tmp-lispy-fix)
+   ("C-t" tmp-lispy-fix)
+   ("r"
+    (("r" cider-run)
+     ("f" cider-pprint-eval-defun-at-point)
+     ("c" cider-find-and-clear-repl-output)
+     ("C" cider-find-and-clear-repl-buffer)
+     ("p" cider-eval-defun-to-comment)
+     ("P" cider-pprint-eval-defun-at-point-to-comment)
+     )
+    )
+   )
   (ryo-modal-major-mode-keys
    'csv-mode
    ("s"
@@ -654,9 +675,7 @@ _s_: modified      ^ ^
                   ("E" jump-to-register)
                   ("ga" beginning-of-buffer)
                   ("ge" end-of-buffer)
-                  ("q" nil "cancel" :color blue)
-                  ))
-  )
+                  ("q" nil "cancel" :color blue))))
 (which-key-add-key-based-replacements
   "ok" "Buffers, Files & and M-x"
   "oa" "Insert"
