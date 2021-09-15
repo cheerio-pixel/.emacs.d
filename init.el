@@ -70,9 +70,7 @@
 ;; (load-theme 'monokai-pro t)
 (use-package smartparens
   :config
-  (sp-local-pair '(emacs-lisp-mode clojure-mode ;; cider-mode
-                                   ) "'" "'" :actions nil)
-  (sp-local-pair '(org-mode) "*" "*" :insert)
+  (sp-local-pair '(emacs-lisp-mode clojure-mode cider-mode) "'" "'" :actions nil)
   (define-key smartparens-mode-map (kbd "C-M-e") 'company-complete)
   (define-key smartparens-mode-map (kbd "M-(") 'sp-wrap-round)
   (define-key smartparens-mode-map (kbd "M-s") 'sp-splice-sexp)
