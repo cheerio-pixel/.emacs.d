@@ -1,5 +1,5 @@
 (require 'avy)
-(require 'elpy)
+;; (require 'elpy)
 (require 'subr-x)
 (require 'cl-lib)
 
@@ -82,19 +82,102 @@ and when nil is returned the node will be filtered out."
     (deactivate-mark))
   )
 
-(defun elpy-goto-definition-or-rgrep ()
-  "Go to the definition of the symbol at point, if found. Otherwise, run `elpy-rgrep-symbol'."
-  (interactive)
-  (ring-insert find-tag-marker-ring (point-marker))
-  (condition-case nil (elpy-goto-definition)
-    (error (elpy-rgrep-symbol
-            (concat "\\(def\\|class\\)\s" (thing-at-point 'symbol) "(")))))
-(defun pipenv-start-first-time ()
-  "My set of command to run when i want to create a virtual env"
-  (interactive)
-  (pipenv-lock)
-  (pipenv-shell)
-  )
+;; (defun elpy-goto-definition-or-rgrep ()
+;;   "Go to the definition of the symbol at point, if found. Otherwise, run `elpy-rgrep-symbol'."
+;;   (interactive)
+;;   (ring-insert find-tag-marker-ring (point-marker))
+;;   (condition-case nil (elpy-goto-definition)
+;;     (error (elpy-rgrep-symbol
+;;             (concat "\\(def\\|class\\)\s" (thing-at-point 'symbol) "(")))))
+
+(defun mymy/elpy-nav-backward-block ()
+  "Move to the previous line indented like point.
+This will skip over lines and statements with different
+indentation levels."
+  (interactive "^")
+  (let ((indent (current-column))
+        (start (point))
+        (cur nil))
+    (when (/= (% indent 1)
+              0)
+      (setq indent 1))
+    (while (and (< indent (current-indentation))
+                (not (bobp)))
+      (when (equal (point) cur)
+        (error "Statement does not start"))
+      (setq cur (point)))
+    (when (< (current-indentation)
+             indent)
+      (goto-char start))))
+
+(defun mymy/elpy-nav-forward-indent ()
+  "Move forward to the next indent level, or over the next word."
+  (interactive "^")
+  (if (< (current-column) (current-indentation))
+      (let* ((current (current-column))
+             (next 1))
+        (goto-char (+ (point-at-bol)
+                      next)))
+    (let ((eol (point-at-eol)))
+      (forward-word)
+      (when (> (point) eol)
+        (goto-char (point-at-bol))))))
+
+(defun mymy/elpy-nav-move-line-or-region-down (&optional beg end)
+  "Move the current line or active region down."
+  (interactive
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list nil nil)))
+  (if beg
+      (mymy/elpy--nav-move-region-vertically beg end 1)
+    (mymy/elpy--nav-move-line-vertically 1)))
+
+(defun mymy/elpy-nav-move-line-or-region-up (&optional beg end)
+  "Move the current line or active region down."
+  (interactive
+   (if (use-region-p)
+       (list (region-beginning) (region-end))
+     (list nil nil)))
+  (if beg
+      (mymy/elpy--nav-move-region-vertically beg end -1)
+    (mymy/elpy--nav-move-line-vertically -1)))
+
+(defun mymy/elpy--nav-move-region-vertically (beg end dir)
+  "Move the current region vertically in direction DIR."
+  (let* ((point-before-mark (< (point) (mark)))
+         (beg (save-excursion
+                (goto-char beg)
+                (point-at-bol)))
+         (end (save-excursion
+                (goto-char end)
+                (if (bolp)
+                    (point)
+                  (point-at-bol 2))))
+         (region (delete-and-extract-region beg end)))
+    (goto-char beg)
+    (forward-line dir)
+    (save-excursion
+      (insert region))
+    (if point-before-mark
+        (set-mark (+ (point)
+                     (length region)))
+      (set-mark (point))
+      (goto-char (+ (point)
+                    (length region))))
+    (setq deactivate-mark nil)))
+
+(defun mymy/elpy--nav-move-line-vertically (dir)
+  "Move the current line vertically in direction DIR."
+  (let* ((beg (point-at-bol))
+         (end (point-at-bol 2))
+         (col (current-column))
+         (region (delete-and-extract-region beg end)))
+    (forward-line dir)
+    (save-excursion
+      (insert region))
+    (goto-char (+ (point) col))))
+
 (defun my-save-word ()
   (interactive)
   (let ((current-location (point))
@@ -495,7 +578,6 @@ and when nil is returned the node will be filtered out."
 ;; remap C-a to `smarter-move-beginning-of-line'
 (global-set-key [remap move-beginning-of-line]
                 'smarter-move-beginning-of-line)
-
 
 (defun smart-open-line ()
   "Insert an empty line after the current line.
