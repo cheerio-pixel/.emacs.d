@@ -228,12 +228,6 @@
        )
       :name "Insert"
       )
-     ("p" ;; Some commands are left
-      (("s" projectile-switch-project)
-       ("t" toggle-centaur-grouping)
-       )
-      :name "Projectile"
-      )
      ("w"
       (("f" ace-window)
        ("r" split-window-below)
