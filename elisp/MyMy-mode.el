@@ -271,11 +271,11 @@
   (ryo-modal-keys
    (:norepeat t)
    ("!"
-    (("c" flycheck-buffer)
-     ("e" flycheck-explain-error-at-point)
-     ("l" flycheck-list-errors)
-     ("x" flycheck-disable-checker)
-     ("o" flycheck-mode)
+    (("c" flycheck-buffer :name "Check buffer")
+     ("e" flycheck-explain-error-at-point :name "Explain error at point")
+     ("l" flycheck-list-errors :name "List errors")
+     ("x" flycheck-disable-checker :name "Disable checker")
+     ("o" flycheck-mode :name "Toggle mode")
      )
     )
    )
