@@ -77,7 +77,7 @@
 (global-set-key (kbd "C-c m c") 'mc/edit-lines)
 
 (global-set-key (kbd "C-a") 'smarter-move-beginning-of-line)
-(global-set-key (kbd "C-M-,") 'company-capf)
+(global-set-key (kbd "C-M-n") 'company-capf)
 (global-set-key (kbd "C-M-e") 'company-complete)
 (global-set-key (kbd "C-c y y") 'yas-insert-snippet)
 ;; Rare bindings
