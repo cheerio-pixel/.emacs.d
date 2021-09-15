@@ -696,4 +696,4 @@ _s_: modified      ^ ^
   "rr" "Refractoring"
   )
 (provide 'MyMy-mode)
-;;; power-mode.el ends here
+;;; MyMy-mode.el ends here
