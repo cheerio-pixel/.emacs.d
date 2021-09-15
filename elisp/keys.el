@@ -1,4 +1,5 @@
 (require 'centered-cursor-mode)
+(require 'dired)
 (global-set-key (kbd "C-M-y") 'duplicate-current-line);; Duplicate line
 (global-set-key (kbd "C-S-e") 'forward-word)
 
