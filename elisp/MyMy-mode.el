@@ -1,6 +1,6 @@
-(require 'elpy)
-(require 'hideshow)
+;; (require 'elpy)
 (require 'org)
+(require 'hideshow)
 (require 'org-roam)
 (require 'magit)
 (require 'flycheck)
