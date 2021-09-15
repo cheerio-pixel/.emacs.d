@@ -265,11 +265,14 @@
   :hook (python-mode . blacken-mode)
   :config
   (setq blacken-line-length 79))
-;; Use (sp-pair) from smartparens instead
-;; (use-package wrap-region
-;;   :straight (wrap-region :type git :host github :repo "rejeep/wrap-region.el" :fork t)
-;;   (wrap-region-add-wrapper "*" "*" nil 'org-mode) (wrap-region-global-mode t)
-;;   )
+;; sp-pair is not suitiable when you have strict-mode activate
+(use-package wrap-region
+  :straight (wrap-region :type git :host github :repo "rejeep/wrap-region.el" :fork t)
+  :config
+  (wrap-region-add-wrapper "*" "*" nil 'org-mode) (wrap-region-global-mode t)
+  :hook
+  (after-init . wrap-region-global-mode)
+  )
 (use-package electric-operator
   :straight t)
 (use-package highlight-indentation
