@@ -92,11 +92,20 @@
 (use-package spaceline)
 (spaceline-emacs-theme t)
 (use-package pdf-tools
+  :ryo
+  (:mode 'pdf-view-mode)
+  ("n" pdf-view-next-line-or-next-page)
+  ("u" pdf-view-previous-line-or-previous-page)
+  ("N" pdf-view-next-page)
+  ("U" pdf-view-previous-page)
   :config
   (use-package org-noter :custom (org-noter-notes-window-location 'other-frame))
   (use-package pdf-avy-highlight
     ;; This is making me uncomfortable all those files just for one file...
     :straight (:host github :repo "dalanicolai/dala-emacs-lisp" :files ("pdf-avy-highlight.el")))
+  ;; Don't make the daemon fail when a new version is avalible
+  (ignore-errors
+    (pdf-tools-install))
   )
 (pdf-tools-install)
 (save-place-mode)
