@@ -51,13 +51,18 @@
                :slant normal
                :weight normal
                :height 130
-               :width normal
-               )))))
+               :width normal)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;MODES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(use-package impatient-mode
+  :straight t)
+
+(use-package web-mode
+  :straight t)
 (use-package dracula-theme
   :config
   (load-theme 'dracula t)
@@ -66,10 +71,17 @@
 ;; (load-theme 'monokai-pro t)
 (use-package smartparens
   :config
-  (sp-local-pair '(emacs-lisp-mode clojure-mode cider-mode) "'" "'" :actions nil)
-  (show-smartparens-global-mode t)
-  (smartparens-global-mode t)
-  )
+  (sp-local-pair '(emacs-lisp-mode clojure-mode ;; cider-mode
+                                   ) "'" "'" :actions nil)
+  (sp-local-pair '(org-mode) "*" "*" :insert)
+  (define-key smartparens-mode-map (kbd "C-M-e") 'company-complete)
+  (define-key smartparens-mode-map (kbd "M-(") 'sp-wrap-round)
+  (define-key smartparens-mode-map (kbd "M-s") 'sp-splice-sexp)
+  (define-key smartparens-mode-map (kbd "M-r") 'sp-splice-sexp-killing-around)
+  (show-smartparens-global-mode)
+  (smartparens-global-mode)
+  (smartparens-global-strict-mode))
+
 (global-hl-line-mode t)
 (global-centered-cursor-mode t)
 (global-whitespace-mode t)
@@ -79,10 +91,19 @@
 (savehist-mode t)
 (use-package spaceline)
 (spaceline-emacs-theme t)
-(use-package pdf-tools)
+(use-package pdf-tools
+  :config
+  (use-package org-noter :custom (org-noter-notes-window-location 'other-frame))
+  (use-package pdf-avy-highlight
+    ;; This is making me uncomfortable all those files just for one file...
+    :straight (:host github :repo "dalanicolai/dala-emacs-lisp" :files ("pdf-avy-highlight.el")))
+  )
 (pdf-tools-install)
 (save-place-mode)
 
+
+(use-package vterm
+  :straight t)
 ;; (use-package eaf
 ;;   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
 ;;   :init
@@ -123,9 +144,13 @@
   :hook
   (cider-mode . clj-refactor-mode)
   )
+(use-package flycheck-clj-kondo
+  :straight t)
 (use-package cider
   :straight t
   :defer
+  :custom
+  (cider-test-show-report-on-success t)
   :hook
   (clojure-mode . cider-mode)
   (cider-repl-mode . aggressive-indent-mode)
@@ -140,64 +165,30 @@
   (haskell-literate-mode . lsp)
   )
 (use-package clojure-mode
-  :straight t)
-(use-package elpy
   :straight t
-  :bind (:map python-mode-map
-              ("C-c C-q" . jupyter-eval-buffer)
-              ("C-c C-j" . jupyter-run-repl)
-              ("C-M-y" . company-jedi)
-              )
-  :init (with-eval-after-load 'python (elpy-enable))
-  :hook
-  (python-mode . anaconda-mode)
-  (python-mode . highlight-indentation-mode)
-  (python-mode . electric-operator-mode)
-  (python-mode . hs-minor-mode)
-  (python-mode . (lambda()
-                   (setq-local
-                    fill-column 79
-                    company-dabbrev-char-regexp "\\sw\\|\\s_"
-                    )))
-  (elpy-mode . mymy-global-mode)
-  (inferior-python-mode . hide-mode-line-mode)
   :config
-  (setq python-indent-guess-indent-offset-verbose nil)
-  (when (load "flycheck" t t)
-    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-    (add-hook 'elpy-mode-hook 'flycheck-mode))
-  ;; (add-hook 'pyvenv-post-activate-hooks (lambda()
-  ;;                                         (pyvenv-restart-python)))
-  (setq
-   python-shell-interpreter "ipython"
-   python-shell-interpreter-args "--colors=Linux --profile=default
---simple-prompt -i"
-   python-shell-prompt-regexup "In \\[[0-9]+\\]: "
-   python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
-   python-shell-completion-setup-code
-   "from IPython.core.completerlib import module_completion"
-   python-shell-completion-module-string-code
-   "';'.join(module_completion('''%s'''))\n"
-   python-shell-completion-string-code
-   "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
-  )
+  (require 'flycheck-clj-kondo))
 (use-package lsp-mode
   :straight t
   :init
-  (setq lsp-keymap-prefix "s-m")
+  (setq lsp-keymap-prefix "C-c l")
   :config
-  (lsp-register-custom-settings
-   '(("pyls.plugins.pyls_mypy.enabled" t t)
-     ("pyls.plugins.pyls_mypy.live_mode" nil t)
-     ("pyls.plugins.pyls_black.enabled" t t)
-     ("pyls.plugins.pyls_isort.enabled" t t)
-     ))
   (setq lsp-log-io t)
+  (setq lsp-keep-workspace-alive nil)
   :hook
-  ((python-mode . lsp)
-   (lsp-mode . lsp-enable-which-key-integration)
-   )
+  ((lsp-mode . lsp-enable-which-key-integration))
   )
+(use-package dap-mode
+  :straight (dap-mode :type git :host github :repo "emacs-lsp/dap-mode" :branch "master")
+  :straight with-venv
+  :after lsp-mode
+  :bind (:map lsp-mode-map ("<f5>" . dap-debug))
+  :config
+  (require 'dap-java)
+  (require 'dap-python)
+  (defun dap-python--pyenv-executable-find (command)
+    (with-venv (executable-find "python")))
+  (setq dap-python-debugger 'debugpy))
 (use-package lsp-ui
   :config (setq lsp-ui-sideline-show-hover t
                 lsp-ui-sideline-delay 0.5
@@ -209,17 +200,59 @@
                 lsp-ui-doc-include-signature t
                 lsp-ui-doc-use-childframe t)
   :commands lsp-ui-mode)
-(use-package company-jedi
-  :straight t
-  :hook (python-mode . enable-jedi)
-  :config (setq jedi:complete-on-dot t)
+(use-package python
+  :bind (:map python-mode-map
+              (("C-c C-q" . jupyter-eval-buffer)
+               ("C-c C-j" . jupyter-run-repl)))
+  :config
+  (setq python-indent-guess-indent-offset-verbose nil)
+  (setq python-shell-interpreter "ipython"
+        python-shell-interpreter-args "--colors=Linux --profile=default --simple-prompt -i"
+        python-shell-prompt-regexup "In \\[[0-9]+\\]: "
+        python-shell-prompt-output-regexp "Out\\[[0-9]+\\]: "
+        python-shell-completion-setup-code
+        "from IPython.core.completerlib import module_completion"
+        python-shell-completion-module-string-code
+        "';'.join(module_completion('''%s'''))\n"
+        python-shell-completion-string-code
+        "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")
+  :hook
+  ((inferior-python-mode . hide-mode-line-mode)
+   (python-mode . (lambda ()
+                    (setq-local
+                     fill-column 79
+                     company-dabbrev-char-regexp "\\sw\\|\\s_"
+                     )))
+   (python-mode . (highlight-indentation-mode))
+   (python-mode . (electric-operator-mode))
+   (python-mode . (hs-minor-mode))
+   )
   )
-(use-package pipenv
-  :hook (python-mode . pipenv-mode)
-  :init
-  (setq
-   pipenv-projectile-after-switch-function
-   #'pipenv-projectile-after-switch-extended)
+(use-package lsp-pyright
+  :straight t)
+(use-package pydoc
+  :straight t
+  :bind (:map python-mode-map
+              ("C-c C-d" . nil)
+              ("C-c C-d C-d" . pydoc-at-point-no-jedi)
+              ("C-c C-d C-v" . pydoc))
+  :hook
+  ((python-mode . lsp)
+   (python-mode . (lambda () (require 'lsp-pyright))))
+  )
+;; (use-package realgud
+;;   :straight t
+;;   )
+(use-package lsp-java
+  :straight t
+  :straight lsp-mode
+  :hook
+  (java-mode . lsp)
+  )
+(use-package poetry
+  :straight t
+  :hook
+  (python-mode . poetry-tracking-mode)
   )
 (use-package rainbow-delimiters
   :straight t
@@ -230,9 +263,15 @@
   :hook (python-mode . blacken-mode)
   :config
   (setq blacken-line-length 79))
-(use-package wrap-region
-  :straight (wrap-region :type git :host github :repo "rejeep/wrap-region.el" :fork t)
-  )
+;; Use (sp-pair) from smartparens instead
+;; (use-package wrap-region
+;;   :straight (wrap-region :type git :host github :repo "rejeep/wrap-region.el" :fork t)
+;;   (wrap-region-add-wrapper "*" "*" nil 'org-mode) (wrap-region-global-mode t)
+;;   )
+(use-package electric-operator
+  :straight t)
+(use-package highlight-indentation
+  :straight t)
 (use-package company
   :straight t
   :bind (
@@ -257,13 +296,14 @@
           company-pseudo-tooltip-frontend
           ))
   ;; (add-to-list 'company-backends #'company-tabnine)
+  (add-to-list 'company-backends #'company-ispell)
   (define-key company-active-map (kbd "TAB") 'company-select-next)
   (define-key company-active-map (kbd "<backtab>") 'company-select-previous)
   (company-tng-mode)
   (global-company-mode)
   )
 (use-package elisp-slime-nav
-  :ensure t)
+  :straight t)
 (use-package aggressive-indent
   :hook
   (emacs-lisp-mode . aggressive-indent-mode)
@@ -286,14 +326,14 @@
 ;;;;;                   HELM MODE
 (use-package helm
   :straight t
-  :straight helm-swoop
+  :straight helm-swoop helm-projectile
   :diminish helm-mode
   :bind (("M-x" . helm-M-x)
          ("C-x b" . helm-mini)
          ("C-x C-f" . helm-find-files)
          ("C-x r b" . helm-filtered-bookmarks)
-         ("C-x p" . helm-projectile)
          ("C-c h s" . helm-swoop)
+         ("C-c t h" . helm-projectile)
          :map helm-map
          ("C-n" . helm-next-line)
          ("C-u" . helm-previous-line)
@@ -311,16 +351,17 @@
          helm-source-buffer-not-found))
   (spaceline-helm-mode t)
   (spaceline-toggle-helm-number-on)
-  (helm-mode)
-  )
-(use-package magit
-  :straight t)
+  (helm-mode))
+(use-package helm-lsp
+  :straight t
+  :after helm)
 (use-package ispell
   ;; https://200ok.ch/posts/2020-08-22_setting_up_spell_checking_with_multiple_dictionaries.html
   :config
   (setq ispell-program-name "hunspell")
   ;; Configure German, Swiss German, and two variants of English.
   (setq ispell-dictionary "en_US,es_ES")
+  (setq company-ispell-dictionary "en_US,es_ES")
   ;; ispell-set-spellchecker-params has to be called
   ;; before ispell-hunspell-add-multi-dic will work
   (ispell-set-spellchecker-params)
@@ -333,6 +374,18 @@
   (unless (file-exists-p ispell-personal-dictionary)
     (write-region "" nil ispell-personal-dictionary nil 0))
   )
+(use-package magit
+  :straight t)
+(use-package dired+
+  :straight t)
+(use-package dired-subtree
+  :straight t
+  :bind (:map dired-mode-map
+              ("i" . dired-subtree-toggle)))
+(use-package dired-collapse
+  :straight t
+  :hook
+  ((dired-mode . dired-collapse-mode)))
 (use-package hydra
   :straight t
   :config
@@ -426,6 +479,7 @@ T - tag prefix
   :init
   (setq org-clock-string-limit 25)
   (setq spaceline-org-clock-format-function 'dwim/org-clock-get-string)
+  (require 'org-habit)
   (require 'ob-clojure)
   (setq org-babel-clojure-backend 'cider)
   (org-babel-do-load-languages
@@ -446,8 +500,11 @@ T - tag prefix
      (sql . nil)
      (sqlite . t)
      (clojure . t)
+     (java . t)
      ))
   :config
+  ;; For org roam
+  (require 'org-protocol)
   (define-key org-mode-map (kbd "C-j") 'nil)
   (define-key org-mode-map (kbd "C-j") (lambda (count)
                                          (interactive "p")
@@ -455,7 +512,6 @@ T - tag prefix
                                          ))
   (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
   (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags . helm-org-completing-read-tags))
-  (wrap-region-add-wrapper "*" "*" nil 'org-mode)
   :custom
   ;; org-default-notes-file "~/task-of-the-day.org"
   ;; org-default-notes-file "~/org-mode/class-note-taking.org"
@@ -502,9 +558,11 @@ T - tag prefix
      ("DOING" . (:foreground "orange" :weight bold))
      ("PROJECT" . (:foreground "white" :weight bold))
      ("COMPLETED" . (:foreground "cyan" :weight bold))
+     ("STAGNATED"  . (:foreground "brown" :weight bold))
      ))
   (org-todo-keywords
-   '((sequence "TODO" "NEXT" "DOING" "|" "DONE")
+   '((sequence "TODO" "NEXT" "DOING" "|" "DONE" "STAGNATED")
+     (sequence "HABIT" "|" "DONE")
      (sequence "PROJECT" "|" "COMPLETED" "CANCELLED")
      (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
      (sequence "CLASS" "|")
@@ -574,8 +632,7 @@ T - tag prefix
    . (lambda () (setq-local tab-width 2
                             indent-tabs-mode nil
                             python-shell-interpreter "python3"
-                            )))
-  )
+                            ))))
 ;; Why do i live, just to suffer?
 (use-package org-journal
   :straight t
@@ -591,20 +648,30 @@ T - tag prefix
   :straight t
   :config
   (org-superstar-configure-like-org-bullets)
-  (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄ ?⁋))
+  (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄))
   )
 (use-package csv-mode)
 (use-package yasnippet-snippets)
+;; (use-package org-roam-ui
+;;   :straight (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+;;   :straight websocket simple-httpd
+;;   :after org-roam
+;;   :config
+;;   (setq org-roam-ui-sync-theme t
+;;         org-roam-ui-follow t
+;;         org-roam-ui-update-on-save t
+;;         org-roam-ui-open-on-start t))
 (use-package org-roam
-  :straight t
+  :straight (:host github :repo "org-roam/org-roam"
+                   :files (:defaults "extensions/*.el"))
   :init
   (setq org-roam-v2-ack t)
   (setq inhibit-startup-screen t)
   (setq initial-buffer-choice "~/Dropbox (Maestral)/Creativè/org-roam/2021-07-19-14-50-18-entries.org")
-  :config
-  (org-roam-setup)
-  (require 'org-roam-protocol)
   (find-file "~/Dropbox (Maestral)/Creativè/org-roam/2021-07-19-14-50-18-entries.org")
+  :config
+  (org-roam-db-autosync-enable)
+  ;; (require 'org-roam-protocol)
   :hook
   (after-init . winner-mode)
   ;; (org-mode . org-hide-properties)
@@ -641,34 +708,34 @@ T - tag prefix
   (org-roam-graph-shorten-titles 'wrap)
   (org-roam-graph-max-title-length '15)
   ;; Let's say that this is a temporary fix for the helm warping issue
-  (org-roam-node-display-template "${title:40} ${tags:20}")
+  ;; (org-roam-node-display-template "${title:40} ${tags:20}")
   (org-roam-completion-everywhere t)
+  (org-tags-exclude-from-inheritance '(Core))
   (org-roam-buffer-window-parameters '((no-delete-other-windows . t)))
   ;; Daily notes
-  (org-roam-dailies-directory "capture")
   (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
+  (org-roam-dailies-directory "capture/")
   (org-roam-capture-templates
    '(("d" "default" plain "%?" :if-new
-      (file+head "%<%Y-%m-%d-%H-%M-%S>-${slug}.org" "#+title: ${title}
-")
+      (file+head "%<%Y-%m-%d-%H-%M-%S>-${slug}.org" "#+title: ${title}\n\n* ${title}")
       :unnarrowed t)))
   (org-roam-dailies-capture-templates
    ;; Projects and resources
    '(("m" "Magnum opus"entry
       "* %?\n"
-      :if-new (file+olp "capture/capture"
+      :if-new (file+olp "capture.org"
                         ("Magnum Opus")
                         )
       )
      ("f" "Findings" entry
       "* %?\n"
-      :if-new (file+olp "capture/capture"
+      :if-new (file+olp "capture.org"
                         ("Findings")
                         )
       )
      ("o" "Ocurrence" entry
       "* %?\n"
-      :if-new (file+olp "capture/capture"
+      :if-new (file+olp "capture.org"
                         ("Ocurrence")
                         )
       )
@@ -718,17 +785,49 @@ T - tag prefix
                           (paragraph . strip-<p>-html)
                           ))))
   )
+;; (use-package nov
+;;   :straight t
+;;   :config
+;;   (use-package olivetti :straight t)
+;;   (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+;;   :hook
+;;   ((nov-mode . olivetti-mode)
+;;    (nov-mode . (lambda () (face-remap-add-relative
+;;                            'variable-pitch
+;;                            :family "Liberation Serif"
+;;                            :height 1.0)))
+;;    (nov-mode . (lambda () (whitespace-mode -1)))
+;;    )
+;;   :custom
+;;   (setq nov-text-width 60)
+;;   )
 (use-package projectile
   :straight t
   :diminish projectile-mode
-  :bind (("C-c p s" . 'projectile-switch-project)
-         )
   :init
+  (define-key projectile-mode-map (kbd "C-c t") 'projectile-command-map)
   (setq-default projectile-project-search-path '("~/Projects/"))
   (setq projectile-completion-system 'helm
         projectile-switch-project-action 'helm-projectile)
   :hook
   (after-init . projectile-mode)
+  )
+(use-package frames-only-mode
+  :ensure t
+  :hook
+  (after-init . frames-only-mode)
+  :init
+  (setq frames-only-mode-kill-frame-when-buffer-killed-buffer-list
+        ;; Default
+        '("*RefTeX Select*" "*Help*" "*Popup Help*" "*Completions*"
+          ;; Cider group
+          "*cider-doc*" "*cider-error*" "*cider-result*" "*cider-apropos*"
+          ;; Vterm
+          "*vterm*"
+          )
+        )
+  :config
+  ;; (advice-add 'org-roam-dailies-capture-today :around 'frames-only-mode-advice-use-windows)
   )
 (use-package spaceline
   :straight t
@@ -775,8 +874,6 @@ T - tag prefix
   :straight all-the-icons page-break-lines
   :defer
   :init
-  ;; It's just that i like the phrase
-  (setq dashboard-banner-logo-title "Welcome back, legend. 800 Japanese words await you")
   ;; Set the banner
   ;; (setq dashboard-startup-banner [VALUE])
   (setq dashboard-set-footer nil)
@@ -840,45 +937,6 @@ T - tag prefix
         )
   (setq uniquify-separator "/"
         uniquify-buffer-name-style 'forward)
-  (defun centaur-tabs-buffer-groups ()
-    "`centaur-tabs-buffer-groups' control buffers' group rules.
-
- Group centaur-tabs with mode if buffer is derived from `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
- All buffer name start with * will group to \"Emacs\".
- Other buffer group by `centaur-tabs-get-group-name' with project name."
-    (list
-     (cond
-      ;; ((not (eq (file-remote-p (buffer-file-name)) nil))
-      ;; "Remote")
-      ((or (string-equal "*" (substring (buffer-name) 0 1))
-           (memq major-mode '(magit-process-mode
-                              magit-status-mode
-                              magit-diff-mode
-                              magit-log-mode
-                              magit-file-mode
-                              magit-blob-mode
-                              magit-blame-mode
-                              )))
-       "Emacs")
-      ((or (derived-mode-p 'prog-mode)
-           (memq major-mode '(org-mode
-                              org-agenda-clockreport-mode
-                              org-src-mode
-                              org-agenda-mode
-                              org-beamer-mode
-                              org-indent-mode
-                              org-bullets-mode
-                              org-cdlatex-mode
-                              org-agenda-log-mode
-                              diary-mode)))
-       "Editing")
-      ((derived-mode-p 'dired-mode)
-       "Dired")
-      ((memq major-mode '(helpful-mode
-                          help-mode))
-       "Help")
-      (t
-       (centaur-tabs-get-group-name (current-buffer))))))
   :bind
   ("C-S-<iso-lefttab>" . centaur-tabs-backward)
   ("C-<tab>" . centaur-tabs-forward)
@@ -943,6 +1001,12 @@ T - tag prefix
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (setq default-buffer-file-coding-system 'utf-8)
+(setenv "JAVA_HOME"  "/usr/lib/jvm/java-11-openjdk/")
+(setenv "PATH" (let ((current (getenv "PATH"))
+                     (new (concat (getenv "HOME") "/.local/bin")))
+                 (if current (concat new ":" current) new)))
+(setenv "WORKON_HOME" "~/.cache/pypoetry/virtualenvs/")
+(setq lsp-java-java-path (concat (getenv "JAVA_HOME") "bin/java"))
 (add-to-list 'golden-ratio-extra-commands 'ace-window)
 (setq default-fill-column 74)
 (setq highlight-nonselected-windows t)
@@ -953,13 +1017,10 @@ T - tag prefix
 (setq default-tab-width 4)
 (setq tab-width 4)
 (setq inhibit-compacting-font-caches t)
-(setq custom-file null-device)
+(setq custom-file "~/.emacs.d/custom-file.el")
 (setq use-package-always-demand (daemonp))
 (setq mouse-yank-at-point t)
-(setq initial-major-mode 'org-mode)
 (setq comp-async-report-warnings-errors nil)
-(setq initial-scratch-message "\
-# This buffer is for notes you don't want to save, and for Python code.")
 (setq default-input-method "japanese-mozc")
 (setq-default tab-always-indent 'complete)
 (setq-default whitespace-line-column 1000)
@@ -970,6 +1031,7 @@ T - tag prefix
 (setq-default garbage-collection-messages t)
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
+(setq scroll-error-top-bottom t)
 (setq-default
  prettify-symbols-alist
  '(("#+BEGIN_SRC"     . "Λ")
@@ -983,7 +1045,7 @@ T - tag prefix
 (setq version-control t)
 (setq vc-make-backup-files t)
 (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/" t)))
-(setq auto-save-default nil)
+;; (setq auto-save-default nil)
 (setq sentence-end-double-space nil)
 (setq sgml-quick-keys 'close)
 (set-frame-parameter (selected-frame) 'buffer-predicate
@@ -1080,6 +1142,10 @@ T - tag prefix
  'dracula
  '(font-lock-variable-name-face ((t (:foreground "#3fa4e8" :bold t))) t)
  )
+(custom-theme-set-faces
+ 'dracula
+ '(font-lock-comment-face ((t (:foreground "light pink"))) t)
+ )
 
 (dolist (mode-iter '(python-mode))
   (font-lock-add-keywords mode-iter
@@ -1116,7 +1182,6 @@ T - tag prefix
             (mymy-global-mode t)
             (yas-global-mode t)
             (global-undo-tree-mode)
-            (wrap-region-global-mode t)
             ))
 (add-hook 'prog-mode
           (lambda()
@@ -1125,7 +1190,6 @@ T - tag prefix
           )
 (add-hook 'TeX-after-compilation-finished-functions
           #'TeX-revert-document-buffer)
-(add-hook 'java-mode-hook #'lsp)
 (define-minor-mode mymy-mode
   "Define all keys to have a preference to override others"
   :init-value nil
@@ -1197,4 +1261,5 @@ T - tag prefix
 (put 'downcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
 (ryo-modal-global-mode t)
+(put 'dired-find-alternate-file 'disabled nil)
 ;; Init.el ends here
