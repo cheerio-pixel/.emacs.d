@@ -913,6 +913,9 @@
   )
 (use-package hydra
   :straight t
+  :ryo
+  ("h"
+   (("s" hydra-straight-helper/body)))
   :config
   (defhydra hydra-straight-helper (:hint nil)
     "
