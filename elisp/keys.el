@@ -88,6 +88,8 @@
 (global-set-key (kbd "M-e") 'hippie-expand)
 (global-set-key (kbd "M-n") 'dabbrev-expand)
 
+(define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
+(define-key dired-mode-map (kbd "M-RET") 'dired-find-file)
 
 (define-key centered-cursor-keymap (kbd "C-M--") 'centered-cursor-raise-position-manually)
 (define-key centered-cursor-keymap (kbd "C-M-+") 'centered-cursor-lower-position-manually)
