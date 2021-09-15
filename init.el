@@ -613,35 +613,26 @@
       :unnarrowed t)))
   (org-roam-dailies-capture-templates
    ;; Projects and resources
-   '(("m" "Magnum opus"entry
-      "* %?\n"
-      :if-new (file+olp "capture.org"
-                        ("Magnum Opus")
-                        )
-      )
-     ("f" "Findings" entry
-      "* %?\n"
-      :if-new (file+olp "capture.org"
-                        ("Findings")
-                        )
-      )
-     ("o" "Ocurrence" entry
-      "* %?\n"
-      :if-new (file+olp "capture.org"
-                        ("Ocurrence")
-                        )
-      )
-     ("p" "Projects" entry
-      "* TODO %?\n" :prepend t
+   '(("q" "Quick! notes" entry "* %?\n\n"
+      :if-new (file+olp "capture.org" ("Quick Notes")))
+
+     ("r" "Quick! reference" entry "* %?\n\n*** "
+      :if-new (file+olp "capture.org" ("Quick Reference")))
+
+     ("s" " Stack! notes" entry "* WHERE?: %?\n\n*** %x"
+      :if-new (file+olp "stack.org" ("Stack Notes")))
+
+     ("s" " Stack! reference" entry "* WHERE?: %?\n\n*** %x"
+      :if-new (file+olp "stack.org" ("Stack Reference")))
+
+     ("p" "Projects" entry "* TODO %?\n"
+      :prepend t
       :if-new (file+olp "~/Dropbox (Maestral)/Creativè/org-roam/Projects/20210715113548-projects.org"
-                        ("Layer: Projects" "Stack <<=")
-                        )
-      )
-     ("e" "English" entry
-      "* %?\n\n"
+                        ("Layer: Projects" "Stack <<=")))
+
+     ("e" "English" entry "* %?\n\n"
       :if-new (file+olp "~/Dropbox (Maestral)/Creativè/org-roam/20210719135856-english.org"
-                        ("Dictionary")
-                        )
+                        ("Dictionary"))
       )
      ))
   :bind (("C-c n l" . org-roam-buffer-toggle)
