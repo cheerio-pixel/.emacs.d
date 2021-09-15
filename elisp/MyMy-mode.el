@@ -346,6 +346,11 @@
      ("P" cider-pprint-eval-defun-at-point-to-comment)
      )
     )
+   ("M-RET" outline-insert-heading)
+   ("M-N" outline-promote)
+   ("M-U" outline-demote)
+   ("M-e" outline-toggle-children)
+   )
    )
   (ryo-modal-major-mode-keys
    'csv-mode
