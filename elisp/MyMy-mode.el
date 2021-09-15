@@ -460,127 +460,127 @@
    ;; i feel are the more comfortable and more frequenly used, but this can
    ;; change over time
    ;; (e)(f)(c)(s)(g)(w)(r)(b)
-   ("s" ;; elpy interaction
-    (("y" ;; eval code section
-      ;; text objects & options:
-      (("e" ;; send statment
-        (("r" elpy-shell-send-statement-and-go)
-         ("s" elpy-shell-send-statement)
-         ("t" elpy-shell-send-statement-and-step)
-         ("f" elpy-shell-send-statement-and-step-and-go)
-         )
-        )
-       ("f" ;; send function
-        (("r" elpy-shell-send-defun-and-go)
-         ("s" elpy-shell-send-defun)
-         ("t" elpy-shell-send-defun-and-step)
-         ("f" elpy-shell-send-defun-and-step-and-go)
-         )
-        )
-       ("c" ;; send class
-        (("r" elpy-shell-send-defclass-and-go)
-         ("s" elpy-shell-send-defclass)
-         ("t" elpy-shell-send-defclass-and-step)
-         ("f" elpy-shell-send-defclass-and-step-and-go)
-         )
-        )
-       ("s" ;; send top-statment
-        (("r" elpy-shell-send-top-statement-and-go)
-         ("s" elpy-shell-send-top-statement)
-         ("t" elpy-shell-send-top-statement-and-step)
-         ("f" elpy-shell-send-top-statement-and-step-and-go)
-         )
-        )
-       ("g" ;; Send Group
-        (("r" elpy-shell-send-group-and-go)
-         ("s" elpy-shell-send-group)
-         ("t" elpy-shell-send-group-and-step)
-         ("f" elpy-shell-send-group-and-step-and-go)
-         )
-        )
-       ("w" ;; Send Cell
-        ;; A cell it defined by enclosing exprssion with ##
-        ;; Like:
-        ;; ##
-        ;; print("hello world!")
-        ;; ##
-        (("r" elpy-shell-send-codecell-and-go)
-         ("s" elpy-shell-send-codecell)
-         ("t" elpy-shell-send-codecell-and-step)
-         ("f" elpy-shell-send-codecell-and-step-and-go)
-         )
-        )
-       ("r" ;; Send Region
-        (("r" elpy-shell-send-region-or-buffer-and-go)
-         ("s" elpy-shell-send-region-or-buffer)
-         ("t" elpy-shell-send-region-or-buffer-and-step)
-         ("f" elpy-shell-send-region-or-buffer-and-step-and-go)
-         )
-        )
-       ("b" ;; Send Buffer
-        (("r" elpy-shell-send-buffer-and-go)
-         ("s" elpy-shell-send-buffer)
-         ("t" elpy-shell-send-buffer-and-step)
-         ("f" elpy-shell-send-buffer-and-step-and-go)
-         )
-        )
-       )
-      );; All under this list is in the "y" Section
-     ;; Special way of evaluating, there are two like this
-     ;; I'm not going to remove the other just to keep things clean
-     ;; And because a don't see any harm
-     ("RET" elpy-shell-send-statement-and-step)
-     ("b" blacken-buffer)
-     ;; Don't know how the specific purpose of this but i think it's to control
-     ;; Shortcuts under a protected key, so i don't do <s-any-letter> and shoot
-     ;; myself in the feet
-     ("c"
-      (("w" elpy-black-fix-code)
-       ("v" elpy-shell-send-region-or-buffer)
-       ("r" elpy-shell-switch-to-shell)
-       ("k" elpy-shell-kill)
-       ("K" elpy-shell-kill-all) ;; Alt: m
-       ("f" elpy-find-file)
-       ("s" elpy-rgrep-symbol)
-       ("d" elpy-doc)
-       ("q" elpy-company-backend)
-       ("." elpy-goto-definition-or-rgrep)
-       ("," pop-tag-mark)
-       )
-      )
-     ("@" ;; HideShow, Codefolding
-      (("c" elpy-folding-toggle-at-point)
-       ("b" elpy-folding-toggle-docstrings)
-       ("m" elpy-folding-toggle-comments)
-       ("f" elpy-folding-hide-leafs)
-       ("a" hs-show-all)
-       )
-      )
-     ;; List of busy characters:
-     ;; y, c, @
-     )
-    )
+   ;; ("s" ;; elpy interaction
+   ;;  (("y" ;; eval code section
+   ;;    ;; text objects & options:
+   ;;    (("e" ;; send statment
+   ;;      (("r" elpy-shell-send-statement-and-go)
+   ;;       ("s" elpy-shell-send-statement)
+   ;;       ("t" elpy-shell-send-statement-and-step)
+   ;;       ("f" elpy-shell-send-statement-and-step-and-go)
+   ;;       )
+   ;;      )
+   ;;     ("f" ;; send function
+   ;;      (("r" elpy-shell-send-defun-and-go)
+   ;;       ("s" elpy-shell-send-defun)
+   ;;       ("t" elpy-shell-send-defun-and-step)
+   ;;       ("f" elpy-shell-send-defun-and-step-and-go)
+   ;;       )
+   ;;      )
+   ;;     ("c" ;; send class
+   ;;      (("r" elpy-shell-send-defclass-and-go)
+   ;;       ("s" elpy-shell-send-defclass)
+   ;;       ("t" elpy-shell-send-defclass-and-step)
+   ;;       ("f" elpy-shell-send-defclass-and-step-and-go)
+   ;;       )
+   ;;      )
+   ;;     ("s" ;; send top-statment
+   ;;      (("r" elpy-shell-send-top-statement-and-go)
+   ;;       ("s" elpy-shell-send-top-statement)
+   ;;       ("t" elpy-shell-send-top-statement-and-step)
+   ;;       ("f" elpy-shell-send-top-statement-and-step-and-go)
+   ;;       )
+   ;;      )
+   ;;     ("g" ;; Send Group
+   ;;      (("r" elpy-shell-send-group-and-go)
+   ;;       ("s" elpy-shell-send-group)
+   ;;       ("t" elpy-shell-send-group-and-step)
+   ;;       ("f" elpy-shell-send-group-and-step-and-go)
+   ;;       )
+   ;;      )
+   ;;     ("w" ;; Send Cell
+   ;;      ;; A cell it defined by enclosing exprssion with ##
+   ;;      ;; Like:
+   ;;      ;; ##
+   ;;      ;; print("hello world!")
+   ;;      ;; ##
+   ;;      (("r" elpy-shell-send-codecell-and-go)
+   ;;       ("s" elpy-shell-send-codecell)
+   ;;       ("t" elpy-shell-send-codecell-and-step)
+   ;;       ("f" elpy-shell-send-codecell-and-step-and-go)
+   ;;       )
+   ;;      )
+   ;;     ("r" ;; Send Region
+   ;;      (("r" elpy-shell-send-region-or-buffer-and-go)
+   ;;       ("s" elpy-shell-send-region-or-buffer)
+   ;;       ("t" elpy-shell-send-region-or-buffer-and-step)
+   ;;       ("f" elpy-shell-send-region-or-buffer-and-step-and-go)
+   ;;       )
+   ;;      )
+   ;;     ("b" ;; Send Buffer
+   ;;      (("r" elpy-shell-send-buffer-and-go)
+   ;;       ("s" elpy-shell-send-buffer)
+   ;;       ("t" elpy-shell-send-buffer-and-step)
+   ;;       ("f" elpy-shell-send-buffer-and-step-and-go)
+   ;;       )
+   ;;      )
+   ;;     )
+   ;;    );; All under this list is in the "y" Section
+   ;;   ;; Special way of evaluating, there are two like this
+   ;;   ;; I'm not going to remove the other just to keep things clean
+   ;;   ;; And because a don't see any harm
+   ;;   ("RET" elpy-shell-send-statement-and-step)
+   ;;   ("b" blacken-buffer)
+   ;;   ;; Don't know how the specific purpose of this but i think it's to control
+   ;;   ;; Shortcuts under a protected key, so i don't do <s-any-letter> and shoot
+   ;;   ;; myself in the feet
+   ;;   ("c"
+   ;;    (("w" elpy-black-fix-code)
+   ;;     ("v" elpy-shell-send-region-or-buffer)
+   ;;     ("r" elpy-shell-switch-to-shell)
+   ;;     ("k" elpy-shell-kill)
+   ;;     ("K" elpy-shell-kill-all) ;; Alt: m
+   ;;     ("f" elpy-find-file)
+   ;;     ("s" elpy-rgrep-symbol)
+   ;;     ("d" elpy-doc)
+   ;;     ("q" elpy-company-backend)
+   ;;     ("." elpy-goto-definition-or-rgrep)
+   ;;     ("," pop-tag-mark)
+   ;;     )
+   ;;    )
+   ;;   ("@" ;; HideShow, Codefolding
+   ;;    (("c" elpy-folding-toggle-at-point)
+   ;;     ("b" elpy-folding-toggle-docstrings)
+   ;;     ("m" elpy-folding-toggle-comments)
+   ;;     ("f" elpy-folding-hide-leafs)
+   ;;     ("a" hs-show-all)
+   ;;     )
+   ;;    )
+   ;;   ;; List of busy characters:
+   ;;   ;; y, c, @
+   ;;   )
+   ;;  )
    ;; Testing, Debugging, Refractoring
-   ("r"
-    (("t" elpy-test) ;; Tests
-     ("d" ;; Debugging
-      (("d" elpy-pdb-debug-buffer)
-       ("b" elpy-pdb-toggle-breakpoint-at-point)
-       ("p" elpy-pdb-break-at-point)
-       ("e" elpy-pdb-debug-last-exception)
-       )
-      )
-     ("r" ;; Refractoring
-      (("e" elpy-multiedit-python-symbol-at-point)
-       ("c" elpy-format-code)
-       ("r" elpy-refactor-rename)
-       ("v" elpy-refactor-extract-variable)
-       ("f" elpy-refactor-extract-function)
-       ("i" elpy-refactor-inline)
-       )
-      )
-     )
-    )
+   ;; ("r"
+   ;;  (("t" elpy-test) ;; Tests
+   ;;   ("d" ;; Debugging
+   ;;    (("d" elpy-pdb-debug-buffer)
+   ;;     ("b" elpy-pdb-toggle-breakpoint-at-point)
+   ;;     ("p" elpy-pdb-break-at-point)
+   ;;     ("e" elpy-pdb-debug-last-exception)
+   ;;     )
+   ;;    )
+   ;;   ("r" ;; Refractoring
+   ;;    (("e" elpy-multiedit-python-symbol-at-point)
+   ;;     ("c" elpy-format-code)
+   ;;     ("r" elpy-refactor-rename)
+   ;;     ("v" elpy-refactor-extract-variable)
+   ;;     ("f" elpy-refactor-extract-function)
+   ;;     ("i" elpy-refactor-inline)
+   ;;     )
+   ;;    )
+   ;;   )
+   ;;  )
    ("h"
     (("b" er/mark-python-block)
      ("s" er/mark-python-statement)
@@ -590,7 +590,7 @@
      ("o" er/mark-outside-python-string)
      )
     )
-   ("<f6>" elpy-pdb-toggle-breakpoint-at-point)
+   ;; ("<f6>" elpy-pdb-toggle-breakpoint-at-point)
    )
   (ryo-modal-key
    "q f" :hydra
@@ -604,20 +604,20 @@
                       ("[" backward-paragraph)
                       ("q" nil "cancel" :color blue)
                       ))
-  (ryo-modal-key
-   "q e" :hydra
-   '(hydra-elpy ()
-                "Elpy Mode"
-                ("n" elpy-nav-move-line-or-region-down)
-                ("u" elpy-nav-move-line-or-region-up)
-                ("N" elpy-nav-indent-shift-left)
-                ("U" elpy-nav-indent-shift-right)
-                ("h" elpy-nav-forward-block)
-                ("l" elpy-nav-backward-block)
-                ("H" elpy-nav-backward-indent)
-                ("L" elpy-nav-forward-indent)
-                ("q" nil "cancel" :color blue)
-                ))
+  ;; (ryo-modal-key
+  ;;  "q e" :hydra
+  ;;  '(hydra-elpy ()
+  ;;               "Elpy Mode"
+  ;;               ("n" elpy-nav-move-line-or-region-down)
+  ;;               ("u" elpy-nav-move-line-or-region-up)
+  ;;               ("N" elpy-nav-indent-shift-left)
+  ;;               ("U" elpy-nav-indent-shift-right)
+  ;;               ("h" elpy-nav-forward-block)
+  ;;               ("l" elpy-nav-backward-block)
+  ;;               ("H" elpy-nav-backward-indent)
+  ;;               ("L" elpy-nav-forward-indent)
+  ;;               ("q" nil "cancel" :color blue)
+  ;;               ))
   (ryo-modal-key
    "q ; f" :hydra
    '(hydra-syntaxcheck ()
@@ -631,14 +631,14 @@
    "q i" :hydra
    '(hydra-indent ()
                   "Indent Mode"
-                  ("n" elpy-nav-move-line-or-region-down)
-                  ("u" elpy-nav-move-line-or-region-up)
+                  ("n" mymy/elpy-nav-move-line-or-region-down)
+                  ("u" mymy/elpy-nav-move-line-or-region-up)
                   ("N" shift-left)
                   ("U" shift-right)
                   ("q" nil "cancel" :color blue)
                   ))
   (ryo-modal-key
-   "d" :hydra
+   "q d" :hydra
    '(hydra-delete (
                    :color pink
                    :hint nil)
