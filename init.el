@@ -505,38 +505,7 @@
   (org-capture-templates
    ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
    ;; https://orgmode.org/manual/Template-elements.html#Template-elements
-   '(("q" "Queue")
-     ("qt" "Queue Task Waiting" entry (file+headline "~/Dropbox (Maestral)/Creativè/notebook.org" "=What I'm Planing to do=")
-      "* %?\n %i" :prepend t
-      )
-     ("qi" "Queue Task Doing" entry (file+headline "~/Dropbox (Maestral)/Creativè/notebook.org" "=What I'm Doing Now=")
-      "* %?\n %i" :clock-in t :prepend t
-      )
-     ("l" "list")
-     ("ls" "list song" entry (file+headline "~/Dropbox (Maestral)/Creativè/notebook.org" "List songs")
-      "* [[%x][%?]]"
-      )
-     ("t" "Simple Todo")
-     ("ts" "Todo Scheduled" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
-      "* TODO %^t %?\n  %i\n"
-      )
-     ("tf" "Todo Scheduled pointing to a file" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
-      "* TODO %^t %?\n %i\n %a"
-      )
-     ("tt" "Plain Todo" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Tasks")
-      "* TODO %?\n  %i\n"
-      )
-     ("td" "Todo Daily" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Daily")
-      "* TODO %?\n    SCHEDULED: <%<%Y-%m-%d %a> ++1d/2d>\n    :PROPERTIES:\n    :STYLE:    habit\n    :END:\n"
-      )
-     ("k" "Japanese")
-     ("kk" "Kanji" entry (file+headline "~/Dropbox (Maestral)/Creativè/Japanese/kanji.org" "Kanji Bin")
-      "* %?\n#TODO\nMeaning: \nKun: \nOn: \n"
-      )
-     ("kw" "Word" entry (file+headline "~/Dropbox (Maestral)/Creativè/Japanese/words.org" "Word Bin")
-      "* %?\n#TODO\nMeaning: \nReading: \nType: "
-      )
-     ))
+   '())
   (org-format-latex-options '(plist-put org-format-latex-options :scale 2.0 :background auto :foreground "white"))
   (org-highlight-latex-and-related '(latex script entities))
   :bind (("C-c o c" . org-capture))
