@@ -23,6 +23,7 @@
         keyboard-quit
         kill-region
         lispy-delete-backward
+        lispy-space
         my-delete-whole-line
         org-beginning-of-line
         org-delete-char
@@ -39,6 +40,7 @@
         slime-autodoc-space
         slime-space
         smarter-move-beginning-of-line
+        special-lispy-repeat
         switch-to-last-buffer
         ))
 
