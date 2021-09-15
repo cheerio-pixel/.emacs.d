@@ -351,6 +351,12 @@
    ("M-U" outline-demote)
    ("M-e" outline-toggle-children)
    )
+  (ryo-modal-major-mode-keys
+   'pdf-view-mode
+   ("n" pdf-view-next-line-or-next-page)
+   ("u" pdf-view-previous-line-or-previous-page)
+   ("N" pdf-view-next-page)
+   ("U" pdf-view-previous-page)
    )
   (ryo-modal-major-mode-keys
    'csv-mode
