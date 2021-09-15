@@ -22,6 +22,7 @@
         indent-for-tab-command
         keyboard-quit
         kill-region
+        lispy-delete-backward
         my-delete-whole-line
         org-beginning-of-line
         org-delete-char
@@ -60,4 +61,5 @@
         ryo-modal-global-mode
         ryo-modal-mode-all
         sp-backward-delete-char
+        special-lispy-ace-paren
         ))
