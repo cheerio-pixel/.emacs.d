@@ -82,14 +82,6 @@ and when nil is returned the node will be filtered out."
     (deactivate-mark))
   )
 
-;; (defun elpy-goto-definition-or-rgrep ()
-;;   "Go to the definition of the symbol at point, if found. Otherwise, run `elpy-rgrep-symbol'."
-;;   (interactive)
-;;   (ring-insert find-tag-marker-ring (point-marker))
-;;   (condition-case nil (elpy-goto-definition)
-;;     (error (elpy-rgrep-symbol
-;;             (concat "\\(def\\|class\\)\s" (thing-at-point 'symbol) "(")))))
-
 (defun mymy/elpy-nav-backward-block ()
   "Move to the previous line indented like point.
 This will skip over lines and statements with different
