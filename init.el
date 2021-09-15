@@ -16,7 +16,6 @@
       '((github . "cheerio-pixel"))
       )
 
-
 (straight-use-package 'use-package)
 (eval-when-compile (require 'use-package))
 (use-package ryo-modal)
