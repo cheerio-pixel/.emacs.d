@@ -247,7 +247,8 @@
 ;;   )
 (use-package lsp-java
   :straight t
-  :straight lsp-mode
+  :after lsp-mode
+  
   :hook
   (java-mode . lsp)
   )
