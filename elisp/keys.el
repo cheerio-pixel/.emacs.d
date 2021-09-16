@@ -80,6 +80,8 @@
 (global-set-key (kbd "C-M-n") 'company-capf)
 (global-set-key (kbd "C-M-e") 'company-complete)
 (global-set-key (kbd "C-c y y") 'yas-insert-snippet)
+
+(global-set-key (kbd "M-<return>") 'new-line-dwim)
 ;; Rare bindings
 ;;;; Uninstalled eaf
 ;; (global-set-key (kbd "C-b") 'switch-to-last-buffer)
