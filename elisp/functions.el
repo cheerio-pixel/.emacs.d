@@ -81,6 +81,18 @@ and when nil is returned the node will be filtered out."
             )))
     (deactivate-mark))
   )
+(defun new-line-dwim ()
+  (interactive)
+  (let ((break-open-pair (or (and (looking-back "{") (looking-at "}"))
+                             (and (looking-back ">") (looking-at "<"))
+                             (and (looking-back "(") (looking-at ")"))
+                             (and (looking-back "\\[") (looking-at "\\]")))))
+    (newline)
+    (when break-open-pair
+      (save-excursion
+        (newline)
+        (indent-for-tab-command)))
+    (indent-for-tab-command)))
 
 (defun mymy/elpy-nav-backward-block ()
   "Move to the previous line indented like point.
