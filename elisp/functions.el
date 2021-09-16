@@ -90,8 +90,7 @@ and when nil is returned the node will be filtered out."
     (newline)
     (when break-open-pair
       (save-excursion
-        (newline)
-        (indent-for-tab-command)))
+        (newline-and-indent)))
     (indent-for-tab-command)))
 
 (defun mymy/elpy-nav-backward-block ()
