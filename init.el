@@ -248,9 +248,8 @@
 (use-package lsp-java
   :straight t
   :after lsp-mode
-  
-  :hook
-  (java-mode . lsp)
+  :config
+  (add-hook 'java-mode-hook #'lsp)
   )
 (use-package poetry
   :straight t
