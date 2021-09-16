@@ -616,6 +616,7 @@
    '(("q" "Quick! notes" entry "* %?\n\n"
       :if-new (file+olp "capture.org" ("Quick Notes")))
 
+     ;; Where and thought, for each heading
      ("r" "Quick! reference" entry "* %?\n\n*** "
       :if-new (file+olp "capture.org" ("Quick Reference")))
 
