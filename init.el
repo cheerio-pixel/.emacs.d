@@ -176,7 +176,7 @@
   (setq lsp-keymap-prefix "C-c l")
   :config
   (setq lsp-log-io t)
-  (setq lsp-keep-workspace-alive nil)
+  (setq lsp-keep-workspace-alive t)
   :hook
   ((lsp-mode . lsp-enable-which-key-integration))
   )
