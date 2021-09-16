@@ -481,7 +481,7 @@
      ("STAGNATED"  . (:foreground "brown" :weight bold))
      ))
   (org-todo-keywords
-   '((sequence "TODO" "NEXT" "DOING" "|" "DONE" "STAGNATED")
+   '((sequence "TODO" "NEXT" "|" "DONE")
      (sequence "HABIT" "|" "DONE")
      (sequence "PROJECT" "|" "COMPLETED" "CANCELLED")
      (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
