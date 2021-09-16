@@ -475,10 +475,8 @@
    '(("CANCELLED" . (:foreground "red" :weight bold))
      ("CLASS" . (:foreground "purple" :weight bold))
      ("NEXT" . (:foreground "blue" :weight bold))
-     ("DOING" . (:foreground "orange" :weight bold))
      ("PROJECT" . (:foreground "white" :weight bold))
      ("COMPLETED" . (:foreground "cyan" :weight bold))
-     ("STAGNATED"  . (:foreground "brown" :weight bold))
      ))
   (org-todo-keywords
    '((sequence "TODO" "NEXT" "|" "DONE")
