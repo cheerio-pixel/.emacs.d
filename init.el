@@ -867,11 +867,12 @@
       (height . 0.5)
       (alpha . 0.80)
       (frame-parameters . ((undecorated . t)
-                           (skip-taskbar . t)
-                           (sticky . t))))
+                           (sticky . t)
+                           (skip-taskbar . t))))
      )
    )
   )
+
 (use-package dired
   :straight nil
   :config
