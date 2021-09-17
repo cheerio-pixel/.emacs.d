@@ -560,6 +560,23 @@
   (setq initial-buffer-choice "~/Dropbox (Maestral)/Creativè/org-roam/2021-07-19-14-50-18-entries.org")
   (find-file "~/Dropbox (Maestral)/Creativè/org-roam/2021-07-19-14-50-18-entries.org")
   :config
+  (use-package git-timemachine
+    :straight t
+    :ryo
+    ("Gt" git-timemachine-toggle)
+    :bind (:map git-timemachine-mode-map
+                ("n" . git-timemachine-show-next-revision)
+                ("u" . git-timemachine-show-previous-revision))
+    :hydra (hydra-undo-tree (:hint nil)
+  "
+  _p_: undo  _n_: redo _s_: save _l_: load   "
+  ("p"   undo-tree-undo)
+  ("n"   undo-tree-redo)
+  ("s"   undo-tree-save-history)
+  ("l"   undo-tree-load-history)
+  ("u"   undo-tree-visualize "visualize" :color blue)
+  ("q"   nil "quit" :color blue)
+    )
   (org-roam-db-autosync-enable)
   ;; (require 'org-roam-protocol)
   :hook
