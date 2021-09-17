@@ -63,7 +63,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (use-package hydra
   :straight t
-  :straight use-package-hydra)
+  :straight use-package-hydra
+  :config (require 'use-package-hydra))
 (use-package impatient-mode :straight t)
 
 (use-package web-mode
