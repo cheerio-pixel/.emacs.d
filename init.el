@@ -879,6 +879,7 @@
   :straight t)
 (use-package yequake
   :straight t
+  :after org-roam
   :custom
   (yequake-frames
    '(("org-roam-dailies-capture-today"
