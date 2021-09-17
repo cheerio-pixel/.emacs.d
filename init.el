@@ -874,6 +874,9 @@
      )
    )
   )
+(use-package dired
+  :straight nil
+  :)
 (use-package hydra
   :straight t
   :ryo
