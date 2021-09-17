@@ -32,7 +32,7 @@
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
 (tool-bar-mode -1)   ; This is much easier
 (menu-bar-mode -1)   ; than needing to change
-(scroll-bar-mode -1) ; this in every OS
+(scroll-bar-mode -1) ; this on every OS
 (setq byte-compile-warnings '(not obsolete));; Cl warnings
 
 (add-to-list 'load-path "~/.emacs.d/elisp/")
