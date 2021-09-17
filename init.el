@@ -843,22 +843,6 @@
   ("C-z" . centaur-tabs-backward-group)
   ("C-S-z" . centaur-tabs-forward-group)
   )
-;; (use-package anki
-;;   :defer t
-;;   :load-path "~/.emacs.d/lisp/anki/"
-;;   :init
-;;   (add-hook 'anki-mode-hook #'shrface-mode)
-;;   (add-hook 'anki-card-mode-hook #'shrface-mode)
-;;   (autoload 'anki "anki")
-;;   (autoload 'anki-browser "anki")
-;;   (autoload 'anki-list-decks "anki")
-;;   :config
-;;   ;; (require 'shrface) ; If you use shrface, require it here
-;;   (setq anki-shr-rendering-functions (append anki-shr-rendering-functions shr-external-rendering-functions))
-;;   (setq sql-sqlite-program "/usr/bin/sqlite3")
-;;   ;; Set up the collection directory, which should contain a file - collection.anki2 and a folder - collection.media
-;;   (setq anki-collection-dir "/Users/chandamon/Library/Application Support/Anki2/User 1")
-;;   )
 (use-package which-key ;; Useful to tell what is the next command that i can do
   :straight t
   :init
