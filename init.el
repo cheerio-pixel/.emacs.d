@@ -65,14 +65,12 @@
   :straight t
   :straight use-package-hydra
   :config (require 'use-package-hydra))
-(use-package impatient-mode :straight t)
+(use-package impatient-mode)
 
-(use-package web-mode
-  :straight t)
+(use-package web-mode)
 (use-package dracula-theme
   :config
-  (load-theme 'dracula t)
-  )
+  (load-theme 'dracula t))
 (use-package smartparens
   :config
   (sp-local-pair '(emacs-lisp-mode clojure-mode cider-mode) "'" "'" :actions nil)
