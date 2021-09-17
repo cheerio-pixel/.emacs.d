@@ -569,16 +569,25 @@
     :bind (:map git-timemachine-mode-map
                 ("n" . git-timemachine-show-next-revision)
                 ("u" . git-timemachine-show-previous-revision))
-    :hydra (hydra-undo-tree (:hint nil)
-  "
-  _p_: undo  _n_: redo _s_: save _l_: load   "
-  ("p"   undo-tree-undo)
-  ("n"   undo-tree-redo)
-  ("s"   undo-tree-save-history)
-  ("l"   undo-tree-load-history)
-  ("u"   undo-tree-visualize "visualize" :color blue)
-  ("q"   nil "quit" :color blue)
-    )
+    :hook
+    ((git-timemachine-mode . hydra-git-timemachine/body))
+    :hydra
+    (hydra-git-timemachine (:hint nil)
+                           "
+| _n_ Next _w_ Copy abbrev hash _g_ Goto nth    _b_ Blame _q_uit
+|==============================================================|[_._]: quit
+| _u_ Prev _W_ Copy full hash   _t_ Goto by msg _c_ Show Magit"
+                           ("n" git-timemachine-show-next-revision)
+                           ("u" git-timemachine-show-previous-revision)
+                           ("w" git-timemachine-kill-abbreviated-revision)
+                           ("W" git-timemachine-kill-revision)
+                           ("g" git-timemachine-show-nth-revision)
+                           ("t" git-timemachine-show-revision-fuzzy)
+                           ("q" git-timemachine-quit)
+                           ("b" git-timemachine-blame)
+                           ("c" git-timemachine-show-commit)
+                           ("? " git-timemachine-help)
+                           ("." nil :color blue)))
   (org-roam-db-autosync-enable)
   ;; (require 'org-roam-protocol)
   :hook
