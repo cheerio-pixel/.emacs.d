@@ -1182,6 +1182,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
           #'TeX-revert-document-buffer)
 (use-package mymy-mode
   :straight nil
+  :no-require t
   :config
   (define-minor-mode mymy-mode
     "Define all keys to have a preference to override others"
