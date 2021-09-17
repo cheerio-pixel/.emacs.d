@@ -107,8 +107,7 @@
 (save-place-mode)
 
 
-(use-package vterm
-  :straight t)
+(use-package vterm)
 (use-package eaf
   :disabled
   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
@@ -127,7 +126,6 @@
   (eaf-bind-key nil "M-q" eaf-browser-keybinding) ;; unbind, see more in the Wiki
   )
 (use-package lispy
-  :straight t
   :defer t
   :init
   (setq lispy-compat '(edebug cider))
@@ -150,10 +148,8 @@
   :hook
   (cider-mode . clj-refactor-mode)
   )
-(use-package flycheck-clj-kondo
-  :straight t)
+(use-package flycheck-clj-kondo)
 (use-package cider
-  :straight t
   :defer
   :custom
   (cider-test-show-report-on-success t)
@@ -165,17 +161,14 @@
   (cider-mode . cider-company-enable-fuzzy-completion)
   )
 (use-package haskell-mode
-  :straight t
   :hook
   (haskell-mode . lsp)
   (haskell-literate-mode . lsp)
   )
 (use-package clojure-mode
-  :straight t
   :config
   (require 'flycheck-clj-kondo))
 (use-package lsp-mode
-  :straight t
   :init
   (setq lsp-keymap-prefix "C-c l")
   :config
@@ -234,10 +227,8 @@
    (python-mode . (hs-minor-mode))
    )
   )
-(use-package lsp-pyright
-  :straight t)
+(use-package lsp-pyright)
 (use-package pydoc
-  :straight t
   :bind (:map python-mode-map
               ("C-c C-d" . nil)
               ("C-c C-d C-d" . pydoc-at-point-no-jedi)
@@ -247,22 +238,17 @@
    (python-mode . (lambda () (require 'lsp-pyright))))
   )
 (use-package realgud
-  :disabled
-  :straight t
-  )
+  :disabled)
 (use-package lsp-java
-  :straight t
   :after lsp-mode
   :config
   (add-hook 'java-mode-hook #'lsp)
   )
 (use-package poetry
-  :straight t
   :hook
   (python-mode . poetry-tracking-mode)
   )
 (use-package rainbow-delimiters
-  :straight t
   :hook
   (prog-mode . rainbow-delimiters-mode)
   )
@@ -278,12 +264,9 @@
   :hook
   (after-init . wrap-region-global-mode)
   )
-(use-package electric-operator
-  :straight t)
-(use-package highlight-indentation
-  :straight t)
+(use-package electric-operator)
+(use-package highlight-indentation)
 (use-package company
-  :straight t
   :bind (
          :map company-active-map
          ("ESC" . company-abort)
@@ -312,15 +295,13 @@
   (company-tng-mode)
   (global-company-mode)
   )
-(use-package elisp-slime-nav
-  :straight t)
+(use-package elisp-slime-nav)
 (use-package aggressive-indent
   :hook
   (emacs-lisp-mode . aggressive-indent-mode)
   (clojure-mode . aggressive-indent-mode)
   )
 (use-package company-quickhelp
-  :straight t
   :init
   (eval-after-load 'company
     '(define-key company-active-map (kbd "C-c h") #'company-quickhelp-manual-begin))
@@ -363,7 +344,6 @@
   (spaceline-toggle-helm-number-on)
   (helm-mode))
 (use-package helm-lsp
-  :straight t
   :after helm)
 (use-package ispell
   ;; https://200ok.ch/posts/2020-08-22_setting_up_spell_checking_with_multiple_dictionaries.html
@@ -384,16 +364,12 @@
   (unless (file-exists-p ispell-personal-dictionary)
     (write-region "" nil ispell-personal-dictionary nil 0))
   )
-(use-package magit
-  :straight t)
-(use-package dired+
-  :straight t)
+(use-package magit)
+(use-package dired+)
 (use-package dired-subtree
-  :straight t
   :bind (:map dired-mode-map
               ("i" . dired-subtree-toggle)))
 (use-package dired-collapse
-  :straight t
   :hook
   ((dired-mode . dired-collapse-mode)))
 (use-package git-auto-commit-mode)
@@ -530,7 +506,6 @@
                             ))))
 ;; Why do i live, just to suffer?
 (use-package org-journal
-  :straight t
   :defer t
   :init
   ;; Change default prefix key; needs to be set before loading org-journal
@@ -540,7 +515,6 @@
         org-journal-date-format "%A, %d %B %Y")
   )
 (use-package org-superstar
-  :straight t
   :config
   (org-superstar-configure-like-org-bullets)
   (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄))
@@ -676,14 +650,12 @@
          ("C-c n j" . org-roam-dailies-capture-today))
   )
 (use-package deft
-  :straight t
   :custom
   (deft-extensions '("org"))
   (deft-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
   (deft-recursive t)
   )
 (use-package anki-editor
-  :straight t
   :config
   (setq anki-editor--ox-anki-html-backend
         (if anki-editor-use-math-jax
@@ -717,7 +689,6 @@
   (setq nov-text-width 60)
   )
 (use-package projectile
-  :straight t
   :diminish projectile-mode
   :init
   (define-key projectile-mode-map (kbd "C-c t") 'projectile-command-map)
@@ -728,7 +699,6 @@
   (after-init . projectile-mode)
   )
 (use-package frames-only-mode
-  :ensure t
   :hook
   (after-init . frames-only-mode)
   :init
@@ -745,7 +715,6 @@
   ;; (advice-add 'org-roam-dailies-capture-today :around 'frames-only-mode-advice-use-windows)
   )
 (use-package spaceline
-  :straight t
   :init
   (spaceline-toggle-minor-modes-off)
   (spaceline-toggle-buffer-encoding-off)
@@ -766,7 +735,6 @@
   (spaceline-compile)
   )
 (use-package avy
-  :straight t
   :bind(("M-g g" . avy-goto-line)
         ("M-g M-g" . avy-goto-line)
         )
@@ -775,7 +743,6 @@
   (setq avy-keys '(?n ?e ?i ?k ?y ?m ?u ?c ?r ?s ?t))
   )
 (use-package ace-window
-  :straight t
   :custom
   (aw-keys '(?n ?e ?i ?o ?k ?m ?u ?y))
   )
@@ -805,7 +772,6 @@
   ;; (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
   )
 (use-package undo-tree
-  :straight t
   :ryo
   ("q /" undo-tree-visualize)
   :bind
@@ -829,7 +795,6 @@
 (use-package ace-mc)
 (use-package direx)
 (use-package nyan-mode ;; Nyan, simple nyan
-  :straight t
   :diminish nyan-mode
   :init
   (setq nyan-animate-nyancat t)
@@ -859,7 +824,6 @@
   ("C-S-z" . centaur-tabs-forward-group)
   )
 (use-package which-key ;; Useful to tell what is the next command that i can do
-  :straight t
   :init
   (setq which-key-enable-extended-define-key t)
   (setq which-key-side-window-location 'bottom)
@@ -869,10 +833,8 @@
   (push '((nil . "ryo:.*:") . (nil . "")) which-key-replacement-alist)
   (which-key-mode))
 (use-package expand-region
-  :straight t
   :bind (("C-'" . er/expand-region)))
 (use-package yequake
-  :straight t
   :after org-roam
   :custom
   (yequake-frames
