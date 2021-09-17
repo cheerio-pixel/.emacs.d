@@ -18,7 +18,12 @@
 
 (straight-use-package 'use-package)
 (eval-when-compile (require 'use-package))
-(use-package ryo-modal)
+(use-package ryo-modal
+  :config
+  (define-globalized-minor-mode ryo-modal-global-mode ryo-modal-mode
+    (lambda ()
+      (if (not (minibufferp (current-buffer)))
+          (ryo-modal-mode t)))))
 
 (set-frame-parameter nil 'fullscreen 'fullboth) ; Fullscreen
 (setq redisplay-dont-pause t)
@@ -1188,10 +1193,6 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
   (lambda ()
     (if (not (minibufferp (current-buffer)))
         (mymy-mode t))))
-(define-globalized-minor-mode ryo-modal-global-mode ryo-modal-mode
-  (lambda ()
-    (if (not (minibufferp (current-buffer)))
-        (ryo-modal-mode t))))
 
 
 
