@@ -67,8 +67,6 @@
   :config
   (load-theme 'dracula t)
   )
-;; (load-theme 'doom-city-lights t)
-;; (load-theme 'monokai-pro t)
 (use-package smartparens
   :config
   (sp-local-pair '(emacs-lisp-mode clojure-mode cider-mode) "'" "'" :actions nil)
