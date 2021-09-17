@@ -875,11 +875,12 @@
 
 (use-package dired
   :straight nil
-  :config
   :bind (:map dired-mode-map
               ("." . hydra-dired/body))
-  :hydra (hydra-dired (:hint nil :color pink))
-  "
+  :init
+  :hydra
+  (hydra-dired (:hint nil :color pink)
+               "
 _+_ mkdir          _v_iew           _m_ark             _(_ details        _i_nsert-subdir    wdired
 _C_opy             _O_ view other   _U_nmark all       _)_ omit-mode      _$_ hide-subdir    C-x C-q : edit
 _D_elete           _o_pen other     _u_nmark           _l_ redisplay      _w_ kill-subdir    C-c C-c : commit
@@ -892,76 +893,77 @@ _Z_ compress       _Q_ repl regexp
 
 T - tag prefix
 "
-  ("\\" dired-do-ispell)
-  ("(" dired-hide-details-mode)
-  (")" dired-omit-mode)
-  ("+" dired-create-directory)
-  ("=" diredp-ediff) ;; smart diff
-  ("?" dired-summary)
-  ("$" diredp-hide-subdir-nomove)
-  ("A" dired-do-find-regexp)
-  ("C" dired-do-copy) ;; Copy all marked files
-  ("D" dired-do-delete)
-  ("E" dired-mark-extension)
-  ("e" dired-ediff-files)
-  ("F" dired-do-find-marked-files)
-  ("G" dired-do-chgrp)
-  ("g" revert-buffer) ;; read all directories again (refresh)
-  ("i" dired-maybe-insert-subdir)
-  ("l" dired-do-redisplay) ;; relist the marked or singel directory
-  ("M" dired-do-chmod)
-  ("m" dired-mark)
-  ("O" dired-display-file)
-  ("o" dired-find-file-other-window)
-  ("Q" dired-do-find-regexp-and-replace)
-  ("R" dired-do-rename)
-  ("r" dired-do-rsynch)
-  ("S" dired-do-symlink)
-  ("s" dired-sort-toggle-or-edit)
-  ("t" dired-toggle-marks)
-  ("U" dired-unmark-all-marks)
-  ("u" dired-unmark)
-  ("v" dired-view-file) ;; q to exit, s to search, = gets line #
-  ("w" dired-kill-subdir)
-  ("Y" dired-do-relsymlink)
-  ("z" diredp-compress-this-file)
-  ("Z" dired-do-compress)
-  ("q" nil)
-  ("." nil :color blue)
+               ("\\" dired-do-ispell)
+               ("(" dired-hide-details-mode)
+               (")" dired-omit-mode)
+               ("+" dired-create-directory)
+               ("=" diredp-ediff) ;; smart diff
+               ("?" dired-summary)
+               ("$" diredp-hide-subdir-nomove)
+               ("A" dired-do-find-regexp)
+               ("C" dired-do-copy) ;; Copy all marked files
+               ("D" dired-do-delete)
+               ("E" dired-mark-extension)
+               ("e" dired-ediff-files)
+               ("F" dired-do-find-marked-files)
+               ("G" dired-do-chgrp)
+               ("g" revert-buffer) ;; read all directories again (refresh)
+               ("i" dired-maybe-insert-subdir)
+               ("l" dired-do-redisplay) ;; relist the marked or singel directory
+               ("M" dired-do-chmod)
+               ("m" dired-mark)
+               ("O" dired-display-file)
+               ("o" dired-find-file-other-window)
+               ("Q" dired-do-find-regexp-and-replace)
+               ("R" dired-do-rename)
+               ("r" dired-do-rsynch)
+               ("S" dired-do-symlink)
+               ("s" dired-sort-toggle-or-edit)
+               ("t" dired-toggle-marks)
+               ("U" dired-unmark-all-marks)
+               ("u" dired-unmark)
+               ("v" dired-view-file) ;; q to exit, s to search, = gets line #
+               ("w" dired-kill-subdir)
+               ("Y" dired-do-relsymlink)
+               ("z" diredp-compress-this-file)
+               ("Z" dired-do-compress)
+               ("q" nil)
+               ("." nil :color blue))
   )
 (use-package straight
   :straight nil
   :bind (("C-c s t" . hydra-straight-helper/body))
   :ryo
   ("hs" hydra-straight-helper/body)
-  :hydra (hydra-straight-helper (:hint nil))
-  "
+  :hydra
+  (hydra-straight-helper (:hint nil)
+                         "
 _c_heck all       |_f_etch all     |_m_erge all      |_n_ormalize all   |p_u_sh all
 _C_heck package   |_F_etch package |_M_erge package  |_N_ormlize package|p_U_sh package
 ----------------^^+--------------^^+---------------^^+----------------^^+------------||_q_uit||
 _r_ebuild all     |_p_ull all      |_v_ersions freeze|_w_atcher start   |_g_et recipe
 _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_ build"
-  ("c" straight-check-all)
-  ("C" straight-check-package)
-  ("r" straight-rebuild-all)
-  ("R" straight-rebuild-package)
-  ("f" straight-fetch-all)
-  ("F" straight-fetch-package)
-  ("p" straight-pull-all)
-  ("P" straight-pull-package)
-  ("m" straight-merge-all)
-  ("M" straight-merge-package)
-  ("n" straight-normalize-all)
-  ("N" straight-normalize-package)
-  ("u" straight-push-all)
-  ("U" straight-push-package)
-  ("v" straight-freeze-versions)
-  ("V" straight-thaw-versions)
-  ("w" straight-watcher-start)
-  ("W" straight-watcher-quit)
-  ("g" straight-get-recipe)
-  ("e" straight-prune-build)
-  ("q" nil)
+                         ("c" straight-check-all)
+                         ("C" straight-check-package)
+                         ("r" straight-rebuild-all)
+                         ("R" straight-rebuild-package)
+                         ("f" straight-fetch-all)
+                         ("F" straight-fetch-package)
+                         ("p" straight-pull-all)
+                         ("P" straight-pull-package)
+                         ("m" straight-merge-all)
+                         ("M" straight-merge-package)
+                         ("n" straight-normalize-all)
+                         ("N" straight-normalize-package)
+                         ("u" straight-push-all)
+                         ("U" straight-push-package)
+                         ("v" straight-freeze-versions)
+                         ("V" straight-thaw-versions)
+                         ("w" straight-watcher-start)
+                         ("W" straight-watcher-quit)
+                         ("g" straight-get-recipe)
+                         ("e" straight-prune-build)
+                         ("q" nil))
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
