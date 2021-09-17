@@ -566,6 +566,7 @@
     :straight t
     :ryo
     ("Gt" git-timemachine-toggle)
+    ("GT" hydra-git-timemachine/body)
     :bind (:map git-timemachine-mode-map
                 ("n" . git-timemachine-show-next-revision)
                 ("u" . git-timemachine-show-previous-revision))
