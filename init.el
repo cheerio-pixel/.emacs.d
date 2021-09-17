@@ -56,9 +56,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;MODES;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(use-package impatient-mode
-  :straight t)
+(use-package hydra
+  :straight t
+  :straight use-package-hydra)
+(use-package impatient-mode :straight t)
 
 (use-package web-mode
   :straight t)
