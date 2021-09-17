@@ -1179,20 +1179,23 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
           )
 (add-hook 'TeX-after-compilation-finished-functions
           #'TeX-revert-document-buffer)
-(define-minor-mode mymy-mode
-  "Define all keys to have a preference to override others"
-  :init-value nil
-  :lighter " mymy"
-  :keymap
-  (let ((keymap (make-sparse-keymap)))
-    (define-key keymap (kbd "S-SPC") 'ryo-modal-global-mode)
-    (define-key keymap (kbd "M-t") 'ryo-modal-global-mode)
-    keymap)
-  :group 'mymy)
-(define-globalized-minor-mode mymy-global-mode mymy-mode
-  (lambda ()
-    (if (not (minibufferp (current-buffer)))
-        (mymy-mode t))))
+(use-package mymy-mode
+  :straight nil
+  :config
+  (define-minor-mode mymy-mode
+    "Define all keys to have a preference to override others"
+    :init-value nil
+    :lighter " mymy"
+    :keymap
+    (let ((keymap (make-sparse-keymap)))
+      (define-key keymap (kbd "S-SPC") 'ryo-modal-global-mode)
+      (define-key keymap (kbd "M-t") 'ryo-modal-global-mode)
+      keymap)
+    :group 'mymy)
+  (define-globalized-minor-mode mymy-global-mode mymy-mode
+    (lambda ()
+      (if (not (minibufferp (current-buffer)))
+          (mymy-mode t)))))
 
 
 
