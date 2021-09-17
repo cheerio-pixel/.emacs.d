@@ -868,8 +868,7 @@
   (setq which-key-side-window-max-width 0.66)
   :config
   (push '((nil . "ryo:.*:") . (nil . "")) which-key-replacement-alist)
-  (which-key-mode)
-  )
+  (which-key-mode))
 (use-package expand-region
   :straight t
   :bind (("C-'" . er/expand-region)
