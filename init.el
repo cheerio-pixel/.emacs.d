@@ -871,11 +871,7 @@
   (which-key-mode))
 (use-package expand-region
   :straight t
-  :bind (("C-'" . er/expand-region)
-         )
-  )
-(use-package change-inner
-  :straight t)
+  :bind (("C-'" . er/expand-region)))
 (use-package yequake
   :straight t
   :after org-roam
