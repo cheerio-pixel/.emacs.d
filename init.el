@@ -700,22 +700,22 @@
                           (paragraph . strip-<p>-html)
                           ))))
   )
-;; (use-package nov
-;;   :straight t
-;;   :config
-;;   (use-package olivetti :straight t)
-;;   (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
-;;   :hook
-;;   ((nov-mode . olivetti-mode)
-;;    (nov-mode . (lambda () (face-remap-add-relative
-;;                            'variable-pitch
-;;                            :family "Liberation Serif"
-;;                            :height 1.0)))
-;;    (nov-mode . (lambda () (whitespace-mode -1)))
-;;    )
-;;   :custom
-;;   (setq nov-text-width 60)
-;;   )
+(use-package nov
+  :disabled
+  :config
+  (use-package olivetti :straight t)
+  (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+  :hook
+  ((nov-mode . olivetti-mode)
+   (nov-mode . (lambda () (face-remap-add-relative
+                           'variable-pitch
+                           :family "Liberation Serif"
+                           :height 1.0)))
+   (nov-mode . (lambda () (whitespace-mode -1)))
+   )
+  :custom
+  (setq nov-text-width 60)
+  )
 (use-package projectile
   :straight t
   :diminish projectile-mode
