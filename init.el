@@ -243,6 +243,8 @@
   (add-hook 'java-mode-hook #'lsp)
   )
 (use-package poetry
+  :config
+  (setq poetry-tracking-strategy 'switch-buffer)
   :hook
   (python-mode . poetry-tracking-mode)
   )
