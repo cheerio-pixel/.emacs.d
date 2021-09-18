@@ -18,13 +18,15 @@ projectile-bookmarks.eld
 projectile.cache
 tramp
 /.org-id-locations
-/straight/
+straight/build
+straight/repos
+straight/build-cache.el
+!straight/versions/default.el
 .cache/
 .dap-breakpoints
 .emacs.desktop
 .emacs.desktop.lock
 .lsp-session-v1
-custom-file.el
 eclipse.jdt.ls/
 ede-projects.el
 eln-cache/
@@ -33,6 +35,5 @@ nov-places
 places
 request/
 semanticdb/
-snippets/clojure-mode/
 type-break
 workspace/
