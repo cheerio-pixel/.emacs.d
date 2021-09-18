@@ -43,44 +43,14 @@
              (lambda (_candidate)
                (insert (mapconcat #'identity (helm-marked-candidates) " "))))))))
 
-(defun org-roam-node-insert-immediate (&optional filter-fn)
-  "Find an Org-roam node and insert (where the point is) an \"id:\" link to it.
-FILTER-FN is a function to filter out nodes: it takes an `org-roam-node',
-and when nil is returned the node will be filtered out."
-  (interactive)
-  (unwind-protect
-      ;; Group functions together to avoid inconsistent state on quit
-      (atomic-change-group
-        (let* (region-text
-               beg end
-               (_ (when (region-active-p)
-                    (setq beg (set-marker (make-marker) (region-beginning)))
-                    (setq end (set-marker (make-marker) (region-end)))
-                    (setq region-text (org-link-display-format (buffer-substring-no-properties beg end)))))
-               (node (org-roam-node-read region-text filter-fn))
-               (description (or region-text
-                                (org-roam-node-title node))))
-          (if (org-roam-node-id node)
-              (progn
-                (when region-text
-                  (delete-region beg end)
-                  (set-marker beg nil)
-                  (set-marker end nil))
-                (insert (org-link-make-string
-                         (concat "id:" (org-roam-node-id node))
-                         description)))
-            (org-roam-capture-
-             :node node
-             :props (append
-                     (when (and beg end)
-                       (list :region (cons beg end)))
-                     (list :insert-at (point-marker)
-                           :link-description description
-                           :finalize 'insert-link)))
-            (org-capture-finalize)
-            )))
-    (deactivate-mark))
-  )
+(defun org-roam-node-insert-immediate (arg &optional args)
+  (interactive "P")
+  ;; Refactored after watching system crafters video
+  (let ((args (cons arg args))
+        (org-roam-capture-templates (list (append (car org-roam-capture-templates)
+                                                  '(:immediate-finish t)))))
+    (apply #'org-roam-node-insert args)))
+
 (defun new-line-dwim ()
   (interactive)
   (let ((break-open-pair (or (and (looking-back "{") (looking-at "}"))
