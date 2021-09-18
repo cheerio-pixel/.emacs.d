@@ -258,7 +258,7 @@
   (setq blacken-line-length 79))
 ;; sp-pair is not suitiable when you have strict-mode activate
 (use-package wrap-region
-  :straight (wrap-region :type git :host github :repo "rejeep/wrap-region.el" :fork t)
+  :straight (:type git :host github :repo "cheerio-pixel/wrap-region.el")
   :config
   (wrap-region-add-wrapper "*" "*" nil 'org-mode) (wrap-region-global-mode t)
   :hook
