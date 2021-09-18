@@ -707,6 +707,8 @@
           "*cider-doc*" "*cider-error*" "*cider-result*" "*cider-apropos*"
           ;; Vterm
           "*vterm*"
+          ;; Poetry
+          "*poetry*"
           )
         )
   :config
