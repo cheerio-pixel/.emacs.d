@@ -12,9 +12,7 @@
   (load bootstrap-file nil 'nomessage))
 ;; Straight config
 (setq straight-use-package-by-default t)
-(setq straight-host-usernames
-      '((github . "cheerio-pixel"))
-      )
+(setq straight-host-usernames '((github . "cheerio-pixel")))
 
 (straight-use-package 'use-package)
 (eval-when-compile (require 'use-package))
@@ -112,10 +110,10 @@
   :disabled
   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
   :init
-  (use-package epc :defer t :ensure t)
-  (use-package ctable :defer t :ensure t)
-  (use-package deferred :defer t :ensure t)
-  (use-package s :defer t :ensure t)
+  (use-package epc :defer t)
+  (use-package ctable :defer t)
+  (use-package deferred :defer t)
+  (use-package s :defer t)
   :custom
   (eaf-browser-continue-where-left-off t)
   :config
