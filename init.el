@@ -34,6 +34,14 @@
 (setq byte-compile-warnings '(not obsolete));; Cl warnings
 
 (add-to-list 'load-path "~/.emacs.d/elisp/")
+(use-package keys
+  :straight nil
+  :no-require t
+  :bind
+  (("C-x C-l" . what-line)
+   ;; Reserverd, since is a fantastic keybinding
+   ("C-h C-a" . nil)
+   ))
 ;; Load all the keys that don't go to a use-packag
 (require 'keys)
 (require 'centered-cursor-mode)
