@@ -96,12 +96,13 @@
   ("u" pdf-view-previous-line-or-previous-page)
   ("N" pdf-view-next-page)
   ("U" pdf-view-previous-page)
+  :init
+  (use-package org-noter :custom (org-noter-notes-window-location 'other-frame))
   :config
   ;; Don't make the daemon fail when a new version is avalible
   (ignore-errors
     (pdf-tools-install))
   )
-(use-package org-noter :custom (org-noter-notes-window-location 'other-frame))
 (save-place-mode)
 
 
