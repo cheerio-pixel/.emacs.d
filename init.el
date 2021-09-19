@@ -118,7 +118,15 @@
 (save-place-mode)
 
 
-(use-package vterm)
+(use-package vterm
+  :bind
+  (("C-x l" . vterm))
+  :config
+  (defun mymy/vterm-hook ()
+    (centered-cursor-mode -1))
+  :hook
+  ((vterm-mode . mymy/vterm-hook))
+  )
 (use-package eaf
   :disabled
   :load-path "~/.emacs.d/site-lisp/emacs-application-framework" ; Set to "/usr/share/emacs/site-lisp/eaf" if installed from AUR
