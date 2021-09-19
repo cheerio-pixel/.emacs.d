@@ -329,6 +329,7 @@
   :config
   (company-quickhelp-mode)
   )
+
 (use-package flycheck
   :bind (
          :map flycheck-mode-map
@@ -363,7 +364,23 @@
          helm-source-buffer-not-found))
   (spaceline-helm-mode t)
   (spaceline-toggle-helm-number-on)
-  (helm-mode))
+  (helm-mode)
+  :config
+  ;; Randomly found in
+  ;; https://emacs.stackexchange.com/questions/15051/can-helm-apropos-display-the-key-bindings-for-commands-the-way-helm-m-x-does
+  (defun helm-def-source--emacs-commands (&optional default)
+    (helm-build-in-buffer-source "Commands"
+      :init `(lambda ()
+               (helm-apropos-init 'commandp ,default))
+      :fuzzy-match helm-apropos-fuzzy-match
+      :filtered-candidate-transformer (and (null helm-apropos-fuzzy-match)
+                                           'helm-apropos-default-sort-fn)
+
+      :candidate-transformer 'helm-M-x-transformer-1
+      :nomark t
+      :action '(("Describe Function" . helm-describe-function)
+                ("Find Function" . helm-find-function)
+                ("Info lookup" . helm-info-lookup-symbol)))))
 (use-package helm-lsp
   :after helm)
 (use-package ispell
