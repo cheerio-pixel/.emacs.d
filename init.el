@@ -49,9 +49,7 @@
 (font-lock-add-keywords 'emacs-lisp-mode mymy/section-font-lock-keywords)
 
 (add-to-list 'load-path "~/.emacs.d/elisp/")
-(use-package keys
-  :straight nil
-  :no-require t
+(mymy/section keys
   :bind
   (("C-x C-l" . what-line)
    ;; Reserverd, since is a fantastic keybinding
@@ -1196,9 +1194,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
           )
 (add-hook 'TeX-after-compilation-finished-functions
           #'TeX-revert-document-buffer)
-(use-package mymy-mode
-  :straight nil
-  :no-require t
+(mymy/section mymy-mode
   :config
   (define-minor-mode mymy-mode
     "Define all keys to have a preference to override others"
