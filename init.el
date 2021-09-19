@@ -72,13 +72,17 @@
 (use-package smartparens
   :config
   (sp-local-pair '(emacs-lisp-mode clojure-mode cider-mode) "'" "'" :actions nil)
-  (define-key smartparens-mode-map (kbd "C-M-e") 'company-complete)
-  (define-key smartparens-mode-map (kbd "M-(") 'sp-wrap-round)
-  (define-key smartparens-mode-map (kbd "M-s") 'sp-splice-sexp)
-  (define-key smartparens-mode-map (kbd "M-r") 'sp-splice-sexp-killing-around)
-  (show-smartparens-global-mode)
-  (smartparens-global-mode)
-  (smartparens-global-strict-mode))
+  :bind
+  (:map smartparens-mode-map
+        ("C-M-e" . company-complete)
+        ("M-(" . sp-wrap-round)
+        ("M-s" . sp-splice-sexp)
+        ("M-r" . sp-splice-sexp-killing-around)
+        )
+  :hook
+  ((after-init . (smartparens-global-mode))
+   (after-init . (show-smartparens-global-mode))
+   (after-init . (smartparens-global-strict-mode))))
 
 (global-hl-line-mode t)
 (global-centered-cursor-mode t)
