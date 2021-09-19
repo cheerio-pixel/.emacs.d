@@ -33,6 +33,21 @@
 (scroll-bar-mode -1) ; this on every OS
 (setq byte-compile-warnings '(not obsolete));; Cl warnings
 
+;; Shamelessly copied from use-package itself
+(defmacro mymy/section (name &rest body)
+  (declare (indent 1))
+  `(use-package ,name
+     :straight nil
+     :no-require t
+     ,@body))
+
+(defconst mymy/section-font-lock-keywords
+  '(("(\\(mymy/section\\)\\_>[ \t']*\\(\\(?:\\sw\\|\\s_\\)+\\)?"
+     (1 font-lock-keyword-face)
+     (2 font-lock-constant-face nil t))))
+
+(font-lock-add-keywords 'emacs-lisp-mode mymy/section-font-lock-keywords)
+
 (add-to-list 'load-path "~/.emacs.d/elisp/")
 (use-package keys
   :straight nil
