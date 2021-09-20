@@ -1013,6 +1013,13 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (setq lsp-java-java-path (concat (getenv "JAVA_HOME") "bin/java"))
 (add-to-list 'golden-ratio-extra-commands 'ace-window)
 (setq default-fill-column 74)
+;; To remind me that this thing is posible
+;; I yet don't feel worthy of such power
+;; (setq enable-recursive-minibuffers t)
+
+;; Why is 60 the default? Not because is such a low number but because
+;; Is not a power of 2
+(setq kill-ring-max 1024)
 (setq highlight-nonselected-windows t)
 (setq use-dialog-box nil) ; Text-based options are better
 (setq bidi-display-reordering nil)
