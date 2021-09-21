@@ -1020,6 +1020,8 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 ;; Why is 60 the default? Not because is such a low number but because
 ;; Is not a power of 2
 (setq kill-ring-max 1024)
+;; Is better to accept that in reality, i don't need this
+(setq line-move-visual nil)
 (setq highlight-nonselected-windows t)
 (setq use-dialog-box nil) ; Text-based options are better
 (setq bidi-display-reordering nil)
