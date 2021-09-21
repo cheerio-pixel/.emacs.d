@@ -123,6 +123,8 @@
   ("U" pdf-view-previous-page)
   :init
   (use-package org-noter :custom (org-noter-notes-window-location 'other-frame))
+  ;; It simply needs to exist, since it extends saveplace
+  (use-package saveplace-pdf-view)
   :config
   ;; Don't make the daemon fail when a new version is avalible
   (ignore-errors
