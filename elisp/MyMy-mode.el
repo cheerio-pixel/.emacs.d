@@ -110,7 +110,7 @@
     (("y" avy-goto-char)
      ("u" avy-goto-char-2)
      ("m" avy-goto-word-0)
-     ("l"pop-global-mark)
+     ("l" helm-all-mark-rings)
      ("k" avy-goto-word-1)
      ("n" avy-goto-word-crt-line)
      ("e" avy-goto-word-forward-crt-line)
