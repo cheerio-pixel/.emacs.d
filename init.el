@@ -433,7 +433,6 @@
 (use-package lsp-haskell)
 (use-package org
   :straight t
-  :straight org-super-agenda
   :init
   (setq org-clock-string-limit 25)
   (setq spaceline-org-clock-format-function 'dwim/org-clock-get-string)
@@ -524,21 +523,6 @@
      (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
      (sequence "CLASS" "|")
      (sequence "CANCELLED")))
-  (org-super-agenda-groups
-   '((:name "DOING"
-            :todo "DOING"
-            )
-     (:name "NEXT"
-            :todo "NEXT"
-            )
-     (:name "PROJECT"
-            :todo "PROJECT"
-            )
-     (:name "TODO"
-            :todo "TODO"
-            )
-     )
-   )
   (org-capture-templates
    ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
    ;; https://orgmode.org/manual/Template-elements.html#Template-elements
@@ -562,6 +546,27 @@
                             indent-tabs-mode nil
                             python-shell-interpreter "python3"
                             ))))
+(use-package org-super-agenda
+  :bind (:map org-super-agenda-header-map
+              ("n" . org-agenda-next-line)
+              ("u" . org-agenda-previous-line))
+  :custom
+  (org-super-agenda-groups
+   '((:name "DOING"
+            :todo "DOING"
+            )
+     (:name "NEXT"
+            :todo "NEXT"
+            )
+     (:name "PROJECT"
+            :todo "PROJECT"
+            )
+     (:name "TODO"
+            :todo "TODO"
+            )
+     )
+   )
+  )
 ;; Why do i live, just to suffer?
 (use-package org-journal
   :defer t
