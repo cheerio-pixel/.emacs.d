@@ -91,6 +91,12 @@
   :config
   (load-theme 'dracula t))
 (use-package smartparens
+  :init
+  (defun mymy/smartparens-hook ()
+    (smartparens-global-mode)
+    (show-smartparens-global-mode)
+    (smartparens-global-strict-mode)
+    )
   :config
   (sp-local-pair '(emacs-lisp-mode clojure-mode cider-mode) "'" "'" :actions nil)
   :bind
@@ -101,9 +107,7 @@
         ("M-r" . sp-splice-sexp-killing-around)
         )
   :hook
-  ((after-init . (smartparens-global-mode))
-   (after-init . (show-smartparens-global-mode))
-   (after-init . (smartparens-global-strict-mode))))
+  ((after-init . mymy/smartparens-hook)))
 
 (global-hl-line-mode t)
 (global-centered-cursor-mode t)
