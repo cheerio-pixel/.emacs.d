@@ -178,6 +178,10 @@
   :hook
   (clojure-mode . lispy-mode)
   (emacs-lisp-mode . lispy-mode))
+(use-package taxy
+  ;; Complain of erros AFTER i loaded the emacs and its colors
+  :defer 5
+  :straight  (taxy :host github :type git :repo "alphapapa/taxy.el" :files ("*.el" "examples/deffy.el")))
 (use-package clj-refactor
   :straight t
   :defer
