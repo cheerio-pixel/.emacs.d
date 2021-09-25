@@ -525,13 +525,13 @@
      (sequence "ASSIGMENT" "|" "ASSIGMENT-DONE")
      (sequence "CLASS" "|")
      (sequence "CANCELLED")))
-  (org-capture-templates
-   ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
-   ;; https://orgmode.org/manual/Template-elements.html#Template-elements
-   '(("c" "Capture")
-     ("cc" "Quick" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Quick")
-      "* %?\n\n")
-     ))
+  ;; (org-capture-templates
+  ;;  ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
+  ;;  ;; https://orgmode.org/manual/Template-elements.html#Template-elements
+  ;;  '(("c" "Capture")
+  ;;    ("cc" "Quick" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Quick")
+  ;;     "* %?\n\n")
+  ;;    ))
   (org-format-latex-options '(plist-put org-format-latex-options :scale 2.0 :background auto :foreground "white"))
   (org-highlight-latex-and-related '(latex script entities))
   :bind (("C-c o c" . org-capture))
