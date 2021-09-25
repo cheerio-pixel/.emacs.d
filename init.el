@@ -529,7 +529,7 @@
    ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
    ;; https://orgmode.org/manual/Template-elements.html#Template-elements
    '(("c" "Capture")
-     ("cc" "Quick" entry (file+headline "~/Dropbox (Maestral)/Creativè/Org_capture.org" "Quick")
+     ("cc" "Quick" entry (file+headline "~/Dropbox (Maestral)/Creativè/agenda.org" "Quick")
       "* %?\n\n")
      ))
   (org-format-latex-options '(plist-put org-format-latex-options :scale 2.0 :background auto :foreground "white"))
