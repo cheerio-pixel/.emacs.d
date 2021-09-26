@@ -1053,7 +1053,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (setq mouse-yank-at-point t)
 (setq comp-async-report-warnings-errors nil)
 (setq default-input-method "japanese-mozc")
-(setq-default tab-always-indent 'complete)
+(setq-default tab-always-indent t)
 (setq-default whitespace-line-column 1000)
 (setq-default cursor-type '(hbar . 3)) ;; Change cursor to a bar
 (setq-default cursor-in-non-selected-windows nil)
