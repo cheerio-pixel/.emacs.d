@@ -676,7 +676,7 @@
   (org-roam-buffer-window-parameters '((no-delete-other-windows . t)))
   ;; Daily notes
   (org-roam-directory "~/Dropbox (Maestral)/Creativè/org-roam/")
-  (org-roam-dailies-directory "capture/")
+  (org-roam-dailies-directory "inbox/")
   (org-roam-capture-templates
    '(("d" "default" plain "%?" :if-new
       (file+head "%<%Y-%m-%d-%H-%M-%S>-${slug}.org" "#+title: ${title}\n\n* ${title}")
