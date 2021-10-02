@@ -1179,7 +1179,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
  )
 (custom-theme-set-faces
  'dracula
- '(font-lock-doc-face ((t (:foreground "chartreuse"))) t)
+ '(font-lock-doc-face ((t (:foreground "spring green"))) t)
  )
 
 (dolist (mode-iter '(python-mode))
