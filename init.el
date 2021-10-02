@@ -1099,7 +1099,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 ;; Note that the default is x100), but this seems too high.
 (setq undo-outer-limit 1006632960)
 
-(setq exec-path (append exec-path '("/home/frailin/.local/bin")))
+(setq exec-path (append exec-path '("~/.local/bin")))
 (setq jit-lock-defer-time 0)
 (setq fast-but-imprecise-scrolling t)
 (setq auto-window-vscroll nil)
