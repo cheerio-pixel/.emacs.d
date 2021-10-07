@@ -602,8 +602,7 @@
   :init
   (setq org-roam-v2-ack t)
   (setq inhibit-startup-screen t)
-  (setq initial-buffer-choice "~/Dropbox (Maestral)/Creativè/org-roam/2021-07-19-14-50-18-entries.org")
-  (find-file "~/Dropbox (Maestral)/Creativè/org-roam/2021-07-19-14-50-18-entries.org")
+  (setq initial-buffer-choice "~/Dropbox (Maestral)/Creativè/org-roam/Projects/20210715113548-projects.org")
   :config
   (use-package git-timemachine
     :straight t
