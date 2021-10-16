@@ -69,6 +69,7 @@
    ("S"
     (("l" org-roam-buffer-toggle)
      ("f" org-roam-node-find)
+     ("F" org-roam-dailies-goto-today)
      ("i" org-roam-node-insert)
      ("I" org-roam-node-insert-immediate)
      ("g" org-roam-graph)
