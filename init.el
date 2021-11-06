@@ -554,10 +554,7 @@
               ("u" . org-agenda-previous-line))
   :custom
   (org-super-agenda-groups
-   '((:name "DOING"
-            :todo "DOING"
-            )
-     (:name "NEXT"
+   '((:name "NEXT"
             :todo "NEXT"
             )
      (:name "PROJECT"
