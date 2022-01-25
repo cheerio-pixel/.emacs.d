@@ -97,9 +97,11 @@
                 (error-message-string err)
                 title id file))
        [:insert :into nodes
-                :values $v1]
+        :values $v1]
        (vector id file level pos todo priority
-               scheduled deadline title properties olp (el-patch-add backlink))))))
+               scheduled deadline title properties olp (el-patch-add backlinkcount))))))
+
+
 (el-patch-defun org-roam-db-insert-file-node ()
   "Insert the file-level node into the Org-roam cache."
   (org-with-point-at 1
@@ -129,18 +131,19 @@
                     (error-message-string err)
                     title id file))
            [:insert :into nodes
-                    :values $v1]
+            :values $v1]
            (vector id file level pos todo priority
-                   scheduled deadline title properties olp (el-patch-add backlink)))
+                   scheduled deadline title properties olp (el-patch-add backlinkcount)))
           (when tags
             (org-roam-db-query
              [:insert :into tags
-                      :values $v1]
+              :values $v1]
              (mapcar (lambda (tag)
                        (vector id (substring-no-properties tag)))
                      tags)))
           (org-roam-db-insert-aliases)
           (org-roam-db-insert-refs))))))
+
 (el-patch-defun org-roam-node-list ()
   "Return all nodes stored in the database as a list of `org-roam-node's."
   (let ((rows (org-roam-db-query
