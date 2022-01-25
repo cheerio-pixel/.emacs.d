@@ -39,7 +39,7 @@
   ("C-t" . ryo-modal-global-mode)
   :config
   (setq ryo-modal-cursor-color nil)
-  (setq ryo-modal-cursor-type 'beam)
+  (setq ryo-modal-cursor-type 'hollow)
   ;; Section-less
   (ryo-modal-keys
    ("C-\\" toggle-input-method :exit 1)
