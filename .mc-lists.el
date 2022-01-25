@@ -5,11 +5,14 @@
       '(
         abort-recursive-edit
         ace-jump-move
+        avy-goto-word-crt-line
         backward-delete-char
         backward-delete-word
         delete-current-line
+        delete-horizontal-space
         delete-region
         god-mode-self-insert
+        handle-switch-frame
         helm-confirm-and-exit-minibuffer
         helm-mini
         hydra-git/body
@@ -18,20 +21,30 @@
         hydra-git/elpy-nav-move-line-or-region-down
         hydra-git/flycheck-next-error
         hydra-git/flycheck-previous-error
+        hydra-org-heading-move/body
+        hydra-org-heading-move/nil
+        hydra-org-heading-move/org-backward-heading-same-level
+        hydra-org-heading-move/org-forward-heading-same-level
+        hydra-org-heading-move/org-metadown
+        hydra-org-heading-move/org-metaup
         ido-switch-buffer
         indent-for-tab-command
         keyboard-quit
         kill-region
         lispy-delete-backward
+        lispy-move-end-of-line
         lispy-space
+        lispy-yank
         my-delete-whole-line
         org-beginning-of-line
+        org-cycle
         org-delete-char
         org-end-of-line
         org-kill-line
         org-return
         org-self-insert-command
         org-yank
+        rectangle-backward-char
         rectangle-forward-char
         rectangle-mark-mode
         ryo:6c0b5bec3522d2e495ff80ad83791864:insert-quotes
@@ -40,8 +53,16 @@
         slime-autodoc-space
         slime-space
         smarter-move-beginning-of-line
+        sp-backward-delete-char
+        sp-delete-char
+        sp-delete-region
+        special-lispy-ace-subword
+        special-lispy-new-copy
         special-lispy-repeat
+        special-lispy-stringify
+        special-lispy-underscore
         switch-to-last-buffer
+        wdired--self-insert
         ))
 
 (setq mc/cmds-to-run-once
@@ -54,14 +75,15 @@
         ace-mc-do-keyboard-reset
         ace-mc-quick-exchange
         beginning-of-buffer
+        describe-key
         god-mode-all
         helm-M-x
         hydra-git/nil
         jupyter-eval-buffer
         point-to-register
-        rectangle-backward-char
         ryo-modal-global-mode
         ryo-modal-mode-all
-        sp-backward-delete-char
         special-lispy-ace-paren
+        special-lispy-narrow
+        special-lispy-occur
         ))
