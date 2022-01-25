@@ -66,17 +66,6 @@
      ("n" downcase-dwim)
      )
     )
-   ("S"
-    (("l" org-roam-buffer-toggle)
-     ("f" org-roam-node-find)
-     ("F" org-roam-dailies-goto-today)
-     ("i" org-roam-node-insert)
-     ("I" org-roam-node-insert-immediate)
-     ("g" org-roam-graph)
-     ("t" org-roam-tag-add)
-     ("c" org-roam-dailies-capture-today)
-     ("o" org-id-get-create)
-     ("p" org-toggle-properties)
      )
     )
    ("Z"

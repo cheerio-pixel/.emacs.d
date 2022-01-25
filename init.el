@@ -630,6 +630,55 @@
                            ("." nil :color blue)))
   (org-roam-db-autosync-enable)
   ;; (require 'org-roam-protocol)
+  (ryo-modal-keys
+   ("S"
+    (("l" org-roam-buffer-toggle)
+     ("y"
+      (("n" mymy-org-move-next-heading)
+       ("u" hydra-zettel/lambda-u)
+       ("a" mymy-org-roam-append-node-heading)
+       ("k" mymy-org-roam-get-link)
+       ("y" hydra-zettel/body)
+       ("e" mymy-org-roam-insert-next-heading)
+       )
+      )
+     ("k"
+      (("f" org-roam-dailies-goto-today)
+       ("F" mymy-org-roam-dailies-secondary-goto-today)
+       ))
+     ("n"
+      (("n" org-roam-node-find)
+       ("i" org-roam-node-insert)
+       ("e" org-roam-node-insert-immediate)
+       ("x" org-roam-extract-subtree)
+       ("b" move-to-notes)
+       )
+      )
+     ("g" org-roam-graph)
+     ("t"
+      (("t" org-roam-tag-add)
+       ("d" org-roam-tag-remove)))
+     ("c" org-roam-dailies-capture-today)
+     ("u" mymy-org-roam-show-preview)
+     ;; ("u" my/org-roam-find-project)
+     ("e"
+      (("e" org-roam-ref-add)
+       ("d" org-roam-ref-remove)
+       ("n" mymy-org-roam-ref-find)
+       ("b" helm-bibtex)
+       ("i" org-ref-cite-insert-helm)
+       ))
+     ("o" org-id-get-create)
+     ("i"
+      (("i" mymy-insert-unix-date)
+       ("e" mymy-insert-exact-date-in-unix-as-link)))
+     ("r" mymy-refile-to-done))))
+  (which-key-add-key-based-replacements
+    "Sk" "Dailies"
+    "Se" "Refs & bibtex"
+    "Sn" "org-roam node"
+    "St" "org-roam tags"
+    )
   :hook
   (after-init . winner-mode)
   ;; (org-mode . org-hide-properties)
