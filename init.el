@@ -33,6 +33,9 @@
 (scroll-bar-mode -1) ; this on every OS
 (setq byte-compile-warnings '(not obsolete));; Cl warnings
 
+(setq dropbox-dir "~/Dropbox (Maestral)/")
+(setq main-dropbox-dir (concat dropbox-dir "Creativè/"))
+
 ;; Shamelessly copied from use-package itself
 (defmacro mymy/section (name &rest body)
   (declare (indent 1))
