@@ -163,6 +163,15 @@
   (eaf-bind-key take_photo "p" eaf-camera-keybinding)
   (eaf-bind-key nil "M-q" eaf-browser-keybinding) ;; unbind, see more in the Wiki
   )
+(use-package rainbow-numbers-mode
+  :straight nil
+  :load-path "~/.emacs.d/elisp/rainbow-numbers-mode.el")
+(mymy/section ses-mode
+  :init
+  (setq ses-after-entry-functions '(next-line))
+  :hook
+  (ses-mode . rainbow-numbers-mode)
+  )
 (use-package lispy
   :defer t
   :init
