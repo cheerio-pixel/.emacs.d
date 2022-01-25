@@ -8,7 +8,7 @@
 (require 'yasnippet)
 (require 'csv-mode)
 (require 'centaur-tabs)
-
+(require 'calibredb)
 (defun export-subtree-to-pdf()
   (interactive)
   (org-latex-export-to-pdf nil t nil nil nil)
