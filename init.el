@@ -89,6 +89,7 @@
   :config (require 'use-package-hydra))
 (use-package impatient-mode)
 
+;; For web programming
 (use-package web-mode)
 (use-package dracula-theme
   :config
