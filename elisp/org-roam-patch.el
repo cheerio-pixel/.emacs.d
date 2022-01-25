@@ -117,12 +117,12 @@
                (tags org-file-tags)
                (properties (org-entry-properties))
                (olp nil)
-               (el-patch-add (backlink (caar (org-roam-db-query
-                                              [:select (funcall count source)
-                                                       :from links
-                                                       :where (= dest $s1)
-                                                       :and (= type "id")
-                                                       ] id)))))
+               (el-patch-add (backlinkcount (caar (org-roam-db-query
+                                                   [:select (funcall count source)
+                                                    :from links
+                                                    :where (= dest $s1)
+                                                    :and (= type "id")
+                                                    ] id)))))
           (org-roam-db-query!
            (lambda (err)
              (lwarn 'org-roam :warning "%s for %s (%s) in %s"
