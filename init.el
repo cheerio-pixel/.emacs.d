@@ -93,7 +93,21 @@
 (use-package web-mode)
 (use-package dracula-theme
   :config
-  (load-theme 'dracula t))
+  (load-theme 'dracula t)
+  (custom-theme-set-faces
+   'dracula
+   '(font-lock-variable-name-face ((t (:foreground "#3fa4e8" :bold t))) t)
+   )
+  (custom-theme-set-faces
+   'dracula
+   '(font-lock-comment-face ((t (:foreground "light pink"))) t)
+   )
+  (custom-theme-set-faces
+   'dracula
+   '(font-lock-doc-face ((t (:foreground "spring green"))) t)
+   )
+  (set-face-attribute 'region nil :background "#a3b32e")
+  )
 (use-package smartparens
   :init
   (defun mymy/smartparens-hook ()
