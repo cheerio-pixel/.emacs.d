@@ -266,6 +266,62 @@ interactive calls FORCE always set to t."
                      (funcall display-buffer-fn buf)))
     (when (org-invisible-p) (org-show-context))
     buf))
+(el-patch-defun org-roam-db-update-file (&optional file-path no-require)
+  "Update Org-roam cache for FILE-PATH.
+
+If the file does not exist anymore, remove it from the cache.
+
+If the file exists, update the cache with information.
+
+If NO-REQUIRE, don't require optional libraries. Set NO-REQUIRE
+when the libraries are already required at some toplevel, e.g.
+in `org-roam-db-sync'."
+  (setq file-path (or file-path (buffer-file-name (buffer-base-buffer))))
+  (let ((content-hash (org-roam-db--file-hash file-path))
+        (db-hash (caar (org-roam-db-query [:select hash :from files
+                                           :where (= file $s1)] file-path)))
+        info)
+    (unless (string= content-hash db-hash)
+      (unless no-require
+        (org-roam-require '(org-ref oc)))
+      (org-roam-with-file file-path nil
+        (emacsql-with-transaction (org-roam-db)
+          (save-excursion
+            (org-set-regexps-and-options 'tags-only)
+            (org-refresh-category-properties)
+            (org-roam-db-clear-file)
+            (org-roam-db-insert-file)
+            (org-roam-db-insert-file-node)
+            (setq org-outline-path-cache nil)
+            (org-roam-db-map-nodes
+             (list ;; (el-patch-add #'mymy-org-roam-db-clear-node-data)
+              #'org-roam-db-insert-node-data
+              #'org-roam-db-insert-aliases
+              #'org-roam-db-insert-tags
+              #'org-roam-db-insert-refs
+              ))
+            (setq org-outline-path-cache nil)
+            (setq info (org-element-parse-buffer))
+            (org-roam-db-map-links
+             (list #'org-roam-db-insert-link))
+            (when (fboundp 'org-cite-insert)
+              (require 'oc)             ;ensure feature is loaded
+              (org-roam-db-map-citations
+               info
+               (list #'org-roam-db-insert-citation)))))))))
+
+;; (org-map-entries #'mymy-org-roam-update-headline nil 'tree)
+(defun mymy-org-roam-update-headline ()
+  (mymy-org-roam-db-clear-node-data)
+  (org-roam-db-insert-node-data)
+  (org-roam-db-insert-tags))
+
+(defun mymy-org-roam-db-clear-node-data (&optional id)
+  "Clear headline from cache"
+  (let ((id (or id (org-id-get))))
+    (org-roam-db-query [:delete :from nodes
+                        :where (= id $s1)]
+                       id)))
 
 (defcustom mymy-org-roam-node-insert-hook nil
   "Hook to run when an Org-roam node is inserted"
