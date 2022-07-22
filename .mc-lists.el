@@ -5,12 +5,17 @@
       '(
         abort-recursive-edit
         ace-jump-move
+        avy-goto-char
         avy-goto-word-crt-line
         backward-delete-char
         backward-delete-word
+        backward-to-word
         delete-current-line
         delete-horizontal-space
+        delete-pair
         delete-region
+        end-of-buffer
+        forward-to-word
         god-mode-self-insert
         handle-switch-frame
         helm-confirm-and-exit-minibuffer
@@ -31,9 +36,15 @@
         indent-for-tab-command
         keyboard-quit
         kill-region
+        lispy-at
+        lispy-colon
         lispy-delete-backward
+        lispy-hash
+        lispy-move-beginning-of-line
         lispy-move-end-of-line
+        lispy-parens
         lispy-space
+        lispy-tick
         lispy-yank
         my-delete-whole-line
         org-beginning-of-line
@@ -41,8 +52,11 @@
         org-delete-char
         org-end-of-line
         org-kill-line
+        org-meta-return
+        org-metaright
         org-return
         org-self-insert-command
+        org-todo
         org-yank
         rectangle-backward-char
         rectangle-forward-char
@@ -56,12 +70,22 @@
         sp-backward-delete-char
         sp-delete-char
         sp-delete-region
+        sp-kill-region
+        sp-wrap-round
         special-lispy-ace-subword
+        special-lispy-ace-symbol
+        special-lispy-different
+        special-lispy-mark-list
+        special-lispy-move-up
         special-lispy-new-copy
+        special-lispy-other-mode
+        special-lispy-raise
         special-lispy-repeat
+        special-lispy-right
         special-lispy-stringify
         special-lispy-underscore
         switch-to-last-buffer
+        upcase-char
         wdired--self-insert
         ))
 
