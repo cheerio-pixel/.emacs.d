@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (require 'org-roam)
 (require 'el-patch)
 (require 'cl-lib)
