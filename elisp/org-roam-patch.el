@@ -242,8 +242,53 @@ GROUP BY id")))
                                                       :refs refs
                                                       (el-patch-add :backlink-count backlink-count)))
                               all-titles)))))
-;; Here stops
 
+(cl-defmethod org-roam-populate ((node org-roam-node))
+  "Populate NODE from database.
+Uses the ID, and fetches remaining details from the database.
+This can be quite costly: avoid, unless dealing with very few
+nodes."
+  (when-let ((node-info (car (org-roam-db-query [:select [file level pos todo priority
+                                                          scheduled deadline title properties olp backlinkcount]
+                                                 :from nodes
+                                                 :where (= id $s1)
+                                                 :limit 1]
+                                                (org-roam-node-id node)))))
+    (pcase-let* ((`(,file ,level ,pos ,todo ,priority ,scheduled ,deadline ,title ,properties ,olp ,backlink-count) node-info)
+                 (`(,atime ,mtime ,file-title) (car (org-roam-db-query [:select [atime mtime title]
+                                                                        :from files
+                                                                        :where (= file $s1)]
+                                                                       file)))
+                 (tag-info (mapcar #'car (org-roam-db-query [:select [tag] :from tags
+                                                             :where (= node-id $s1)]
+                                                            (org-roam-node-id node))))
+                 (alias-info (mapcar #'car (org-roam-db-query [:select [alias] :from aliases
+                                                               :where (= node-id $s1)]
+                                                              (org-roam-node-id node))))
+                 (refs-info (mapcar #'car (org-roam-db-query [:select [ref] :from refs
+                                                              :where (= node-id $s1)]
+                                                             (org-roam-node-id node)))))
+      (setf (org-roam-node-file node) file
+            (org-roam-node-file-title node) file-title
+            (org-roam-node-file-atime node) atime
+            (org-roam-node-file-mtime node) mtime
+            (org-roam-node-level node) level
+            (org-roam-node-point node) pos
+            (org-roam-node-todo node) todo
+            (org-roam-node-priority node) priority
+            (org-roam-node-scheduled node) scheduled
+            (org-roam-node-deadline node) deadline
+            (org-roam-node-title node) title
+            (org-roam-node-properties node) properties
+            (org-roam-node-olp node) olp
+            (org-roam-node-tags node) tag-info
+            (org-roam-node-refs node) refs-info
+            (org-roam-node-aliases node) alias-info
+            ;; (org-roam-node-backlink-count node) backlink-count
+            )))
+  node)
+
+;; Here stops
 (el-patch-defun org-roam-node-visit (node &optional other-window force)
   "From the current buffer, visit NODE. Return the visited buffer.
 Display the buffer in the selected window.  With a prefix
