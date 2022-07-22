@@ -42,6 +42,7 @@
   (setq ryo-modal-cursor-type 'hollow)
   ;; Section-less
   (ryo-modal-keys
+   ("f" iedit-mode)
    ("C-\\" toggle-input-method :exit 1)
    ("gr" golden-ratio-mode)
    ("gd" remember)
@@ -66,6 +67,8 @@
      ("n" downcase-dwim)
      )
     )
+   ("O"
+    (("s" org-set-tags-command)
      )
     )
    ("Z"
@@ -174,7 +177,6 @@
    )
   ;; search
   (ryo-modal-keys
-   ("f" isearch-forward)
    ("b" isearch-backward)
    ("F" helm-swoop)
    ("B" helm-semantic-or-imenu)
@@ -197,6 +199,7 @@
        ("u" kill-buffer)
        ("n" switch-to-last-buffer)
        ("c" kill-current-buffer)
+       ("k" helm-complex-command-history)
        ("x" reopen-killed-file)
        ("X" reopen-killed-file-fancy)
        ("m" helm-find-files :name "Find file")
@@ -234,17 +237,17 @@
        ("~" mymy/insert-pair~)
        ("=" mymy/insert-pair=)
        ("\\" insert-pair)
+       ("a" direx:jump-to-directory)
        )
       :name "Insert pairs"
       )
      )
-    )
-   )
+    ))
   ;; Org mode
   (ryo-modal-keys
    (:norepeat t)
    ("O"
-    (("c" org-capture)
+    (("c" org-columns)
      ("a" org-agenda)
      ("t" org-todo-list)
      ("u" org-agenda-clock-goto)
@@ -316,6 +319,10 @@
    ("8" "M-8")
    ("9" "M-9")
    )
+  (ryo-modal-major-mode-keys
+   'lisp-mode
+   ("S-SPC" tmp-lispy-fix)
+   ("C-t" tmp-lispy-fix))
   (defun cider-find-and-clear-repl-buffer ()
     (interactive)
     (cider-find-and-clear-repl-output t)
@@ -362,6 +369,7 @@
    'org-mode
    ;; avalible r s
    ("M-m" org-meta-return)
+   ("M-M" org-insert-heading-respect-content)
    ("M-c" org-toggle-checkbox)
    ("C-M-m" org-insert-heading-respect-content)
    ("M-U" org-metaright)
@@ -408,10 +416,11 @@
    ("e" org-end-of-line)
    ("O"
     (("o" org-agenda-clock-out)
-     ("i" org-agenda-clock-in)
-     ("r" org-agenda-refile)
+     ("i" org-clock-in)
+     ("r" org-refile)
      ("e" org-agenda-clock-cancel)
      ("d" org-insert-drawer)
+     ("g" org-mark-ring-goto)
      )
     )
    ("O R" :hydra
@@ -439,8 +448,7 @@
                              ("U" org-metaup)
                              ("N" org-metadown)
                              ("q" nil "cancel" :color blue)
-                             ))
-   )
+                             )))
   (ryo-modal-major-mode-keys
    'python-mode
    ;; avalible rstf
