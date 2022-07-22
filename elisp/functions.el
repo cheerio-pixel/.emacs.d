@@ -15,6 +15,29 @@
         (overlay-put ov_this 'hidden-prop-drawer t))))
   (put 'org-toggle-properties-hide-state 'state 'hidden))
 
+(defvar mymy/org-tag-kill-ring nil
+  "This variable will only hold you one set of tags")
+
+;; The body of this functions comes from the function org-roam-tag-add
+(defun mymy/org-roam-get-tags ()
+  "Get tags at point"
+  (if (= (org-outline-level) 0)
+      (split-string (or (cadr (assoc "FILETAGS" (org-collect-keywords '("filetags"))))
+                        "")
+                    ":" 'omit-nulls)
+    (org-set-tags (seq-uniq (append tags (org-get-tags))))))
+
+
+(defun mymy/org-copy-tags ()
+  (interactive)
+  (setq mymy/org-tag-kill-ring (mymy/org-roam-get-tags)))
+
+(defun mymy/org-roam-paste-tags ()
+  (interactive)
+  (if mymy/org-tag-kill-ring
+      (org-roam-tag-add mymy/org-tag-kill-ring)
+    (message "No tags")))
+
 (defun org-show-properties ()
   "Show all org-mode property drawers hidden by org-hide-properties."
   (interactive)
@@ -27,6 +50,13 @@
   (if (eq (get 'org-toggle-properties-hide-state 'state) 'hidden)
       (org-show-properties)
     (org-hide-properties)))
+
+(defun sum-time (&rest time)
+  (let* ((first-minute (floor (* 100 (apply '+ time))))
+         (minutes (% first-minute 60))
+         (hours (/ first-minute 60)))
+    )
+  )
 
 
 ;; https://emacs.stackexchange.com/questions/35417/how-to-insert-strings-from-a-string-list-in-one-file-into-another-file-with-a-h
@@ -43,13 +73,6 @@
              (lambda (_candidate)
                (insert (mapconcat #'identity (helm-marked-candidates) " "))))))))
 
-(defun org-roam-node-insert-immediate (arg &optional args)
-  (interactive "P")
-  ;; Refactored after watching system crafters video
-  (let ((args (cons arg args))
-        (org-roam-capture-templates (list (append (car org-roam-capture-templates)
-                                                  '(:immediate-finish t)))))
-    (apply #'org-roam-node-insert args)))
 
 (defun new-line-dwim ()
   (interactive)
@@ -160,11 +183,13 @@ indentation levels."
 (defun enable-jedi()
   (setq-local company-backends
               (append '(company-jedi company-anaconda) company-backends)))
+
 (defun my/refile (file headline)
   (let ((pos (save-excursion
                (find-file file)
                (org-find-exact-headline-in-buffer headline))))
     (org-refile nil nil (list headline file nil pos))))
+
 (defun +org-toggle-inline-image-at-point ()
   "Toggle inline image at point."
   (interactive)
@@ -221,8 +246,9 @@ indentation levels."
 (defun reopen-killed-file ()
   "Reopen the most recently killed file, if one exists."
   (interactive)
-  (when killed-file-list
-    (find-file (pop killed-file-list))))
+  (if killed-file-list
+      (find-file (pop killed-file-list))
+    (error "No recently-killed files to reopen")))
 (defun reopen-killed-file-fancy ()
   "Pick a file to revisit from a list of files killed during this
   Emacs session."
