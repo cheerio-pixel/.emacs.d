@@ -204,6 +204,7 @@
 (use-package electric-operator)
 (use-package highlight-indentation)
 (use-package rainbow-delimiters :hook (prog-mode . rainbow-delimiters-mode))
+
 (use-package ag)
 ;; sp-pair is not suitiable when you have strict-mode activate
 (use-package wrap-region
