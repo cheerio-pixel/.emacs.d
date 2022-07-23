@@ -258,7 +258,9 @@
   :config (sp-local-pair mymy-lisp-modes "'" "'" :actions nil)
   :hook ((after-init . mymy/smartparens-hook)))
 
-(use-package golden-ratio :config (golden-ratio-mode t))
+(use-package golden-ratio
+  :config (golden-ratio-mode t)
+  (add-to-list 'golden-ratio-extra-commands 'ace-window))
 
 ;;** Spaceline
 
@@ -2423,7 +2425,6 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
                      (new (concat (getenv "HOME") "/.local/bin")))
                  (if current (concat new ":" current) new)))
 (setq lsp-java-java-path (concat (getenv "JAVA_HOME") "bin/java"))
-(add-to-list 'golden-ratio-extra-commands 'ace-window)
 (setq default-fill-column 74)
 ;; To remind me that this thing is posible
 ;; I yet don't feel worthy of such power
