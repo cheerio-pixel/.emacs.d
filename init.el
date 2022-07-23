@@ -413,7 +413,9 @@
   :init
   (setq lsp-keymap-prefix "C-c l")
   :config
-  (setq lsp-log-io t)
+  ;; For debugging
+  ;; (setq lsp-log-io t)
+  (setq lsp-log-io nil)
   ;; Please forgive my soul for being foolish
   ;; (setq lsp-keep-workspace-alive t)
   :hook
