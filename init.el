@@ -412,6 +412,8 @@
 (use-package lsp-mode
   :init
   (setq lsp-keymap-prefix "C-c l")
+  (setenv "LSP_USE_PLISTS" "true")
+  (setq lsp-use-plists t)
   :config
   ;; For debugging
   ;; (setq lsp-log-io t)
