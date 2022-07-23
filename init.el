@@ -238,7 +238,15 @@
 ;; (use-package web-mode)
 ;; (use-package impatient-mode)
 
-(use-package centered-cursor-mode :config (global-centered-cursor-mode))
+(use-package centered-cursor-mode
+  :straight (:type git :host github :repo "andre-r/centered-cursor-mode.el" :branch "dev")
+  :config
+  ;; (global-centered-cursor-mode)
+  (setq scroll-preserve-screen-position t
+        scroll-conservatively 0
+        maximum-scroll-margin 0.5
+        scroll-margin 99999)
+  )
 
 (use-package smartparens
   :init
