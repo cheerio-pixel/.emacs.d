@@ -142,6 +142,8 @@
  "C-p" "C-u"
  "C-u" "C-p"
  )
+;; (define-key key-translation-map (kbd "C-p") (kbd "C-u"))
+;; (define-key key-translation-map (kbd "C-u") (kbd "C-p"))
 ;;** smartparens-mode-map
 (general-define-key
  :keymaps 'smartparens-mode-map
@@ -167,8 +169,6 @@
  "C-c C-d" nil
  )
 
-;; (define-key key-translation-map (kbd "C-p") (kbd "C-u"))
-;; (define-key key-translation-map (kbd "C-u") (kbd "C-p"))
 ;;* Set the font
 (custom-set-faces
  '(default
