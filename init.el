@@ -1221,6 +1221,27 @@ collection."
   (defun mymy-delve-link-to-zettel (s)
     "Convert org id link to a delve--zettel object"
     (delve--zettel-create (org-roam-node-from-id (plist-get (mymy-delve-parse-link s) :path))))
+
+  ;; I putted myself the limitation of only modifying this function,
+  ;; thinking that this would be good in the long term but man what a pain was this
+  (el-patch-defun delve--key--yank (&optional arg)
+    "Yank last kill, if it is a Delve token string; If it's a link,
+    yank it as a node.
+  Option ARG is currently ignored."
+    (interactive)
+    (ignore arg)
+    (delve--assert-buf nil "This yank function has to be called in a Delve buffer")
+    (let* ((yank (current-kill 0)))
+      (if (el-patch-wrap 1 1
+            (or (eq (car (get-text-property 0 'yank-handler yank))
+                    'delve--yank-handler)
+                ;; Check that yank is a link
+                (when (string-equal (plist-get (mymy-delve-parse-link yank) :type)
+                                    "id")
+                  ;; Put yank such that it will pass all the checks objects have to pass
+                  (setq yank (format "%S" (list (delve-store--tokenize-object (mymy-delve-link-to-zettel yank))))))))
+          (delve--yank-handler yank)
+        (user-error "Current kill is not a Delve object; cannot yank"))))
   :config
   (setq delve-dashboard-tags '("entry"))
   (setq delve-display-path nil)
