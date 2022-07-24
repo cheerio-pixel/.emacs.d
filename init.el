@@ -2085,7 +2085,7 @@ Author: %^{author}
   :custom
   (setq nov-text-width 60))
 (use-package projectile
-  :diminish projectile-mode
+  ;; TODO: Come here later
   :init
   (general-define-key
    :keymaps 'projectile-mode-map
