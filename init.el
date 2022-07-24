@@ -1204,6 +1204,20 @@ collection."
                                     string-end))
                               "\\1"
                               cand))
+
+  (defun mymy-delve-parse-link (link)
+    "Return the name, type and path of org link as plist. The string
+    just needs to have a link and the link used is the first one"
+    (if (save-match-data
+          ;; Check that it's a org link and set the first occurence as
+          ;; the link
+          (and (string-match org-bracket-link-regexp link)
+               (setq link (match-string 0 link))))
+        (let* ((get (lambda (n) (replace-regexp-in-string org-bracket-link-regexp n link)))
+               (name (funcall get "\\2"))
+               (link-props (split-string (funcall get "\\1") ":")))
+          `(:type ,(car link-props) :path ,(cadr link-props) :name ,name))))
+
   :config
   (setq delve-dashboard-tags '("entry"))
   (setq delve-display-path nil)
