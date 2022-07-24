@@ -1239,6 +1239,8 @@ collection."
             (or (eq (car (get-text-property 0 'yank-handler yank))
                     'delve--yank-handler)
                 ;; Check that yank is a link
+                ;; Don't need to apply no-properties here because
+                ;; string equal doesn't care about the text properties
                 (when (string-equal (plist-get (mymy-delve-parse-link yank) :type)
                                     "id")
                   ;; Put yank such that it will pass all the checks objects have to pass
