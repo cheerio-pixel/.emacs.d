@@ -1265,13 +1265,13 @@ collection."
           (t
            `(progn ,form ,new-form))))
   (set-default 'native-comp-async-env-modifier-form
-               (phc-prognify-and-append
-                (when (boundp 'native-comp-async-env-modifier-form)
-                  native-comp-async-env-modifier-form)
-                `(defvar org-roam-v2-ack ,org-roam-v2-ack)))
+                (phc-prognify-and-append
+                 (when (boundp 'native-comp-async-env-modifier-form)
+                   native-comp-async-env-modifier-form)
+                 `(defvar org-roam-v2-ack ,org-roam-v2-ack)))
   (setq mymy-org-roam-visit-node-other-window t)
   :config
-  (setq org-agenda-files (list (concat mymy-org-roam-dir "Projects/")))
+  (setq org-agenda-files (list (concat mymy-org-roam-dir "Projects/20210715113548-projects.org")))
   (require 'org-roam-patch)
   (org-roam-db-autosync-enable)
   ;; https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
