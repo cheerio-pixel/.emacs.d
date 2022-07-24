@@ -52,6 +52,7 @@
 (savehist-mode)
 (save-place-mode)
 ;;* Alias
+(defalias 'yes-or-no-p 'y-or-n-p)
 (defalias 'gsetq 'general-setq)
 ;;* GC and minibuffer
 (defun my-minibuffer-setup-hook ()
@@ -2500,7 +2501,6 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (setq jit-lock-defer-time 0)
 (setq fast-but-imprecise-scrolling t)
 (setq auto-window-vscroll nil)
-(defalias 'yes-or-no-p 'y-or-n-p)
 (setq savehist-additional-variables '(register-alist))
 (setq
  split-height-threshold 4
