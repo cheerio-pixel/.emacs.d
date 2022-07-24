@@ -1872,7 +1872,7 @@ Author: %^{author}
   :hook
   (org-pomodoro-short-break-finished . (lambda () (interactive) (org-pomodoro '(16)))))
 
-(use-package org-hyperscheduler)
+;; (use-package org-hyperscheduler)
 
 (use-package eww
   :config
