@@ -942,6 +942,7 @@
               ("u" . git-timemachine-show-previous-revision))
   :hook
   ((git-timemachine-mode . hydra-git-timemachine/body))
+  :config
   (defhydra hydra-git-timemachine (:hint nil)
     "
 | _n_ Next _w_ Copy abbrev hash _g_ Goto nth    _b_ Blame _q_uit
