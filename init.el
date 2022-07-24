@@ -15,6 +15,8 @@
 ;;* Straight config
 (setq straight-use-package-by-default t)
 (setq straight-host-usernames '((github . "cheerio-pixel")))
+;;* vc-follows-symlinks
+(setq vc-follow-symlinks t)
 ;;* Use package installation
 (straight-use-package 'use-package)
 (eval-when-compile (require 'use-package))
