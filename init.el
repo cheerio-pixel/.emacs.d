@@ -86,8 +86,7 @@
   "C-M-p"
   "C-M-f"
   "C-c C-b"
-  "C-d"
-  )
+  "C-d")
 ;;** global-set
 (general-define-key
  "C-M-y" 'duplicate-current-line
@@ -122,28 +121,24 @@
  "M-n" 'dabbrev-expand
  "C-c s u" 'straight-use-package
  "C-c s g" 'straight-get-recipe
- "C-;" 'iedit-mode
- )
+ "C-;" 'iedit-mode)
 ;;** dired-mode-map
 (general-define-key
  :keymaps 'dired-mode-map
  "RET" 'dired-find-alternate-file
- "M-RET" 'dired-find-file
- )
+ "M-RET" 'dired-find-file)
 ;;** centered-cursor-keymap
 (general-define-key
  :keymaps 'centered-cursor-keymap
  "C-M--" 'centered-cursor-raise-position-manually
  "C-M-+" 'centered-cursor-lower-position-manually
  "C-M-=" 'centered-cursor-lower-position-manually
- "C-M-0" 'centered-cursor-reset-position-manually
- )
+ "C-M-0" 'centered-cursor-reset-position-manually)
 ;;** key-translation-map
 (general-define-key
  :keymaps 'key-translation-map
  "C-p" "C-u"
- "C-u" "C-p"
- )
+ "C-u" "C-p")
 ;; (define-key key-translation-map (kbd "C-p") (kbd "C-u"))
 ;; (define-key key-translation-map (kbd "C-u") (kbd "C-p"))
 ;;** smartparens-mode-map
@@ -152,24 +147,20 @@
  "C-M-e" 'company-complete
  "M-(" 'sp-wrap-round
  "M-s" 'sp-splice-sexp
- "M-r" 'sp-splice-sexp-killing-around
- )
+ "M-r" 'sp-splice-sexp-killing-around)
 ;;** lispy-mode-map
 (general-define-key
  :keymaps 'lispy-mode-map
- "e" 'special-lispy-different
- )
+ "e" 'special-lispy-different)
 ;;** Ryo-modal through general
 (general-define-key
  :keymaps 'ryo-modal-mode-map
  :prefix "S"
- "b" 'calibredb-find-helm
- )
+ "b" 'calibredb-find-helm)
 ;;** python-mode-map
 (general-define-key
  :keymaps 'python-mode-map
- "C-c C-d" nil
- )
+ "C-c C-d" nil)
 
 ;;* Set the font
 (custom-set-faces
@@ -194,8 +185,7 @@
   (custom-theme-set-faces
    'dracula
    '(font-lock-doc-face ((t (:foreground "spring green"))) t))
-  (set-face-attribute 'region nil :background "#a3b32e")
-  )
+  (set-face-attribute 'region nil :background "#a3b32e"))
 ;;* Normal Packages
 ;;** Niceties
 (use-package hydra)
@@ -244,8 +234,7 @@
   (setq scroll-preserve-screen-position t
         scroll-conservatively 0
         maximum-scroll-margin 0.5
-        scroll-margin 99999)
-  )
+        scroll-margin 99999))
 
 (use-package smartparens
   :init
@@ -315,8 +304,7 @@
   :ryo
   (:mode 'pdf-view-mode)
   ("i" org-noter-insert-note)
-  ("I" org-noter-insert-precise-note)
-  )
+  ("I" org-noter-insert-precise-note))
 ;;** Vterm
 (use-package vterm
   ;; I prefer to open a terminal before opening this
@@ -328,44 +316,42 @@
   (defun mymy/vterm-hook ()
     (centered-cursor-mode -1))
   :hook
-  ((vterm-mode . mymy/vterm-hook))
-  )
+  ((vterm-mode . mymy/vterm-hook)))
 
 ;;** calibredb
 (use-package calibredb
   :defer t
   :config
-  ;;; Moved to the sections keys of ryo modal
+;;; Moved to the sections keys of ryo modal
   ;; (ryo-modal-key "Sb" 'calibredb-find-helm)
   (defun mymy-calibredb-update-list ()
     (interactive)
     (setq calibredb-search-entries (calibredb-candidates))
-    (setq calibredb-full-entries calibredb-search-entries)
-    )
+    (setq calibredb-full-entries calibredb-search-entries))
   (setq calibredb-root-dir "~/Sync/CalibreLibrary/")
   (setq calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
   (setq calibredb-library-alist '(("~/Sync/")))
   (setq calibredb-helm-actions
         (helm-make-actions
-         "Open file"                   'calibredb-find-file
-         "View details"                'calibredb-show-entry
-         "Open file other frame"       'calibredb-find-file-other-frame
+         "Open file" 'calibredb-find-file
+         "View details" 'calibredb-show-entry
+         "Open file other frame" 'calibredb-find-file-other-frame
          "Open file with default tool" (lambda (candidate)
                                          (calibredb-open-file-with-default-tool nil candidate))
-         "Open Cover Page"             'calibredb-find-cover
-         "Set tags"          'calibredb-set-metadata--tags
-         "Set comments"      'calibredb-set-metadata--comments
+         "Open Cover Page" 'calibredb-find-cover
+         "Set tags" 'calibredb-set-metadata--tags
+         "Set comments" 'calibredb-set-metadata--comments
          "List fileds" 'calibredb-set-metadata--list-fields
-         "Show metadata"               'calibredb-show-metadata
-         "Export"                      'calibredb-export
-         "Remove"                      'calibredb-remove
-         "Insert an org link"          (lambda (candidate)
-                                         (unless (featurep 'org)
-                                           (require 'org))
-                                         (if (fboundp 'org-insert-link)
-                                             (kill-new (format "[[%s][]]" (calibredb-getattr candidate :file-path)))))
-         "Mail Add attachment"         (lambda (candidate)
-                                         (mail-add-attachment (calibredb-getattr candidate :file-path))))))
+         "Show metadata" 'calibredb-show-metadata
+         "Export" 'calibredb-export
+         "Remove" 'calibredb-remove
+         "Insert an org link" (lambda (candidate)
+                                (unless (featurep 'org)
+                                  (require 'org))
+                                (if (fboundp 'org-insert-link)
+                                    (kill-new (format "[[%s][]]" (calibredb-getattr candidate :file-path)))))
+         "Mail Add attachment" (lambda (candidate)
+                                 (mail-add-attachment (calibredb-getattr candidate :file-path))))))
 
 ;;** Spreedsheet
 ;; Will keep this two just in case
@@ -393,8 +379,7 @@
   :hook
   (clojure-mode . lispy-mode)
   (emacs-lisp-mode . lispy-mode)
-  (lisp-mode . lispy-mode)
-  )
+  (lisp-mode . lispy-mode))
 
 (use-package clj-refactor
   :defer
@@ -482,8 +467,7 @@
                             '(("\\([@~^&\|!<>:=\\+*/%-]\\)" 0
                                'font-lock-operator-face keep)
                               ("\\<[\\+-]?[0-9]+\\(.[0-9]+\\)?\\>" 0
-                               'font-lock-number-face keep)
-                              )))
+                               'font-lock-number-face keep))))
   :hook
   ((inferior-python-mode . hide-mode-line-mode)
    (python-mode . (lambda ()
@@ -554,9 +538,9 @@
 
 ;;** flycheck
 (use-package flycheck
-  :bind ( :map flycheck-mode-map
-          ("M-n" . flycheck-next-error)
-          ("M-u" . flycheck-previous-error)))
+  :bind (:map flycheck-mode-map
+              ("M-n" . flycheck-next-error)
+              ("M-u" . flycheck-previous-error)))
 ;;** Helm
 (use-package helm
   :straight t
@@ -654,8 +638,7 @@
   (require 'emms-setup)
   (emms-all)
   (emms-default-players)
-  (setq emms-source-file-default-directory "~/Music/")
-  )
+  (setq emms-source-file-default-directory "~/Music/"))
 (use-package empv
   :straight (empv :type git :host github :repo "isamert/empv.el")
   :config
@@ -665,8 +648,7 @@
     ("-" empv-volume-down)
     ("s" empv-volume-set)
     ("+" empv-volume-up)
-    ("." nil :color blue)
-    )
+    ("." nil :color blue))
   :bind
   ("C-c e n" . empv-playlist-next)
   ("C-c e p" . empv-playlist-prev)
@@ -674,8 +656,7 @@
   ("C-c e e" . empv-toggle)
   ("C-c e l" . empv-playlist-loop-on)
   ("C-c e f" . empv-play-file)
-  ("C-c e v" . hydra-empv-volume/body)
-  )
+  ("C-c e v" . hydra-empv-volume/body))
 
 ;;** Org mode
 (use-package org
@@ -708,12 +689,11 @@
      (sql . nil)
      (sqlite . t)
      (clojure . t)
-     (java . t)
-     ))
+     (java . t)))
   :config
   ;; For org roam
   (require 'org-protocol)
-  (define-key org-mode-map (kbd "C-j") 'nil)
+  (define-key org-mode-map (kbd "C-j") '())
   ;; Unneeded
   ;; (define-key org-mode-map (kbd "C-j") (lambda (count)
   ;;                                        (interactive "p")
@@ -732,7 +712,7 @@
       (org-agenda nil "n")
       (setq-local mode-line-format nil)
       (centaur-tabs-local-mode)))
-  ;;; org element
+;;; org element
   (defun mymy-org-element-parse-string (s &optional parser)
     (with-temp-buffer
       (let ((org-inhibit-startup nil))
@@ -768,14 +748,13 @@
   ;; (btw, i can just modify org-font-lock-extra-keywords but i will not
   ;; get (org-hide-emphasis-markers t) with my current knowledge
   (org-emphasis-alist
-   (quote (("*" (bold :foreground "magenta"))
-           ("/" italic)
-           ("_" underline)
-           ("=" (underline org-code))
-           ("~" org-code verbatim)
-           ("+"
-            (:strike-through t))
-           )))
+   '(("*" (bold :foreground "magenta"))
+     ("/" italic)
+     ("_" underline)
+     ("=" (underline org-code))
+     ("~" org-code verbatim)
+     ("+"
+      (:strike-through t))))
   (org-startup-folded t)
   (org-default-notes-file (concat main-dropbox-dir "agenda.org"))
   (org-todo-keyword-faces
@@ -806,8 +785,7 @@
   (org-log-into-drawer t)
   :bind (("C-c o c" . org-capture)
          :map org-mode-map
-         (("C-M-k" . company-files))
-         )
+         (("C-M-k" . company-files)))
   :hook
   (org-mode . org-superstar-mode)
   (org-mode . prettify-symbols-mode)
@@ -891,8 +869,7 @@
   (defun preserve-minibuffer-focus ()
     "keep the minibuffer in focus"
     (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
-      (switch-to-minibuffer-window)))
-  )
+      (switch-to-minibuffer-window))))
 (use-package org-journal
   ;; Dailies is a better alternative
   :disabled
@@ -902,23 +879,19 @@
   (setq org-journal-prefix-key "C-c j")
   :config
   (setq org-journal-dir (concat main-dropbox-dir "journal/")
-        org-journal-date-format "%A, %d %B %Y")
-  )
+        org-journal-date-format "%A, %d %B %Y"))
 (use-package org-superstar
   :config
   (org-superstar-configure-like-org-bullets)
-  (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄))
-  )
+  (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄)))
 (use-package elisp-slime-nav
   :config
   ;; elisp-slime-nav-describe-elisp-thing-at-point C-c C-d C-d
-  (if (s-suffix\? "laptop" (system-name))
+  (if (s-suffix? "laptop" (system-name))
       (bind-key "C-." 'elisp-slime-nav-find-elisp-thing-at-point)
-    (bind-key "M-." 'elisp-slime-nav-find-elisp-thing-at-point)
-    )
+    (bind-key "M-." 'elisp-slime-nav-find-elisp-thing-at-point))
   :hook
-  (emacs-lisp-mode . elisp-slime-nav-mode)
-  )
+  (emacs-lisp-mode . elisp-slime-nav-mode))
 (use-package csv-mode)
 (use-package yasnippet-snippets)
 (use-package org-roam-ui
@@ -974,8 +947,7 @@
     ("A" persp-set-buffer)
     ("k" persp-kill)
     ("r" persp-rename)
-    ("q" nil :color blue)
-    )
+    ("q" nil :color blue))
   :ryo
   ("S"
    (("p"
@@ -985,14 +957,12 @@
       ("i" persp-import)
       ("S" persp-state-save)
       ("L" persp-state-load)
-      ("m" hydra-persp/body :name "hydra-persp")
-      ))))
+      ("m" hydra-persp/body :name "hydra-persp")))))
   :config
   (setq persp-state-default-file (concat user-emacs-directory "persp"))
   :hook
   (after-init . persp-mode)
-  (kill-emacs . persp-state-save)
-  )
+  (kill-emacs . persp-state-save))
 (use-package vulpea :after org-roam
   :disabled
   :config
@@ -1003,8 +973,7 @@
       (when (seq-contains-p tags "Ref")
         (org-roam-tag-add '("literature_node")))))
   (add-hook 'vulpea-insert-handle-functions
-            #'my-vulpea-insert-handle)
-  )
+            #'my-vulpea-insert-handle))
 
 (use-package helm-bibtex
   :config
@@ -1016,18 +985,17 @@
       :filtered-candidate-transformer 'helm-bibtex-candidates-formatter
       :action (helm-make-actions
                ;; Moved "Edit notes" to the default action
-               "Edit notes"                 'helm-bibtex-edit-notes
-               "Open PDF, URL or DOI"       'helm-bibtex-open-any
+               "Edit notes" 'helm-bibtex-edit-notes
+               "Open PDF, URL or DOI" 'helm-bibtex-open-any
                "Open URL or DOI in browser" 'helm-bibtex-open-url-or-doi
-               "Insert citation"            'helm-bibtex-insert-citation
-               "Insert reference"           'helm-bibtex-insert-reference
-               "Insert BibTeX key"          'helm-bibtex-insert-key
-               "Insert BibTeX entry"        'helm-bibtex-insert-bibtex
-               "Attach PDF to email"        'helm-bibtex-add-PDF-attachment
-               "Show entry"                 'helm-bibtex-show-entry
-               "Add PDF to library"         'helm-bibtex-add-pdf-to-library))
-    "Source for searching in BibTeX files.")
-  )
+               "Insert citation" 'helm-bibtex-insert-citation
+               "Insert reference" 'helm-bibtex-insert-reference
+               "Insert BibTeX key" 'helm-bibtex-insert-key
+               "Insert BibTeX entry" 'helm-bibtex-insert-bibtex
+               "Attach PDF to email" 'helm-bibtex-add-PDF-attachment
+               "Show entry" 'helm-bibtex-show-entry
+               "Add PDF to library" 'helm-bibtex-add-pdf-to-library))
+    "Source for searching in BibTeX files."))
 (use-package bibtex
   :config
   (setq bibtex-autokey-year-length 4))
@@ -1080,15 +1048,14 @@ string."
   (add-to-list 'org-capture-templates
                `("r" "bibliopraphic reference" entry
                  (file+olp ,ebib-notes-default-file "Zettelkästen" "lit notes")
-                 (function ebib-notes-create-org-template)))
+                 #'ebib-notes-create-org-template))
   :bind (;; ("C-c n" . ebib)
          :map ebib-index-mode-map
          ("u" . ebib-prev-entry)
          ("p" . ebib-browse-url)
          :map ebib-entry-mode-map
          ("u" . ebib-prev-entry)
-         ("p" . ebib-browse-url)
-         ))
+         ("p" . ebib-browse-url)))
 (use-package ebib-biblio
   :disabled
   :after (ebib biblio)
@@ -1341,10 +1308,10 @@ backend.")
           (t
            `(progn ,form ,new-form))))
   (set-default 'native-comp-async-env-modifier-form
-                (phc-prognify-and-append
-                 (when (boundp 'native-comp-async-env-modifier-form)
-                   native-comp-async-env-modifier-form)
-                 `(defvar org-roam-v2-ack ,org-roam-v2-ack)))
+               (phc-prognify-and-append
+                (when (boundp 'native-comp-async-env-modifier-form)
+                  native-comp-async-env-modifier-form)
+                `(defvar org-roam-v2-ack ,org-roam-v2-ack)))
   (setq mymy-org-roam-visit-node-other-window t)
   :config
   (setq org-agenda-files (list (concat mymy-org-roam-dir "Projects/20210715113548-projects.org")))
@@ -1463,9 +1430,9 @@ and when nil is returned the node will be filtered out."
                                           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+category: ${title}\n#+filetags: TODO\n\n* ${title}")
                                           :unnarrowed t)))
   (add-to-list 'helm-completing-read-handlers-alist
-                '(org-roam-node-find . helm-completing-read-sync-default-handler))
+               '(org-roam-node-find . helm-completing-read-sync-default-handler))
   (add-to-list 'helm-completing-read-handlers-alist
-                '(mymy-org-roam-node-insert-wrapper . helm-completing-read-sync-default-handler))
+               '(mymy-org-roam-node-insert-wrapper . helm-completing-read-sync-default-handler))
   ;; (add-to-list 'helm-completing-read-handlers-alist
   ;;              '(org-roam-node-insert . helm-completing-read-sync-default-handler))
   (defface mymy-org-roam-title
@@ -1879,11 +1846,9 @@ Author: %^{author}
   (setq orb-roam-ref-format 'org-ref-v3)
   (org-roam-bibtex-mode)
   (setq orb-preformat-templates t)
-  (setq orb-preformat-keywords '("title" "citekey" "entry-type" "date" "author"))
-  )
+  (setq orb-preformat-keywords '("title" "citekey" "entry-type" "date" "author")))
 (use-package asoc
-  :straight (asoc :type git :host github :repo "troyp/asoc.el")
-  )
+  :straight (asoc :type git :host github :repo "troyp/asoc.el"))
 (use-package org-capture-ref
   :after org-roam
   :straight doct
@@ -1892,42 +1857,41 @@ Author: %^{author}
   :config
   (gsetq org-capture-ref-capture-target (concat mymy-org-roam-dir "inbox/capture.org")
          org-capture-ref-capture-keys '("b" "B")
-         org-capture-ref-capture-template `( :group "Browser link"
-                                             :type entry
-                                             :file ,org-capture-ref-capture-target
-                                             :fetch-bibtex (lambda () (org-capture-ref-process-capture)) ; this must run first
-                                             :link-type (lambda () (org-capture-ref-get-bibtex-field :type))
-                                             :extra (lambda () (if (org-capture-ref-get-bibtex-field :journal)
-                                                                   (s-join "\n"
-                                                                           '("- [ ] download and attach pdf"
-                                                                             "- [ ] [[elisp:org-attach-open][read paper capturing interesting references]]"
-                                                                             "- [ ] [[elisp:(browse-url (url-encode-url (format \"https://www.semanticscholar.org/search?q=%s\" (org-entry-get nil \"TITLE\"))))][check citing articles]]"
-                                                                             "- [ ] [[elisp:(browse-url (url-encode-url (format \"https://www.connectedpapers.com/search?q=%s\" (org-entry-get nil \"TITLE\"))))][check related articles]]"
-                                                                             "- [ ] check if bibtex entry has missing fields"))
-                                                                 ""))
-                                             :org-entry (lambda () (org-capture-ref-get-org-entry))
-                                             :bibtex-string (lambda () (org-capture-ref-format-bibtex))
-                                             :template
-                                             ("%{fetch-bibtex}* TODO %?%{space}%{org-entry}"
-                                              "%{extra}"
-                                              "%{bibtex-string}"
-                                              "- Keywords: #%{link-type}")
-                                             :headline "References"
-                                             :children (("Interactive link"
-                                                         :keys ,(car org-capture-ref-capture-keys)
-                                                         :clock-in t
-                                                         :space " "
-                                                         :clock-resume t
-                                                         )
-                                                        ("Silent link"
-                                                         :keys ,(cadr org-capture-ref-capture-keys)
-                                                         :space ""
-                                                         :immediate-finish t))))
+         org-capture-ref-capture-template `(:group "Browser link"
+                                                   :type entry
+                                                   :file ,org-capture-ref-capture-target
+                                                   :fetch-bibtex (lambda () (org-capture-ref-process-capture)) ; this must run first
+                                                   :link-type (lambda () (org-capture-ref-get-bibtex-field :type))
+                                                   :extra (lambda () (if (org-capture-ref-get-bibtex-field :journal)
+                                                                         (s-join "\n"
+                                                                                 '("- [ ] download and attach pdf"
+                                                                                   "- [ ] [[elisp:org-attach-open][read paper capturing interesting references]]"
+                                                                                   "- [ ] [[elisp:(browse-url (url-encode-url (format \"https://www.semanticscholar.org/search?q=%s\" (org-entry-get nil \"TITLE\"))))][check citing articles]]"
+                                                                                   "- [ ] [[elisp:(browse-url (url-encode-url (format \"https://www.connectedpapers.com/search?q=%s\" (org-entry-get nil \"TITLE\"))))][check related articles]]"
+                                                                                   "- [ ] check if bibtex entry has missing fields"))
+                                                                       ""))
+                                                   :org-entry (lambda () (org-capture-ref-get-org-entry))
+                                                   :bibtex-string (lambda () (org-capture-ref-format-bibtex))
+                                                   :template
+                                                   ("%{fetch-bibtex}* TODO %?%{space}%{org-entry}"
+                                                    "%{extra}"
+                                                    "%{bibtex-string}"
+                                                    "- Keywords: #%{link-type}")
+                                                   :headline "References"
+                                                   :children (("Interactive link"
+                                                               :keys ,(car org-capture-ref-capture-keys)
+                                                               :clock-in t
+                                                               :space " "
+                                                               :clock-resume t)
+                                                              ("Silent link"
+                                                               :keys ,(cadr org-capture-ref-capture-keys)
+                                                               :space ""
+                                                               :immediate-finish t))))
   (let ((templates (doct org-capture-ref-capture-template)))
     (dolist (template templates)
       (asoc-put! org-capture-templates
                  (car template)
-                 (cdr  template)
+                 (cdr template)
                  'replace)))
   (setq org-capture-ref-capture-template-set-p t))
 
@@ -1971,8 +1935,8 @@ Author: %^{author}
   (bind-key "u" nil eww-image-link-keymap)
   (setq shr-width 80)
   :hook
-  ((eww-mode . olivetti-mode))
-  )
+  ((eww-mode . olivetti-mode)))
+
 (use-package gnus
   :config
   (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
@@ -2081,14 +2045,13 @@ Author: %^{author}
                                     (mml-preview
                                      (frame 1.0
                                             (message 0.5)
-                                            (mml-preview 1.0 point)))))
-  )
+                                            (mml-preview 1.0 point))))))
 (use-package deft
   :custom
   (deft-extensions '("org"))
   (deft-directory (concat main-dropbox-dir "org-roam/"))
-  (deft-recursive t)
-  )
+  (deft-recursive t))
+
 (use-package anki-editor
   :disabled
   :config
@@ -2098,15 +2061,13 @@ Author: %^{author}
              :parent 'html
              :transcoders '((latex-fragment . anki-editor--ox-latex-for-mathjax)
                             (latex-environment . anki-editor--ox-latex-for-mathjax)
-                            (paragraph . strip-<p>-html)
-                            ))
+                            (paragraph . strip-<p>-html)))
           (org-export-create-backend
            :parent 'html
            :transcoders '((latex-fragment . anki-editor--ox-latex)
                           (latex-environment . anki-editor--ox-latex)
-                          (paragraph . strip-<p>-html)
-                          ))))
-  )
+                          (paragraph . strip-<p>-html))))))
+
 (use-package org-drill :disabled)
 (use-package quickrun)
 (use-package olivetti :straight t)
@@ -2120,11 +2081,9 @@ Author: %^{author}
                            'variable-pitch
                            :family "Liberation Serif"
                            :height 1.0)))
-   (nov-mode . (lambda () (whitespace-mode -1)))
-   )
+   (nov-mode . (lambda () (whitespace-mode -1))))
   :custom
-  (setq nov-text-width 60)
-  )
+  (setq nov-text-width 60))
 (use-package projectile
   :diminish projectile-mode
   :init
@@ -2135,8 +2094,7 @@ Author: %^{author}
   (setq projectile-completion-system 'helm
         projectile-switch-project-action 'helm-projectile)
   :hook
-  (after-init . projectile-mode)
-  )
+  (after-init . projectile-mode))
 (use-package frames-only-mode
   :hook
   (after-init . frames-only-mode)
@@ -2149,16 +2107,13 @@ Author: %^{author}
           ;; Vterm
           "*vterm*"
           ;; Poetry
-          "*poetry*"
-          )
-        )
+          "*poetry*"))
   ;; :config
   ;; (advice-add 'org-roam-dailies-capture-today :around 'frames-only-mode-advice-use-windows)
   )
 (use-package avy
-  :bind(("M-g g" . avy-goto-line)
-        ("M-g M-g" . avy-goto-line)
-        )
+  :bind (("M-g g" . avy-goto-line)
+         ("M-g M-g" . avy-goto-line))
   :init
   (setq avy-case-fold-search nil)
   (setq avy-keys '(?n ?e ?i ?k ?y ?m ?u ?c ?r ?s ?t))
@@ -2166,21 +2121,18 @@ Author: %^{author}
   (set-face-attribute 'avy-lead-face nil
                       :background "#818182" :foreground "#000000")
   (set-face-attribute 'avy-lead-face-0 nil
-                      :background "#bdbca6" :foreground "#000000")
-  )
+                      :background "#bdbca6" :foreground "#000000"))
 (use-package ace-window
   :config
   (setq aw-keys '(?n ?e ?i ?o ?k ?m ?u ?y))
-  (ace-window-display-mode)
-  )
+  (ace-window-display-mode))
 (use-package windmove
   :config
   (windmove-default-keybindings)
   (setq windmove-wrap-around t))
 
 (use-package yasnippet
-  :bind (("C-l" . yas-expand)
-         )
+  :bind (("C-l" . yas-expand))
   :config
   (add-to-list 'company-backends 'company-yasnippet t)
   ;; (add-to-list 'warning-suppress-types '(yasnippet backquote-change))
@@ -2195,15 +2147,11 @@ Author: %^{author}
        (":bd" "(\"${1:keys}\" . ${2:function})" "Use package :bind binding")
        (":s" ":straight " "Use package :straigth")
        (":ss" ":straight (:host github :type git :repo \"${1:repo}\" :files (${2:files}))" ":straight repo")
-       (":h" ":hook" "Use package :hook")
-       )
-     )
+       (":h" ":hook" "Use package :hook")))
     (yas-define-snippets
      'python-mode
      '(;; "Key" "Template" "Name"
-       ("pr" "print(${1:`(when (region-active-p) (yas-selected-text))`})$0" "print")
-       )
-     )
+       ("pr" "print(${1:`(when (region-active-p) (yas-selected-text))`})$0" "print")))
     (yas-define-snippets
      'org-mode
      '(;; "Key" "Template" "Name"
@@ -2223,14 +2171,10 @@ Author: %^{author}
        ("::=" "{${1:a} = ${2:b}}" "Equality")
        ("::nck" "{${1:n} \\choose ${2:k}}" "Choose function")
        ("::int" "\\int_{${1:a}}^{${2:b}} ${3:f(x)} \\,dx" "Integrals")
-       ("::sum" "\\sum_{${1:a}}^{${2:b}}" "Summation")
-       )
-     )
-    )
+       ("::sum" "\\sum_{${1:a}}^{${2:b}}" "Summation"))))
   :bind ((;; C-c y is reserved for yasnippets and, possibly, its
           ;; snippets shortcuts
-          "C-c y y" . company-yasnippet)
-         )
+          "C-c y y" . company-yasnippet))
   :hook
   ;; Doesn't work for some reason
   ;; (after-init . yas-global-mode)
@@ -2238,8 +2182,7 @@ Author: %^{author}
   (prog-mode . yas-minor-mode)
   (text-mode . yas-minor-mode)
   ;; I'm really getting sure this things run
-  (yas-minor-mode . mymy-yasnippet-hook)
-  )
+  (yas-minor-mode . mymy-yasnippet-hook))
 (use-package slime-company
   :after (slime company)
   :config (setq slime-company-completion 'fuzzy
@@ -2270,8 +2213,7 @@ Author: %^{author}
   (setq slime-complete-symbol-function 'slime-fuzzy-complete-symbol)
   :hook
   (lisp-mode . (lambda () (setq-local company-backends (cons 'company-slime company-backends))))
-  (lisp-mode . aggressive-indent-mode)
-  )
+  (lisp-mode . aggressive-indent-mode))
 
 (use-package dashboard
   :straight t
@@ -2287,8 +2229,7 @@ Author: %^{author}
   (setq dashboard-center-content t)
   ;; Projects, Areas of activity, Reading list
   (setq dashboard-items '((bookmarks . 5)
-                          (projects . 5)
-                          ))
+                          (projects . 5)))
   :bind (:map dashboard-mode-map
               ("TAB" . dashboard-next-section)
               ("<backtab>" . dashboard-previous-section))
@@ -2342,8 +2283,7 @@ Author: %^{author}
   (setq selected-minor-mode-override t)
   :bind (:map selected-keymap
               ("q" . selected-off)
-              ("" . count-words-region))
-  )
+              ("" . count-words-region)))
 (use-package ace-mc)
 (use-package direx)
 (use-package nyan-mode ;; Nyan, simple nyan
@@ -2352,8 +2292,7 @@ Author: %^{author}
   (setq nyan-animate-nyancat t
         nyan-wavy-trail t)
   :hook
-  ((after-init) . nyan-mode)
-  )
+  ((after-init) . nyan-mode))
 (use-package centaur-tabs
   :demand
   :config
@@ -2365,8 +2304,7 @@ Author: %^{author}
         centaur-tabs-set-close-button nil
         centaur-tabs-cycle-scope 'tabs
         centaur-tabs-show-new-tab-button nil
-        centaur-tabs-label-fixed-length 6
-        )
+        centaur-tabs-label-fixed-length 6)
   (setq uniquify-separator "/"
         uniquify-buffer-name-style 'forward)
   (centaur-tabs-group-by-projectile-project)
@@ -2380,13 +2318,12 @@ Author: %^{author}
   ("C-S-<iso-lefttab>" . centaur-tabs-backward)
   ("C-<tab>" . centaur-tabs-forward)
   ("C-z" . centaur-tabs-backward-group)
-  ("C-S-z" . centaur-tabs-forward-group)
-  )
+  ("C-S-z" . centaur-tabs-forward-group))
 (use-package which-key ;; Useful to tell what is the next command that i can do
   :init
   (setq which-key-enable-extended-define-key t)
   (setq which-key-side-window-location 'bottom)
-  (setq which-key-side-window-max-height 0.40)
+  (setq which-key-side-window-max-height 0.4)
   (setq which-key-side-window-max-width 0.66)
   :config
   (push '((nil . "ryo:.*:") . (nil . "")) which-key-replacement-alist)
@@ -2401,13 +2338,10 @@ Author: %^{author}
       (buffer-fns . (yequake-org-roam-dailies-capture-today))
       (width . 0.75)
       (height . 0.5)
-      (alpha . 0.80)
+      (alpha . 0.8)
       (frame-parameters . ((undecorated . t)
                            (sticky . t)
-                           (skip-taskbar . t))))
-     )
-   )
-  )
+                           (skip-taskbar . t)))))))
 
 (use-package dired
   :straight nil
@@ -2463,8 +2397,7 @@ T - tag prefix
     ("z" diredp-compress-this-file)
     ("Z" dired-do-compress)
     ("q" nil)
-    ("." nil :color blue))
-  )
+    ("." nil :color blue)))
 (use-package straight
   :straight nil
   :bind (("C-c s t" . hydra-straight-helper/body))
@@ -2497,15 +2430,14 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
     ("W" straight-watcher-quit)
     ("g" straight-get-recipe)
     ("e" straight-prune-build)
-    ("q" nil))
-  )
+    ("q" nil)))
 
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (setq default-buffer-file-coding-system 'utf-8)
-(setenv "JAVA_HOME"  "/usr/lib/jvm/java-11-openjdk/")
+(setenv "JAVA_HOME" "/usr/lib/jvm/java-11-openjdk/")
 (setenv "PATH" (let ((current (getenv "PATH"))
                      (new (concat (getenv "HOME") "/.local/bin")))
                  (if current (concat new ":" current) new)))
@@ -2539,7 +2471,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (setq use-package-always-demand (daemonp))
 (setq mouse-yank-at-point t)
 (setq comp-async-report-warnings-errors nil)
-(if (s-suffix\? "laptop" (system-name))
+(if (s-suffix? "laptop" (system-name))
     (setq default-input-method "japanese")
   (setq default-input-method "japanese-mozc"))
 (setq-default tab-always-indent t)
@@ -2554,12 +2486,11 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (setq scroll-error-top-bottom t)
 (setq-default
  prettify-symbols-alist
- '(("#+BEGIN_SRC"     . "Λ")
-   ("#+END_SRC"       . "Λ")
-   ("#+begin_src"     . "Λ")
-   ("#+end_src"       . "Λ")
-   ("lambda"          . "λ")
-   ))
+ '(("#+BEGIN_SRC" . "Λ")
+   ("#+END_SRC" . "Λ")
+   ("#+begin_src" . "Λ")
+   ("#+end_src" . "Λ")
+   ("lambda" . "λ")))
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 (setq delete-old-versions -1)
 (setq version-control t)
@@ -2607,14 +2538,13 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
         (call-process-region
          (point-min) (point-max)
          "xclip" nil 0 nil "-i" "-selection" "clipboard")))
-    (defun xclip-paste-function()
+    (defun xclip-paste-function ()
       (let ((xclip-output
              (shell-command-to-string "xclip -o -selection clipboard")))
         (unless (string= (car kill-ring) xclip-output)
-          xclip-output )))
+          xclip-output)))
     (setq interprogram-cut-function 'xclip-cut-function)
-    (setq interprogram-paste-function 'xclip-paste-function)
-    ))
+    (setq interprogram-paste-function 'xclip-paste-function)))
 
 ;;                   Don't know where to put it, but it's still config
 (with-eval-after-load "linum"
@@ -2646,19 +2576,15 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 ;;             (set-window-margins (car (get-buffer-window-list (current-buffer) nil t)) 1 1)))
 
 (add-hook 'csv-mode-hook
-          'csv-align-mode
-          )
+          'csv-align-mode)
 
 (add-hook 'after-init-hook
-          (lambda()
+          (lambda ()
             (which-function-mode t)
-            (global-undo-tree-mode)
-            ))
+            (global-undo-tree-mode)))
 (add-hook 'prog-mode
-          (lambda()
-            (auto-fill-mode t)
-            )
-          )
+          (lambda ()
+            (auto-fill-mode t)))
 (add-hook 'TeX-after-compilation-finished-functions
           #'TeX-revert-document-buffer)
 
@@ -2686,8 +2612,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
       (goto-char old-point))))
 (ryo-modal-keys
  ("z+" increment-number-at-point)
- ("z-" decrement-number-at-point)
- )
+ ("z-" decrement-number-at-point))
 (define-minor-mode mymy-mode
   "Define all keys to have a preference to override others"
   :init-value nil
