@@ -1265,6 +1265,14 @@ collection."
                                                    ", ")
                                       ",")))))
 
+  (setq delve-export--yank-handlers (list 'mymy-yank-into-org))
+  (el-patch-defvar delve-export--yank-handlers
+    (list 'mymy-yank-into-org)
+    "List of available backends for yanking (by name).
+When yanking, check which of these backends can be used in the
+current buffer by calling its `assert' function.  If there are
+multiple options available, let the user choose the proper
+backend.")
   :config
   (setq delve-dashboard-tags '("entry"))
   (setq delve-display-path nil)
