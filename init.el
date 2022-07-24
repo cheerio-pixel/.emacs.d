@@ -1252,6 +1252,19 @@ collection."
                                (setq yank)))))
           (delve--yank-handler yank)
         (user-error "Current kill is not a Delve object; cannot yank"))))
+
+  (delve-export-new-backend 'mymy-yank-into-org
+    "Print Delve zettels as links of the form that i use"
+    :parent 'yank-into-org
+    ;; Prefer not to use :separator because i don't know if the author
+    ;; will use it for other types in the future
+    :printers `((delve--pile    . ,(lambda (p o)
+                                     (concat
+                                      (string-join (--map (delve-export--item-string it o)
+                                                          (delve--pile-zettels p))
+                                                   ", ")
+                                      ",")))))
+
   :config
   (setq delve-dashboard-tags '("entry"))
   (setq delve-display-path nil)
