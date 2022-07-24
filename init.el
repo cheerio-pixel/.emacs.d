@@ -1273,6 +1273,7 @@ When yanking, check which of these backends can be used in the
 current buffer by calling its `assert' function.  If there are
 multiple options available, let the user choose the proper
 backend.")
+
   :config
   (setq delve-dashboard-tags '("entry"))
   (setq delve-display-path nil)
@@ -1318,6 +1319,12 @@ backend.")
   ;;   "A Zettel item storing an Org Roam node."
   ;;   node preview out-of-sync info)
   ;; TODO: Find more about delve--note
+  ;; There is a problem with the approach taken in the export backends
+  ;; I think there should be two options one in which it takes by
+  ;; defualt the first element of the list And another that prompts
+  ;; for selection whenever there is a prefix
+  ;; TODO: Implement prev paragraph as a patch
+  ;; Maybe use let binding delve--key--yank for delve-export--yank-handlers
   )
 
 ;;** Org roam
