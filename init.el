@@ -732,6 +732,16 @@
       (org-agenda nil "n")
       (setq-local mode-line-format nil)
       (centaur-tabs-local-mode)))
+  ;;; org element
+  (defun mymy-org-element-parse-string (s &optional parser)
+    (with-temp-buffer
+      (let ((org-inhibit-startup nil))
+        (insert s)
+        (org-mode)
+        (goto-char (point-min))
+        (funcall (or parser #'org-element-parse-buffer)))))
+  (defun mymy-org-element-parse-link (link)
+    (mymy-org-element-parse-string link #'org-element-link-parser))
   (setq org-columns-default-format "%25ITEM %TODO %3PRIORITY %TAGS %6CLOCKSUM(Clock) %8Effort(Effort)")
   ;; Press C-c to deactivate this temporarily
   (setq org-fast-tag-selection-single-key t)
