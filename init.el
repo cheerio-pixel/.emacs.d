@@ -1221,7 +1221,9 @@ collection."
 
   (defun mymy-delve-link-to-zettel (s)
     "Convert org id link to a delve--zettel object"
-    (delve--zettel-create (org-roam-node-from-id (plist-get (mymy-delve-parse-link s) :path))))
+    (thread-last (plist-get (mymy-delve-parse-link s) :path)
+                 (org-roam-node-from-id)
+                 (delve--zettel-create)))
 
   ;; I putted myself the limitation of only modifying this function,
   ;; thinking that this would be good in the long term but man what a pain was this
@@ -1240,7 +1242,12 @@ collection."
                 (when (string-equal (plist-get (mymy-delve-parse-link yank) :type)
                                     "id")
                   ;; Put yank such that it will pass all the checks objects have to pass
-                  (setq yank (format "%S" (list (delve-store--tokenize-object (mymy-delve-link-to-zettel yank))))))))
+                  (thread-last (substring-no-properties yank)
+                               (mymy-delve-link-to-zettel)
+                               (delve-store--tokenize-object)
+                               (list)
+                               (format "%S")
+                               (setq yank)))))
           (delve--yank-handler yank)
         (user-error "Current kill is not a Delve object; cannot yank"))))
   :config
