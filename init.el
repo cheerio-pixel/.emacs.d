@@ -40,7 +40,6 @@
 (setq redisplay-dont-pause t)
 (setq frame-resize-pixelwise t)
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
-(setq gc-cons-threshold 100000000)
 (tool-bar-mode -1)   ; This is much easier
 (menu-bar-mode -1)   ; than needing to change
 (scroll-bar-mode -1) ; this on every OS
