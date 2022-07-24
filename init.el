@@ -977,7 +977,7 @@
     )
   :ryo
   ("S"
-   (("y"
+   (("p"
      (("s" persp-switch)
       ("k" persp-kill :name "Kill perspective")
       ("r" persp-rename)
