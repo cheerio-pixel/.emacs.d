@@ -1211,6 +1211,9 @@ collection."
   (abbreviate-file-name delve-storage-paths)
   (setq delve--no-icons nil)
   (add-hook #'delve-mode-hook #'delve-compact-view-mode)
+  ;; Makes it so that when you kill, kill the node at point
+  ;; This is set local to the buffer because i like the actual behaivour of kill-line
+  (add-hook #'delve-mode-hook (lambda () (setq-local kill-whole-line t)))
   (delve-global-minor-mode)
   (ryo-modal-keys
    ("Sd"
