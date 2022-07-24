@@ -1236,19 +1236,19 @@ collection."
    ("M-N" lister-mode-left)
    ("M-U" lister-mode-right)
    ("d" delve--key--multi-delete))
-  ;; TODO: Make a function that collects all the links of marked nodes
-  ;; lister-walk-marked-nodes is the function to use
-  ;; An example
-  ;; (lister-walk-marked-nodes ewoc
-  ;;                           (lambda (ewoc node)
-  ;;                             ;; Goes to all of the sublist, maybe i need this to have more flexibility
-  ;;                             ;; Maybe not since this will walk again
-  ;;                             ;; in every node, and only want to walk
-  ;;                             ;; once
-  ;;                             (lister-with-sublist-below ewoc node beg end
-  ;;                               (lister-walk-nodes ewoc #'lister-move-item-left beg end))))
+  ;; This two can wait
   ;; TODO: Make a function that copies the name of the current node
   ;; TODO: Make a function that insert a description list as a node with a description
+  ;; DONE: Make a function that inserts the current copied link as a delve object
+  ;; delve--key--yank
+  ;; delve--yank-handler
+  ;; Need to create a type for a id link
+  ;; (cl-defstruct (delve--zettel
+  ;;                (:include delve--item)
+  ;;                (:constructor delve--zettel-create (node)))
+  ;;   "A Zettel item storing an Org Roam node."
+  ;;   node preview out-of-sync info)
+  ;; TODO: Find more about delve--note
   )
 
 ;;** Org roam
