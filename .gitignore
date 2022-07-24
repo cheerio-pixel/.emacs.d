@@ -37,3 +37,11 @@ request/
 semanticdb/
 type-break
 workspace/
+/site-lisp/
+/projects
+/ltximg/
+/emms/
+/eaf/
+/persist/
+/network-security.data
+/image-dired/
