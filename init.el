@@ -987,8 +987,7 @@
       ("m" hydra-persp/body :name "hydra-persp")
       ))))
   :config
-  (setq persp-state-default-file (concat user-emacs-directory "persp")
-        )
+  (setq persp-state-default-file (concat user-emacs-directory "persp"))
   :hook
   (after-init . persp-mode)
   (kill-emacs . persp-state-save)
