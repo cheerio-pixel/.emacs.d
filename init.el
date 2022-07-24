@@ -819,6 +819,7 @@
   (org-mode . (lambda () (setq-local tab-width 2
                                      indent-tabs-mode nil
                                      python-shell-interpreter "python3"))))
+
 ;;*** Org latex
 (use-package org-fragtog
   ;; For another time
@@ -1189,6 +1190,7 @@ collection."
         (message (format "%s %s to this buffer"
                          (if move "Moved" "Added")
                          counted-items)))))
+
   (el-patch-defun delve--remove-candidate-suffix (cand)
     "Remove suffix in parentheses from CAND."
     (replace-regexp-in-string (el-patch-swap
@@ -1382,9 +1384,9 @@ and when nil is returned the node will be filtered out."
                                           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+category: ${title}\n#+filetags: TODO\n\n* ${title}")
                                           :unnarrowed t)))
   (add-to-list 'helm-completing-read-handlers-alist
-               '(org-roam-node-find . helm-completing-read-sync-default-handler))
+                '(org-roam-node-find . helm-completing-read-sync-default-handler))
   (add-to-list 'helm-completing-read-handlers-alist
-               '(mymy-org-roam-node-insert-wrapper . helm-completing-read-sync-default-handler))
+                '(mymy-org-roam-node-insert-wrapper . helm-completing-read-sync-default-handler))
   ;; (add-to-list 'helm-completing-read-handlers-alist
   ;;              '(org-roam-node-insert . helm-completing-read-sync-default-handler))
   (defface mymy-org-roam-title
@@ -1560,8 +1562,8 @@ Like `org-id-open', but additionally uses the Org-roam database."
           (org-mode)
           (erase-buffer)
           (insert node-preview)
-          (org-show-all)
-          )
+          (goto-char (point-min))
+          (org-show-all))
         (posframe-show buf
                        :poshandler 'posframe-poshandler-frame-top-right-corner
                        :hidehandler 'mymy-posframe-hidehandler-org-roam-hide-preview
