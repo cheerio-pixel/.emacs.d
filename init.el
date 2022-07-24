@@ -1218,6 +1218,9 @@ collection."
                (link-props (split-string (funcall get "\\1") ":")))
           `(:type ,(car link-props) :path ,(cadr link-props) :name ,name))))
 
+  (defun mymy-delve-link-to-zettel (s)
+    "Convert org id link to a delve--zettel object"
+    (delve--zettel-create (org-roam-node-from-id (plist-get (mymy-delve-parse-link s) :path))))
   :config
   (setq delve-dashboard-tags '("entry"))
   (setq delve-display-path nil)
