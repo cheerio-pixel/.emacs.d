@@ -1124,7 +1124,7 @@ string."
   ;;     (save-excursion
   ;;       (lister-with-node ewoc pos-or-node node
   ;;         ((el-patch-swap ewoc-invalidate ewoc-refresh) ewoc)))))
-  ;; Tested and works well, execpt that it messes up location after refresh
+  ;; Tested and works well, execept that it messes up location after refresh
   ;; TODO: Try to add the sublist in lister--parse-position
   ;; Prototype
   ;; (if (lister-sublist-below-p lister-local-ewoc :point)
