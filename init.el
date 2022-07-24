@@ -960,6 +960,7 @@
     ("? " git-timemachine-help)
     ("." nil :color blue)))
 (use-package perspective
+  ;; TODO: Come back here later i have plans for this package an the like
   :disabled
   (defhydra hydra-persp (:hint nil)
     "
