@@ -289,29 +289,6 @@ nodes."
   node)
 
 ;; Here stops
-(el-patch-defun org-roam-node-visit (node &optional other-window force)
-  "From the current buffer, visit NODE. Return the visited buffer.
-Display the buffer in the selected window.  With a prefix
-argument OTHER-WINDOW display the buffer in another window
-instead.
-
-If NODE is already visited, this won't automatically move the
-point to the beginning of the NODE, unless FORCE iws non-nil. In
-interactive calls FORCE always set to t."
-  (interactive (list (org-roam-node-at-point t) current-prefix-arg t))
-  (org-roam-node-open node (if (el-patch-swap other-window mymy-org-roam-visit-node-other-window)
-                               (el-patch-swap
-                                 #'switch-to-buffer-other-window
-                                 (if (equal (org-roam-node-file node)
-                                            (ignore-errors (org-roam-node-file
-                                                            (org-roam-node-at-point))))
-                                     (lambda () (progn
-                                                  (pop-to-buffer-same-window buf)
-                                                  (org-show-entry)))
-                                   #'switch-to-buffer-other-window
-                                   ))
-                             #'pop-to-buffer-same-window)
-                      force))
 
 (el-patch-defun org-roam-db-update-file (&optional file-path no-require)
   "Update Org-roam cache for FILE-PATH.
