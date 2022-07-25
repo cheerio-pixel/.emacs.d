@@ -1231,6 +1231,8 @@ collection."
                                                           (delve--pile-zettels p))
                                                    ", ")
                                       ",")))))
+                (delve--heading . ,(lambda (h _) (concat "- " (delve--heading-text h))))
+                ))
 
   (setq delve-export--yank-handlers (list 'mymy-yank-into-org))
   (el-patch-defvar delve-export--yank-handlers
