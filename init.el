@@ -1247,7 +1247,6 @@ backend.")
   (setq delve-dashboard-tags '("entry"))
   (setq delve-display-path nil)
   (setq delve-storage-paths (concat main-dropbox-dir "Notes-Delve/"))
-  (abbreviate-file-name delve-storage-paths)
   (setq delve--no-icons nil)
   (add-hook #'delve-mode-hook #'delve-compact-view-mode)
   ;; Makes it so that when you kill, kill the node at point
