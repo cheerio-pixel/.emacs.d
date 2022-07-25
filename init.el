@@ -833,6 +833,10 @@
    ("oks" org-agenda-write)
    ("rl" org-toggle-link-display)
    ("ro" org-agenda-open-link))
+  (setq org-agenda-custom-commands
+        '(("n" "Agenda and all TODOs"
+           ((agenda #1="")
+            (alltodo #1#)))))
   ;; Previously called org-agenda-ndays
   (setq org-agenda-span 1)
   ;; (setq org-agenda-start-day "-1d")
