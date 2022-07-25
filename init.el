@@ -1228,7 +1228,7 @@ collection."
   (delve-export-new-backend 'mymy-yank-into-org
     "Print Delve zettels as links of the form that i use"
     :parent 'yank-into-org
-    :separator ", "
+    :separator "\n"
     :printers `((delve--pile    . ,(lambda (p o)
                                      (concat
                                       (string-join (--map (delve-export--item-string it o)
@@ -1236,6 +1236,7 @@ collection."
                                                    ", ")
                                       ",")))
                 (delve--heading . ,(lambda (h _) (concat "- " (delve--heading-text h))))
+                (delve--zettel  . ,#'mymy-delve-export--zettel-to-link)
                 ))
 
   (setq delve-export--yank-handlers (list 'mymy-yank-into-org))
