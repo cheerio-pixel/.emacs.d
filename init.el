@@ -1632,6 +1632,8 @@ Like `org-id-open', but additionally uses the Org-roam database."
     )
 
 
+  ;; Found this somewhere else, the core idea is not mine but the
+  ;; other things are mine
   (defun org-count-subentries (&optional pos match scope level)
     "Return number of subentries for entry at POS.
 MATCH and SCOPE are the same as for `org-map-entries', but
