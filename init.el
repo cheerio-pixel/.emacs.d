@@ -1732,8 +1732,8 @@ _._: Quit _q_: Quit
    ("S"
     (("l" org-roam-buffer-toggle)
      ("y"
-      (("n" mymy-org-move-next-heading)
-       ("u" mymy-org-move-prev-heading)
+      (("n" org-next-link)
+       ("u" org-previous-link)
        ("a" mymy-org-roam-append-node-heading)
        ("k" mymy-org-roam-get-link)
        ("y" hydra-zettel/body)
