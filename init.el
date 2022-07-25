@@ -493,6 +493,11 @@
 (use-package poetry
   :config
   (setenv "WORKON_HOME" "~/.cache/pypoetry/virtualenvs/")
+  display-buffer-alist
+  (add-to-list 'display-buffer-alist
+               '("\\*poetry\\*"
+                 (display-buffer-no-window)
+                 ))
   :hook
   (python-mode . poetry-tracking-mode))
 ;;** Haskell
