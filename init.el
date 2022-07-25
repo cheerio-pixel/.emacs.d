@@ -1297,6 +1297,19 @@ backend.")
   ;; for selection whenever there is a prefix
   ;; TODO: Implement prev paragraph as a patch
   ;; Maybe use let binding delve--key--yank for delve-export--yank-handlers
+  ;; TODO: Function that provides fast access to enry notes
+  ;; Like searching a heading "entries" or having a delve file with
+  ;; all top entries being candidate for selection
+  ;; Or just having one
+  ;; TODO: Make function that undoes changes in delve buffer
+  ;; TODO: Make function that opens current delve node in another collection
+  ;; Limit only to zettels
+  ;; This is the same a inspection
+  ;; TODO: Implement undo functionality
+  ;; To do this i need to first implement a way of getting the state,
+  ;; a way of storing (Obviously a list but let's keep this in doubt)
+  ;; and a way of restoring this state
+  ;; Maybe i can save the ewoc
   )
 
 ;;** Org roam
