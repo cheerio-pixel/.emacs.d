@@ -1224,6 +1224,15 @@ collection."
           (delve--yank-handler yank)
         (user-error "Current kill is not a Delve object; cannot yank"))))
 
+  (defun mymy-delve-export--zettel-to-link (z &optional args)
+    "Return zettel Z as an Org link pointing to its headline with the
+    format that i like.
+Optional argument ARGS is ignored."
+    (ignore args)
+    (concat (org-link-make-string (concat "id:" (delve--zettel-id z))
+                                  (delve--zettel-title z))
+            ", "))
+
   ;; It broke for some reason
   (delve-export-new-backend 'mymy-yank-into-org
     "Print Delve zettels as links of the form that i use"
