@@ -1723,12 +1723,10 @@ By default, all subentries are counted; restrict with LEVEL."
   (defun mymy-org-id-roam-create ()
     (interactive)
     (org-id-get-create)
-    (mymy-org-roam-update-headline)
-    )
+    (mymy-org-roam-update-headline))
   (defun mymy-say-back-link-count ()
     (interactive)
-    (message (number-to-string (mymy-org-roam-get-backlinks)))
-    )
+    (message (number-to-string (mymy-org-roam-get-backlinks))))
   (defhydra hydra-zettel (:hint nil :color pink)
     "
 _n_: Next _k_: Get link
