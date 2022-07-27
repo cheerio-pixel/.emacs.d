@@ -508,6 +508,9 @@
                '("\\*poetry\\*"
                  (display-buffer-no-window)
                  ))
+  (general-define-key
+   "C-c c" 'poetry
+   )
   :hook
   (python-mode . poetry-tracking-mode))
 ;;** Haskell
