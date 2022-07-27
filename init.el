@@ -1973,111 +1973,7 @@ Author: %^{author}
   :config
   (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
   (add-hook 'gnus-summary-mode-hook #'gnus-undo-mode)
-  (setq gnus-asynchronous t)
-  (setq gnus-buffer-configuration '((group
-                                     (frame 1.0
-                                            (group 1.0 point)))
-                                    (summary
-                                     (frame 1.0
-                                            (summary 1.0 point)))
-                                    (article
-                                     (cond
-                                      (gnus-use-trees
-                                       '(frame 1.0
-                                               (summary 0.25 point)
-                                               (tree 0.25)
-                                               (article 1.0)))
-                                      (t
-                                       '(frame 1.0
-                                               (summary 0.25 point)
-                                               (article 1.0)))))
-                                    (server
-                                     (frame 1.0
-                                            (server 1.0 point)))
-                                    (browse
-                                     (frame 1.0
-                                            (browse 1.0 point)))
-                                    (message
-                                     (frame 1.0
-                                            (message 1.0 point)))
-                                    (pick
-                                     (frame 1.0
-                                            (article 1.0 point)))
-                                    (info
-                                     (frame 1.0
-                                            (info 1.0 point)))
-                                    (summary-faq
-                                     (frame 1.0
-                                            (summary 0.25)
-                                            (faq 1.0 point)))
-                                    (only-article
-                                     (frame 1.0
-                                            (article 1.0 point)))
-                                    (edit-article
-                                     (frame 1.0
-                                            (article 1.0 point)))
-                                    (edit-form
-                                     (frame 1.0
-                                            (group 0.5)
-                                            (edit-form 1.0 point)))
-                                    (edit-score
-                                     (frame 1.0
-                                            (summary 0.25)
-                                            (edit-score 1.0 point)))
-                                    (edit-server
-                                     (frame 1.0
-                                            (server 0.5)
-                                            (edit-form 1.0 point)))
-                                    (post
-                                     (frame 1.0
-                                            (post 1.0 point)))
-                                    (reply
-                                     (frame 1.0
-                                            (article 0.5)
-                                            (message 1.0 point)))
-                                    (forward
-                                     (frame 1.0
-                                            (message 1.0 point)))
-                                    (reply-yank
-                                     (frame 1.0
-                                            (message 1.0 point)))
-                                    (mail-bounce
-                                     (frame 1.0
-                                            (article 0.5)
-                                            (message 1.0 point)))
-                                    (pipe
-                                     (frame 1.0
-                                            (summary 0.25 point)
-                                            ("*Shell Command Output*" 1.0)))
-                                    (bug
-                                     (frame 1.0
-                                            ("*Gnus Bug*" 1.0 point)))
-                                    (score-trace
-                                     (frame 1.0
-                                            (summary 0.5 point)
-                                            ("*Score Trace*" 1.0)))
-                                    (score-words
-                                     (frame 1.0
-                                            (summary 0.5 point)
-                                            ("*Score Words*" 1.0)))
-                                    (split-trace
-                                     (frame 1.0
-                                            (summary 0.5 point)
-                                            ("*Split Trace*" 1.0)))
-                                    (category
-                                     (frame 1.0
-                                            (category 1.0)))
-                                    (compose-bounce
-                                     (frame 1.0
-                                            (article 0.5)
-                                            (message 1.0 point)))
-                                    (display-term
-                                     (frame 1.0
-                                            ("*display*" 1.0)))
-                                    (mml-preview
-                                     (frame 1.0
-                                            (message 0.5)
-                                            (mml-preview 1.0 point))))))
+  (setq gnus-asynchronous t))
 (use-package deft
   :custom
   (deft-extensions '("org"))
@@ -2142,6 +2038,113 @@ Author: %^{author}
           "*poetry*"))
   ;; :config
   ;; (advice-add 'org-roam-dailies-capture-today :around 'frames-only-mode-advice-use-windows)
+  :config
+  (with-eval-after-load 'gnus
+    (setq gnus-buffer-configuration '((group
+                                       (frame 1.0
+                                              (group 1.0 point)))
+                                      (summary
+                                       (frame 1.0
+                                              (summary 1.0 point)))
+                                      (article
+                                       (cond
+                                        (gnus-use-trees
+                                         '(frame 1.0
+                                                 (summary 0.25 point)
+                                                 (tree 0.25)
+                                                 (article 1.0)))
+                                        (t
+                                         '(frame 1.0
+                                                 (summary 0.25 point)
+                                                 (article 1.0)))))
+                                      (server
+                                       (frame 1.0
+                                              (server 1.0 point)))
+                                      (browse
+                                       (frame 1.0
+                                              (browse 1.0 point)))
+                                      (message
+                                       (frame 1.0
+                                              (message 1.0 point)))
+                                      (pick
+                                       (frame 1.0
+                                              (article 1.0 point)))
+                                      (info
+                                       (frame 1.0
+                                              (info 1.0 point)))
+                                      (summary-faq
+                                       (frame 1.0
+                                              (summary 0.25)
+                                              (faq 1.0 point)))
+                                      (only-article
+                                       (frame 1.0
+                                              (article 1.0 point)))
+                                      (edit-article
+                                       (frame 1.0
+                                              (article 1.0 point)))
+                                      (edit-form
+                                       (frame 1.0
+                                              (group 0.5)
+                                              (edit-form 1.0 point)))
+                                      (edit-score
+                                       (frame 1.0
+                                              (summary 0.25)
+                                              (edit-score 1.0 point)))
+                                      (edit-server
+                                       (frame 1.0
+                                              (server 0.5)
+                                              (edit-form 1.0 point)))
+                                      (post
+                                       (frame 1.0
+                                              (post 1.0 point)))
+                                      (reply
+                                       (frame 1.0
+                                              (article 0.5)
+                                              (message 1.0 point)))
+                                      (forward
+                                       (frame 1.0
+                                              (message 1.0 point)))
+                                      (reply-yank
+                                       (frame 1.0
+                                              (message 1.0 point)))
+                                      (mail-bounce
+                                       (frame 1.0
+                                              (article 0.5)
+                                              (message 1.0 point)))
+                                      (pipe
+                                       (frame 1.0
+                                              (summary 0.25 point)
+                                              ("*Shell Command Output*" 1.0)))
+                                      (bug
+                                       (frame 1.0
+                                              ("*Gnus Bug*" 1.0 point)))
+                                      (score-trace
+                                       (frame 1.0
+                                              (summary 0.5 point)
+                                              ("*Score Trace*" 1.0)))
+                                      (score-words
+                                       (frame 1.0
+                                              (summary 0.5 point)
+                                              ("*Score Words*" 1.0)))
+                                      (split-trace
+                                       (frame 1.0
+                                              (summary 0.5 point)
+                                              ("*Split Trace*" 1.0)))
+                                      (category
+                                       (frame 1.0
+                                              (category 1.0)))
+                                      (compose-bounce
+                                       (frame 1.0
+                                              (article 0.5)
+                                              (message 1.0 point)))
+                                      (display-term
+                                       (frame 1.0
+                                              ("*display*" 1.0)))
+                                      (mml-preview
+                                       (frame 1.0
+                                              (message 0.5)
+                                              (mml-preview 1.0 point)))))
+    )
   )
 (use-package avy
   :bind (("M-g g" . avy-goto-line)
