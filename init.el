@@ -455,6 +455,11 @@
   ;; (haskell-mode . lsp)
   ;; (haskell-literate-mode . lsp)
   )
+;;** Kotlin
+(use-package kotlin-mode
+  :config
+  (add-hook 'kotlin-mode-hook 'lsp))
+
 ;;** Python
 (use-package python
   :bind (:map python-mode-map
