@@ -1781,8 +1781,7 @@ _._: Quit _q_: Quit
        ("d" org-roam-ref-remove)
        ("n" mymy-org-roam-ref-find)
        ("b" helm-bibtex)
-       ("i" org-ref-cite-insert-helm)
-       ))
+       ("i" org-ref-cite-insert-helm)))
      ("o" mymy-org-id-roam-create)
      ("i"
       ;; (format-time-string "%c" (seconds-to-time 1645577664))
@@ -1897,8 +1896,7 @@ Author: %^{author}
    ;; Dailies
    ("C-c C-j" . mymy-org-roam-dailies-secondary-capture-today)
    :map org-mode-map
-   ("C-c C-j" . mymy-org-roam-dailies-secondary-capture-today)
-   ))
+   ("C-c C-j" . mymy-org-roam-dailies-secondary-capture-today)))
 (use-package org-transclusion)
 (use-package org-roam-bibtex
   :config
