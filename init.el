@@ -25,6 +25,10 @@
 ;;* Important packages
 ;; This packages need to be loaded before all the others
 (use-package ryo-modal
+  ;; TODO: Make ryo-modal-key create a function when passed a lambda
+  ;; The name of the function will be from the keyword :lambda-name
+  ;; So ryo-modal-key will check if TARGET is a lambda and then theck
+  ;; if lambda-name exists, if not then complain
   :config
   (define-globalized-minor-mode ryo-modal-global-mode ryo-modal-mode
     (lambda ()
