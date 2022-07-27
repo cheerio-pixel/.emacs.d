@@ -68,6 +68,7 @@
 (add-hook 'minibuffer-setup-hook #'my-minibuffer-setup-hook)
 (add-hook 'minibuffer-exit-hook #'my-minibuffer-exit-hook)
 ;;* My variables
+;; TODO: Set all of this in the defconst or defvar form
 (setq dropbox-dir "~/Dropbox (Maestral)/")
 (setq main-dropbox-dir (concat dropbox-dir "Creativè/"))
 (setq mymy-org-roam-dir (concat main-dropbox-dir "Notes/"))
