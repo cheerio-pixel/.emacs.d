@@ -280,7 +280,7 @@
   (spaceline-toggle-python-pyvenv-on)
   (spaceline-toggle-process-on)
   (spaceline-toggle-nyan-cat-on)
-  (setq powerline-default-separator 'wave)
+  (gsetq powerline-default-separator 'wave)
   (spaceline-compile))
 ;;** PDF
 (use-package pdf-tools
