@@ -999,24 +999,24 @@
 
 (use-package helm-bibtex
   :config
-  (defvar helm-source-bibtex
+  (el-patch-defvar helm-source-bibtex
     (helm-build-sync-source "BibTeX entries"
       :header-name (lambda (name)
                      (format "%s%s: " name (if helm-bibtex-local-bib " (local)" "")))
       :candidates 'helm-bibtex-candidates
       :filtered-candidate-transformer 'helm-bibtex-candidates-formatter
       :action (helm-make-actions
-               ;; Moved "Edit notes" to the default action
-               "Edit notes" 'helm-bibtex-edit-notes
-               "Open PDF, URL or DOI" 'helm-bibtex-open-any
+               (el-patch-add "Edit notes"                 'helm-bibtex-edit-notes)
+               "Open PDF, URL or DOI"       'helm-bibtex-open-any
                "Open URL or DOI in browser" 'helm-bibtex-open-url-or-doi
-               "Insert citation" 'helm-bibtex-insert-citation
-               "Insert reference" 'helm-bibtex-insert-reference
-               "Insert BibTeX key" 'helm-bibtex-insert-key
-               "Insert BibTeX entry" 'helm-bibtex-insert-bibtex
-               "Attach PDF to email" 'helm-bibtex-add-PDF-attachment
-               "Show entry" 'helm-bibtex-show-entry
-               "Add PDF to library" 'helm-bibtex-add-pdf-to-library))
+               "Insert citation"            'helm-bibtex-insert-citation
+               "Insert reference"           'helm-bibtex-insert-reference
+               "Insert BibTeX key"          'helm-bibtex-insert-key
+               "Insert BibTeX entry"        'helm-bibtex-insert-bibtex
+               "Attach PDF to email"        'helm-bibtex-add-PDF-attachment
+               (el-patch-remove "Edit notes"                 'helm-bibtex-edit-notes)
+               "Show entry"                 'helm-bibtex-show-entry
+               "Add PDF to library"         'helm-bibtex-add-pdf-to-library))
     "Source for searching in BibTeX files."))
 (use-package bibtex
   :config
