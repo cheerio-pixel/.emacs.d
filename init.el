@@ -72,6 +72,11 @@
 (setq dropbox-dir "~/Dropbox (Maestral)/")
 (setq main-dropbox-dir (concat dropbox-dir "Creativè/"))
 (setq mymy-org-roam-dir (concat main-dropbox-dir "Notes/"))
+(defvar mymy-index-id "cd6174d3-3589-4286-8a1d-9f7254e22c33"
+  "The org ID of my index note in `mymy-org-roam-dir'")
+(with-eval-after-load 'org-roam
+  (defvar mymy-index-node (org-roam-node-from-id mymy-index-id)
+    "The org-roam node of my index note"))
 ;;* Load path
 (add-to-list 'load-path "~/.emacs.d/elisp/")
 ;;* Keys
