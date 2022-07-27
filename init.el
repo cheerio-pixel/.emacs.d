@@ -969,7 +969,7 @@
       (when (seq-contains-p tags "Ref")
         (org-roam-tag-add '("literature_node")))))
   (add-hook 'vulpea-insert-handle-functions
-            #'my-vulpea-insert-handle))
+             #'my-vulpea-insert-handle))
 
 (use-package helm-bibtex
   :config
