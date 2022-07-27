@@ -1332,7 +1332,6 @@ Optional argument ARGS is ignored."
                 (when (boundp 'native-comp-async-env-modifier-form)
                   native-comp-async-env-modifier-form)
                 `(defvar org-roam-v2-ack ,org-roam-v2-ack)))
-  (setq mymy-org-roam-visit-node-other-window t)
   :config
   (setq org-agenda-files (list (concat mymy-org-roam-dir "Projects/20210715113548-projects.org")))
   (require 'org-roam-patch)
