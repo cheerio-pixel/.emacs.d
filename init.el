@@ -959,37 +959,6 @@
     ("c" git-timemachine-show-commit)
     ("? " git-timemachine-help)
     ("." nil :color blue)))
-(use-package perspective
-  ;; TODO: Come back here later i have plans for this package an the like
-  :disabled
-  (defhydra hydra-persp (:hint nil)
-    "
-|_n_ Next _a_ Add buffer _r_ rename
-|==================================|[_q_] Quit
-|_u_ Prev _A_ Set buffer _k_ kill persp
-"
-    ("n" persp-next)
-    ("u" persp-prev)
-    ("a" persp-add-buffer)
-    ("A" persp-set-buffer)
-    ("k" persp-kill)
-    ("r" persp-rename)
-    ("q" nil :color blue))
-  :ryo
-  ("S"
-   (("p"
-     (("s" persp-switch)
-      ("k" persp-kill :name "Kill perspective")
-      ("r" persp-rename)
-      ("i" persp-import)
-      ("S" persp-state-save)
-      ("L" persp-state-load)
-      ("m" hydra-persp/body :name "hydra-persp")))))
-  :config
-  (setq persp-state-default-file (concat user-emacs-directory "persp"))
-  :hook
-  (after-init . persp-mode)
-  (kill-emacs . persp-state-save))
 (use-package vulpea :after org-roam
   :disabled
   :config
