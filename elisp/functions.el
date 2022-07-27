@@ -453,6 +453,7 @@ indentation levels."
 (defun switch-to-last-buffer ()
   (interactive)
   (switch-to-buffer nil))
+
 (defun create-scratch-buffer nil
   "create a scratch buffer"
   (interactive)
