@@ -1700,6 +1700,11 @@ By default, all subentries are counted; restrict with LEVEL."
   (defun mymy-say-back-link-count ()
     (interactive)
     (message (number-to-string (mymy-org-roam-get-backlinks))))
+  (defun mymy-org-roam-goto-index (&optional other-window force)
+    "Go to index file
+When interactive, FORCE is "
+    (interactive (list current-prefix-arg nil))
+    (org-roam-node-visit mymy-index-node other-window force))
   (defhydra hydra-zettel (:hint nil :color pink)
     "
 _n_: Next _k_: Get link
