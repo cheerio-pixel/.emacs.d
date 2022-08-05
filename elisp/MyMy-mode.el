@@ -228,7 +228,6 @@
        ("d" delete-window)
        ("a" delete-other-windows)
        ("t" make-frame)
-       ("p" delete-frame)
        )
       :name "Windows"
       )
