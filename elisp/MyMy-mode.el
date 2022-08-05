@@ -414,7 +414,7 @@
    ("a" org-beginning-of-line)
    ("e" org-end-of-line)
    ("O"
-    (("o" org-agenda-clock-out)
+    (("o" org-clock-out)
      ("i" org-clock-in)
      ("r" org-refile)
      ("e" org-agenda-clock-cancel)
