@@ -48,7 +48,8 @@
 (menu-bar-mode -1)   ; than needing to change
 (scroll-bar-mode -1) ; this on every OS
 (setq byte-compile-warnings '(not obsolete));; Cl warnings
-
+(setq custom-file "~/.emacs.d/custom-file.el")
+(load custom-file)
 ;;* Modes
 (global-hl-line-mode)
 (global-whitespace-mode)
@@ -2502,7 +2503,6 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (setq default-tab-width 4)
 (setq tab-width 4)
 (setq inhibit-compacting-font-caches t)
-(setq custom-file "~/.emacs.d/custom-file.el")
 (setq use-package-always-demand (daemonp))
 (setq mouse-yank-at-point t)
 (setq comp-async-report-warnings-errors nil)
