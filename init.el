@@ -50,6 +50,7 @@
 (setq byte-compile-warnings '(not obsolete));; Cl warnings
 (setq custom-file "~/.emacs.d/custom-file.el")
 (load custom-file)
+(setq save-abbrevs 'silently)
 ;;* Modes
 (global-hl-line-mode)
 (global-whitespace-mode)
@@ -80,6 +81,20 @@
     "The org-roam node of my index note"))
 ;;* Load path
 (add-to-list 'load-path "~/.emacs.d/elisp/")
+;;* Abbrevs
+
+(let ((mymy-abbrevs
+       '(("bc" "because")
+         ("wo" "without")
+         ("ex" "For example,")
+         ("zk" "Zettelkasten")
+         ("col" "collection")
+         ("perm" "permanent")
+         ("lit" "literature")
+         ("sd" "software development")
+         ("diff" "different")
+         )))
+  (mapc (lambda (x) (define-global-abbrev (car x) (cadr x))) mymy-abbrevs))
 ;;* Keys
 
 ;; Same as global-set-key
