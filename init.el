@@ -1590,7 +1590,11 @@ Like `org-id-open', but additionally uses the Org-roam database."
             (or
              (cdr
               (assq
-               (cdr (assq 'file org-link-frame-setup))
+               (cdr (assq 'file (el-patch-swap
+                                  org-link-frame-setup
+                                  (if (equal arg '(4))
+                                      org-link-frame-setup
+                                    '((file . find-file))))))
                '((find-file . switch-to-buffer)
                  (find-file-other-window . switch-to-buffer-other-window)
                  (find-file-other-frame . switch-to-buffer-other-frame))))
