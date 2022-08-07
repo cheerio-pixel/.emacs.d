@@ -1331,6 +1331,8 @@ Optional argument ARGS is ignored."
   ;; a way of storing (Obviously a list but let's keep this in doubt)
   ;; and a way of restoring this state
   ;; Maybe i can save the ewoc
+  ;; Maybe I can make undo work like a normal buffer
+  ;; I will come back later, way later
   )
 
 ;;** Org roam
