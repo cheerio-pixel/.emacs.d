@@ -701,6 +701,7 @@
 ;;** Org mode
 (use-package org
   :straight t
+  :straight org-contrib
   :ryo
   (:mode 'org-agenda-mode)
   ("okc" org-agenda-exit)
