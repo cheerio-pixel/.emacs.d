@@ -2386,16 +2386,30 @@ Author: %^{author}
   :bind (("C-'" . er/expand-region)))
 (use-package yequake
   :after org-roam
-  :custom
-  (yequake-frames
-   '(("org-roam-dailies-capture-today"
-      (buffer-fns . (yequake-org-roam-dailies-capture-today))
-      (width . 0.75)
-      (height . 0.5)
-      (alpha . 0.8)
-      (frame-parameters . ((undecorated . t)
-                           (sticky . t)
-                           (skip-taskbar . t)))))))
+  :config
+  ;; Will change this to an advice later
+  (el-patch-defun yequake-toggle (name)
+    "Toggle the Yequake frame named NAME."
+    (interactive (list (completing-read "Frame: " yequake-frames)))
+    ;; This is from equake
+    (el-patch-add
+      (if-let ((graphic-frame (-first #'display-graphic-p (frame-list))))
+          (select-frame graphic-frame t)))
+    (if-let* ((frame (alist-get name yequake-frames nil nil #'string=)))
+        (yequake--toggle-frame name frame)
+      (user-error "No Yequake frame named: %s" name)))
+  :config
+  (setq yequake-frames
+        '(("org-roam-dailies-capture-today"
+           (buffer-fns . (yequake-org-roam-dailies-capture-today))
+           (width . 0.75)
+           (height . 0.5)
+           (alpha . 0.8)
+           (frame-parameters . ((undecorated . t)
+                                (sticky . t)
+                                (skip-taskbar . t)
+                                ;; (window-system . x)
+                                ))))))
 
 (use-package dired
   :straight nil
