@@ -471,6 +471,7 @@
   ;; (haskell-mode . lsp)
   ;; (haskell-literate-mode . lsp)
   )
+(use-package lsp-java)
 ;;** Kotlin
 (use-package kotlin-mode
   :config
@@ -1120,26 +1121,28 @@ string."
   ;;         (lister-refresh-at ewoc :point)
   ;;         (lister-mode-cycle-sublist ewoc :point))
   ;;     (lister-refresh-at ewoc :point)))
-  (el-patch-defun delve--key--toggle-preview (zettel &optional prefix)
-    "Toggle the display of the preview of ZETTEL.
-  With PREFIX, open ZETTEL's file in a buffer."
-    (interactive (list (delve--current-item-or-error 'delve--zettel) current-prefix-arg))
-    (if prefix
-        (delve--key--open-zettel zettel)
-      (let ((preview (and (not (delve--zettel-preview zettel))
-                          (or (delve--get-preview-contents zettel)
-                              "No preview available"))))
-        (setf (delve--zettel-preview zettel) preview)
-        (el-patch-swap
-          (lister-refresh-at ewoc :point)
-          (let ((ewoc lister-local-ewoc))
-            (if (lister-with-sublist-below ewoc :point beg end
-                  (lister--outline-invisible-p ewoc beg))
-                (progn
-                  (lister-mode-cycle-sublist ewoc :point)
-                  (lister-refresh-at ewoc :point)
-                  (lister-mode-cycle-sublist ewoc :point))
-              (lister-refresh-at ewoc :point)))))))
+  ;; Got solve
+  ;; https://github.com/publicimageltd/lister/commit/f3e9748b3417184c36e301a381ec20ef4a88e511
+  ;; (el-patch-defun delve--key--toggle-preview (zettel &optional prefix)
+  ;;   "Toggle the display of the preview of ZETTEL.
+  ;; With PREFIX, open ZETTEL's file in a buffer."
+  ;;   (interactive (list (delve--current-item-or-error 'delve--zettel) current-prefix-arg))
+  ;;   (if prefix
+  ;;       (delve--key--open-zettel zettel)
+  ;;     (let ((preview (and (not (delve--zettel-preview zettel))
+  ;;                         (or (delve--get-preview-contents zettel)
+  ;;                             "No preview available"))))
+  ;;       (setf (delve--zettel-preview zettel) preview)
+  ;;       (el-patch-swap
+  ;;         (lister-refresh-at ewoc :point)
+  ;;         (let ((ewoc lister-local-ewoc))
+  ;;           (if (lister-with-sublist-below ewoc :point beg end
+  ;;                 (lister--outline-invisible-p ewoc beg))
+  ;;               (progn
+  ;;                 (lister-mode-cycle-sublist ewoc :point)
+  ;;                 (lister-refresh-at ewoc :point)
+  ;;                 (lister-mode-cycle-sublist ewoc :point))
+  ;;             (lister-refresh-at ewoc :point)))))))
 
   (el-patch-defun delve--key--collect-into-buffer (ewoc &optional move)
     "In Delve EWOC, copy all marked items into a (new) collection.
