@@ -803,8 +803,8 @@
      ("CLASS" . (:foreground "purple" :weight bold))
      ("NEXT" . (:foreground "blue" :weight bold))
      ("HABIT" . (:foreground "yellow" :weight italic))
-     ;; ("PROJECT" . (:foreground "white" :weight bold))
-     ;; ("COMPLETED" . (:foreground "cyan" :weight bold))
+     ;; As in alloted time
+     ("BOOK" . (:foreground "white" :weight bold))
      ))
   (org-todo-keywords
    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(s)")
