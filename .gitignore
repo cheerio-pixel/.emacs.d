@@ -45,3 +45,7 @@ workspace/
 /persist/
 /network-security.data
 /image-dired/
+/persp-confs/
+/abbrev_defs
+/dirvish/
+/equake-persistent-display
