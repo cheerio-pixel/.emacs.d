@@ -1540,21 +1540,24 @@ and when nil is returned the node will be filtered out."
     (org-hide-entry)
     (org-forward-heading-same-level (or arg 1))
     (org-show-entry))
-  (defun mymy-org-roam-get-link ()
-    "Insert node at point as a link in the kill ring"
-    (interactive)
+  (defun mymy-org-roam-get-link (&optional arg)
+    "Insert node at point as a link in the kill ring, with `C-u' copy
+the name of the node"
+    (interactive "P")
     (let* ((node (org-roam-node-at-point))
            (node-id (org-roam-node-id node))
            (node-name (org-roam-node-title node))
            (node-name (or node-name (org-entry-get nil "ITEM"))))
-      (kill-new (format "[[id:%s][%s]]" node-id node-name))))
+      (kill-new
+       (if (equal arg '(4))
+           node-name
+         (format "[[id:%s][%s]]" node-id node-name)))))
 
   (defun mymy-org-roam-insert-next-heading (&optional arg)
     (interactive)
     (save-excursion
       (org-forward-heading-same-level (or arg 1))
-      (mymy-org-roam-get-link)
-      )
+      (mymy-org-roam-get-link))
     (yank))
 
   (defun mymy-org-id-get-create-with-roam-exclude (&optional force)
