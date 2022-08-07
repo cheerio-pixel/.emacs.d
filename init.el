@@ -701,7 +701,6 @@
 ;;** Org mode
 (use-package org
   :straight t
-  ;; :straight helm-org
   :ryo
   (:mode 'org-agenda-mode)
   ("okc" org-agenda-exit)
