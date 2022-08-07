@@ -6,7 +6,10 @@
  '(org-modules
    '(ol-bbdb ol-bibtex ol-docview ol-doi ol-eww ol-gnus ol-info ol-irc ol-mhe ol-rmail ol-w3m org-checklist))
  '(safe-local-variable-values
-   '((eval add-to-list 'load-path
+   '((eval progn
+           (pp-buffer)
+           (indent-buffer))
+     (eval add-to-list 'load-path
            (file-name-directory
             (buffer-file-name)))
      (elisp-lint-indent-specs
