@@ -1572,14 +1572,11 @@ the name of the node"
       (unless m
         (error "Cannot find entry with ID \"%s\"" id))
       (if (not (equal (current-buffer) (marker-buffer m)))
-          (funcall 'switch-to-buffer (marker-buffer m))
-        )
+          (funcall 'switch-to-buffer (marker-buffer m)))
       (goto-char m)
       (move-marker m nil)
-      (org-show-context)
-      )
-    )
-  (el-patch-defun org-roam-id-open (id _)
+      (org-show-context)))
+  (el-patch-defun org-roam-id-open (id (el-patch-swap _ arg))
     "Go to the entry with id ID.
 Like `org-id-open', but additionally uses the Org-roam database."
     (org-mark-ring-push)
@@ -2167,9 +2164,7 @@ Author: %^{author}
                                       (mml-preview
                                        (frame 1.0
                                               (message 0.5)
-                                              (mml-preview 1.0 point)))))
-    )
-  )
+                                              (mml-preview 1.0 point)))))))
 (use-package avy
   :bind (("M-g g" . avy-goto-line)
          ("M-g M-g" . avy-goto-line))
