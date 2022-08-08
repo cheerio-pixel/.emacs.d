@@ -70,8 +70,15 @@
 (add-hook 'minibuffer-setup-hook #'my-minibuffer-setup-hook)
 (add-hook 'minibuffer-exit-hook #'my-minibuffer-exit-hook)
 ;;* My variables
+<<<<<<< HEAD
 ;; TODO: Set all of this in the defconst or defvar form
 (setq dropbox-dir "~/Dropbox (Maestral)/")
+=======
+(setq dropbox-dir
+      (pcase system-type
+        ('windows-nt "c:/Users/frail/Dropbox/")
+        ('gnu/linux (or "~/Dropbox (Maestral)/"))))
+>>>>>>> fe6ffbd (Bump)
 (setq main-dropbox-dir (concat dropbox-dir "Creativè/"))
 (setq mymy-org-roam-dir (concat main-dropbox-dir "Notes/"))
 (defvar mymy-index-id "cd6174d3-3589-4286-8a1d-9f7254e22c33"
@@ -2049,8 +2056,6 @@ Author: %^{author}
   :hook
   (after-init . projectile-mode))
 (use-package frames-only-mode
-  :hook
-  (after-init . frames-only-mode)
   :init
   (setq frames-only-mode-kill-frame-when-buffer-killed-buffer-list
         ;; Default
@@ -2061,7 +2066,10 @@ Author: %^{author}
           "*vterm*"
           ;; Poetry
           "*poetry*"))
-  ;; :config
+  :config
+  ;; This is a temporary solution
+  (unless (equal "DESKTOP-GTTJN7V" (system-name))
+    (add-hook 'after-init-hook #'frames-only-mode))
   ;; (advice-add 'org-roam-dailies-capture-today :around 'frames-only-mode-advice-use-windows)
   :config
   (with-eval-after-load 'gnus
