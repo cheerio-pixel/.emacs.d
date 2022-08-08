@@ -23,7 +23,6 @@
       (magit-section-case . 0)
       (org-roam-with-file . 2))
      (elisp-lint-ignored-validators "byte-compile" "package-lint"))))
- )
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
