@@ -70,15 +70,11 @@
 (add-hook 'minibuffer-setup-hook #'my-minibuffer-setup-hook)
 (add-hook 'minibuffer-exit-hook #'my-minibuffer-exit-hook)
 ;;* My variables
-<<<<<<< HEAD
 ;; TODO: Set all of this in the defconst or defvar form
-(setq dropbox-dir "~/Dropbox (Maestral)/")
-=======
 (setq dropbox-dir
       (pcase system-type
         ('windows-nt "c:/Users/frail/Dropbox/")
         ('gnu/linux (or "~/Dropbox (Maestral)/"))))
->>>>>>> fe6ffbd (Bump)
 (setq main-dropbox-dir (concat dropbox-dir "Creativè/"))
 (setq mymy-org-roam-dir (concat main-dropbox-dir "Notes/"))
 (defvar mymy-index-id "cd6174d3-3589-4286-8a1d-9f7254e22c33"
