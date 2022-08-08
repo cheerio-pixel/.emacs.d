@@ -2052,6 +2052,9 @@ Author: %^{author}
   :hook
   (after-init . projectile-mode))
 (use-package frames-only-mode
+  :unless (equal system-type windows-nt)
+  :hook
+  (after-init . frames-only-mode)
   :init
   (setq frames-only-mode-kill-frame-when-buffer-killed-buffer-list
         ;; Default
@@ -2062,10 +2065,7 @@ Author: %^{author}
           "*vterm*"
           ;; Poetry
           "*poetry*"))
-  :config
-  ;; This is a temporary solution
-  (unless (equal "DESKTOP-GTTJN7V" (system-name))
-    (add-hook 'after-init-hook #'frames-only-mode))
+  ;; :config
   ;; (advice-add 'org-roam-dailies-capture-today :around 'frames-only-mode-advice-use-windows)
   :config
   (with-eval-after-load 'gnus
