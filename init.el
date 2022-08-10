@@ -1696,7 +1696,7 @@ By default, all subentries are counted; restrict with LEVEL."
     (interactive)
     (save-excursion
       (goto-char (or pos (point)))
-      ;; If we are in the middle ot an entry, use the current heading.
+      ;; If we are in the middle of an entry, use the current heading.
       (org-back-to-heading t)
       (let* ((maxlevel (when (and level (org-current-level))
                          (+ level (org-current-level))))
