@@ -2521,7 +2521,6 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (setq default-buffer-file-coding-system 'utf-8)
-(setenv "JAVA_HOME" "/usr/lib/jvm/java-11-openjdk/")
 (setenv "PATH" (let ((current (getenv "PATH"))
                      (new (concat (getenv "HOME") "/.local/bin")))
                  (if current (concat new ":" current) new)))
