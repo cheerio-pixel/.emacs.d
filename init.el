@@ -184,13 +184,17 @@
 
 ;;* Set the font
 (custom-set-faces
- '(default
+ `(default
     ((t
       (:family "Fantasque Sans Mono"
                :foundry "outline"
                :slant normal
                :weight normal
-               :height 130
+               :height ,(cond
+                         ((<= (display-pixel-width) 1280)
+                          130)
+                         ((> (display-pixel-width) 1280)
+                          110))
                :width normal)))))
 ;;* Emacs theme
 (use-package dracula-theme
