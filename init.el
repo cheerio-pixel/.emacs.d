@@ -83,22 +83,12 @@
 (with-eval-after-load 'org-roam
   (defvar mymy-index-node (org-roam-node-from-id mymy-index-id)
     "The org-roam node of my index note"))
+(when (file-directory-p dropbox-dir)
+  (mkdir (concat dropbox-dir "emacs"))
+  (setq abbrev-file-name (concat dropbox-dir "emacs/abbrev_defs")))
 ;;* Load path
 (add-to-list 'load-path "~/.emacs.d/elisp/")
-;;* Abbrevs
 
-(let ((mymy-abbrevs
-       '(("bc" "because")
-         ("wo" "without")
-         ("ex" "For example,")
-         ("zk" "Zettelkasten")
-         ("col" "collection")
-         ("perm" "permanent")
-         ("lit" "literature")
-         ("sd" "software development")
-         ("diff" "different")
-         )))
-  (mapc (lambda (x) (define-global-abbrev (car x) (cadr x))) mymy-abbrevs))
 ;;* Keys
 
 ;; Same as global-set-key
