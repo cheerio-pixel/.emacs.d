@@ -1887,6 +1887,11 @@ Author: %^{author}
       :prepend t
       :target (file+olp ,(concat org-roam-directory "Projects/20210715113548-projects.org")
                         ("Projects" "Inbox")))
+     ("c" "Current pending list" entry "* NEXT %T %?\n"
+      :prepend t
+      :target (file+olp ,(concat org-roam-directory "Projects/20210715113548-projects.org")
+                        ("Projects" "Current pending list"))
+      )
      ("b" "Buffer" entry "* TODO Read [[%L][S]] %?\n"
       :prepend t
       :target (file+olp ,(concat org-roam-directory "20210715113548-projects.org")
