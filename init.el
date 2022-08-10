@@ -57,6 +57,7 @@
 (xterm-mouse-mode)
 (savehist-mode)
 (save-place-mode)
+(setq-default abbrev-mode t)
 ;;* Alias
 (defalias 'yes-or-no-p 'y-or-n-p)
 (defalias 'gsetq 'general-setq)
