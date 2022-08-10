@@ -74,7 +74,7 @@
 ;; TODO: Set all of this in the defconst or defvar form
 (setq dropbox-dir
       (pcase system-type
-        ('windows-nt "c:/Users/frail/Dropbox/")
+        ('windows-nt (concat "C:/Users/" (user-login-name) "/Dropbox/"))
         ('gnu/linux (or "~/Dropbox (Maestral)/"))))
 (setq main-dropbox-dir (concat dropbox-dir "Creativè/"))
 (setq mymy-org-roam-dir (concat main-dropbox-dir "Notes/"))
