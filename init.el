@@ -141,7 +141,9 @@
  "M-n" 'dabbrev-expand
  "C-c s u" 'straight-use-package
  "C-c s g" 'straight-get-recipe
- "C-;" 'iedit-mode)
+ "C-;" 'iedit-mode
+ "C-x a E" 'edit-abbrevs
+ )
 ;;** dired-mode-map
 (general-define-key
  :keymaps 'dired-mode-map
