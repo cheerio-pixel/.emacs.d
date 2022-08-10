@@ -866,6 +866,29 @@
               ("n" . org-agenda-next-line)
               ("u" . org-agenda-previous-line))
   :config
+  (defun mymy-get-count-of-tags ()
+    "Return a string with the counting of tags in the buffer"
+    (save-window-excursion
+      (org-id-goto "Project_stack")
+      (let ((count 0))
+        (--reduce (concat acc (if (< count mymy-org-agenda-tags-width)
+                                  (progn (setq count (1+ count))
+                                         " ")
+                                (progn (setq count 0)
+                                       "\n"))
+                          it )
+                  ;; Get a list of the local buffer
+                  (--> org-current-tag-alist
+                       (-map #'car it)
+                       (-remove #'keywordp it)
+                       (--map (org-count-subentries nil it nil 1) it)
+                       (--remove (< (cadr it) 0) it)
+                       (--map (format "%s" it) it)
+                       (--map (--> it
+                                   (s-chop-prefix "(" it)
+                                   (s-chop-suffix ")" it))
+                              it))))))
+  :config
   (ryo-modal-major-mode-keys
    'org-agenda-mode
    ("n" org-agenda-next-line)
@@ -873,10 +896,17 @@
    ("oks" org-agenda-write)
    ("rl" org-toggle-link-display)
    ("ro" org-agenda-open-link))
+  (setq mymy-org-agenda-tags-width 0)
   (setq org-agenda-custom-commands
         '(("n" "Agenda and all TODOs"
            ((agenda #1="")
-            (alltodo #1#)))))
+            ;; (agenda "" ((org-agenda-overriding-header (mymy-get-count-of-tags))
+            ;;             ;; No time grid
+            ;;             (org-agenda-time-grid nil)
+            ;;             ;; Delete the date
+            ;;             (org-agenda-format-date (lambda (x) (ignore x) ""))
+            ;;             ))
+            (alltodo #1#)))
           ("c" "Inbox/Capture"
            ((todo "" ((org-agenda-files (list (concat mymy-org-roam-dir "inbox/capture.org")))
                       (org-super-agenda-groups
