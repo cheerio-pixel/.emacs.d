@@ -871,6 +871,17 @@
         '(("n" "Agenda and all TODOs"
            ((agenda #1="")
             (alltodo #1#)))))
+          ("c" "Inbox/Capture"
+           ((todo "" ((org-agenda-files (list (concat mymy-org-roam-dir "inbox/capture.org")))
+                      (org-super-agenda-groups
+                       '((:name "Up to review"
+                                :todo "TODO")
+                         (:name "Up to processing"
+                                :todo "NEXT")
+                         (:name "Waiting for new notes"
+                                :todo "STRAY")
+                         (:name "To archive"
+                                :todo "DONE")))))))))
   ;; Previously called org-agenda-ndays
   (setq org-agenda-span 1)
   ;; (setq org-agenda-start-day "-1d")
