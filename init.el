@@ -2060,7 +2060,8 @@ Author: %^{author}
   :hook
   (after-init . projectile-mode))
 (use-package frames-only-mode
-  :unless (equal system-type windows-nt)
+  ;; Set this to non-nil value if you want to have frame functionality
+  :if (intern (getenv "EMACS_FRAMES"))
   :hook
   (after-init . frames-only-mode)
   :init
