@@ -88,8 +88,6 @@
 (with-eval-after-load 'org-roam
   (defvar mymy-index-node (org-roam-node-from-id mymy-index-id)
     "The org-roam node of my index note"))
-;;* Load path
-(add-to-list 'load-path "~/.emacs.d/elisp/")
 ;;* Abbrevs
 
 (let ((mymy-abbrevs
