@@ -83,8 +83,8 @@
 (with-eval-after-load 'org-roam
   (defvar mymy-index-node (org-roam-node-from-id mymy-index-id)
     "The org-roam node of my index note"))
-(when (not (file-directory-p dropbox-dir))
-  (mkdir (concat dropbox-dir "emacs"))
+(when (file-directory-p dropbox-dir)
+  (ignore-errors (mkdir (concat dropbox-dir "emacs")))
   (setq abbrev-file-name (concat dropbox-dir "emacs/abbrev_defs")))
 ;;* Load path
 (add-to-list 'load-path "~/.emacs.d/elisp/")
