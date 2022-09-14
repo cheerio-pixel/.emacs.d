@@ -434,10 +434,10 @@
   :config (require 'flycheck-clj-kondo))
 ;;** lsp
 (use-package lsp-mode
+  :defer 5
   :init
   (setq lsp-keymap-prefix "C-c l")
-  (setenv "LSP_USE_PLISTS" "true")
-  (setq lsp-use-plists t)
+  ;; (setq lsp-use-plists t)
   :config
   ;; For debugging
   ;; (setq lsp-log-io t)
