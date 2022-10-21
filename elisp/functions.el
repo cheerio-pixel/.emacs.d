@@ -174,12 +174,6 @@ indentation levels."
       (insert region))
     (goto-char (+ (point) col))))
 
-(defun my-save-word ()
-  (interactive)
-  (let ((current-location (point))
-        (word (flyspell-get-word)))
-    (when (consp word)
-      (flyspell-do-correct 'save nil (car word) current-location (cadr word) (caddr word) current-location))))
 (defun enable-jedi()
   (setq-local company-backends
               (append '(company-jedi company-anaconda) company-backends)))
@@ -189,16 +183,6 @@ indentation levels."
                (find-file file)
                (org-find-exact-headline-in-buffer headline))))
     (org-refile nil nil (list headline file nil pos))))
-
-(defun +org-toggle-inline-image-at-point ()
-  "Toggle inline image at point."
-  (interactive)
-  (if-let* ((bounds (and (not org-inline-image-overlays)
-                         (org-in-regexp org-link-any-re nil t)))
-            (beg (car bounds))
-            (end (cdr bounds)))
-      (org-display-inline-images nil nil beg end)
-    (org-toggle-inline-images)))
 
 (defun yequake-org-roam-dailies-capture-today (&optional goto)
   "Call `org-roam-dailies-capture-today' in a Yequake frame.
@@ -231,45 +215,6 @@ indentation levels."
          ;; Capture aborted: remove the hook and hide the capture frame.
          (remove-hook 'org-capture-after-finalize-hook #'yequake-retoggle)
          (yequake-retoggle))))))
-
-(defvar killed-file-list nil
-  "List of recently killed files.")
-
-(defun add-file-to-killed-file-list ()
-  "If buffer is associated with a file name, add that file to the
-  `killed-file-list' when killing the buffer."
-  (when buffer-file-name
-    (push buffer-file-name killed-file-list)))
-
-(add-hook 'kill-buffer-hook #'add-file-to-killed-file-list)
-
-(defun reopen-killed-file ()
-  "Reopen the most recently killed file, if one exists."
-  (interactive)
-  (if killed-file-list
-      (find-file (pop killed-file-list))
-    (error "No recently-killed files to reopen")))
-(defun reopen-killed-file-fancy ()
-  "Pick a file to revisit from a list of files killed during this
-  Emacs session."
-  (interactive)
-  (if killed-file-list
-      (let ((file (completing-read "Reopen killed file: " killed-file-list
-                                   nil nil nil nil (car killed-file-list))))
-        (when file
-          (setq killed-file-list (cl-delete file killed-file-list :test #'equal))
-          (find-file file)))
-    (error "No recently-killed files to reopen")))
-
-(defun org-goto-tasks()
-  (interactive)
-  (org-id-goto "2271da12-1a80-4627-be66-9678d3926a36")
-  )
-(defun org-goto-school-schedule ()
-  (interactive)
-  (org-id-goto "d3b993f2-6132-422c-8b30-ce2ef1867235")
-  )
-
 
 (defun strip-<p>-html (paragraph contents info)
   (thread-last (org-html-paragraph paragraph contents info)
@@ -311,39 +256,7 @@ indentation levels."
       backend
     (append (if (consp backend) backend (list backend))
             '(:with company-yasnippet))))
-(defun paste-primary-selection ()
-  (interactive)
-  (insert (gui-get-primary-selection)))
 
-(defun yank-at-point ()
-  (interactive)
-  (yank)
-  (pop-global-mark)
-  )
-(defun mymy/insert-pair$ ()
-  (interactive)
-  (save-excursion
-    (insert "$")
-    (exchange-point-and-mark)
-    (insert "$")
-    )
-  )
-(defun mymy/insert-pair~ ()
-  (interactive)
-  (save-excursion
-    (insert "~")
-    (exchange-point-and-mark)
-    (insert "~")
-    )
-  )
-(defun mymy/insert-pair= ()
-  (interactive)
-  (save-excursion
-    (insert "=")
-    (exchange-point-and-mark)
-    (insert "=")
-    )
-  )
 
 (defun avy-delete-region (arg)
   "Select two lines and delete the region between them.
@@ -413,62 +326,17 @@ indentation levels."
                           ))))
     (select-window initial-window)))
 
-(defun replace-next-line ()
-  "Replace the next line with kill ring."
-  (interactive)
-  (save-excursion
-    (forward-line)
-    (beginning-of-line)
-    (delete-line 1)
-    (yank)
-    )
-  )
-(defun replace-current-line()
-  "Replace current line with kill ring"
-  (interactive)
-  (beginning-of-line)
-  (delete-line 1)
-  (yank)
-  )
-(defun insert-quotes (&optional arg)
-  "Enclose following ARG sexps in string.
-  Leave point after open-paren.
-  A negative ARG encloses the preceding ARG sexps instead.
-  No argument is equivalent to zero: just insert `\"\"' and leave point between.
-  If `string-require-spaces' is non-nil, this command also inserts a space
-  before and after, depending on the surrounding characters.
-  If region is active, insert enclosing characters at region boundaries.
-
-  This command assumes point is not in a string or comment."
-  (interactive "P")
-  (insert-pair arg ?\" ?\"))
 
 ;;(advice-add 'toggle-input-method :after 'ryo-modal-global-mode)
 ;;;(advice-add 'toggle-input-method :after 'ryo-modal-global-mode)
 
-
-(defun switch-to-last-buffer ()
-  (interactive)
-  (switch-to-buffer nil))
-
-(defun create-scratch-buffer nil
-  "create a scratch buffer"
-  (interactive)
-  (switch-to-buffer (get-buffer-create "*scratch*"))
-  (lisp-interaction-mode)
-  )
-
 ;;;;;                   AVY
-(defun avy-goto-word-crt-line ()
-  "Jump to a word start on the current line only."
-  (interactive)
-  (avy-with avy-goto-word-0
-    (avy-goto-word-0 nil (line-beginning-position) (line-end-position))))
 
 (defun avy-goto-parens ()
   (interactive)
   (let ((avy-command this-command))   ; for look up in avy-orders-alist
     (avy-jump "(+")))
+
 (defun avy-org-same-level (&optional all)
   "Go to any org heading of the same level as the current one.
 
@@ -554,81 +422,12 @@ indentation levels."
    nil
    'pre))
 
-(defun smarter-move-beginning-of-line (arg)
-  "Move point back to indentation of beginning of line.
-  Move point to the first non-whitespace character on this line.
-  If point is already there, move to the beginning of the line.
-  Effectively toggle between the first non-whitespace character and
-  the beginning of the line.
-  If ARG is not nil or 1, move forward ARG - 1 lines first.  If
-  point reaches the beginning or end of the buffer, stop there."
-  (interactive "^p")
-  (setq arg (or arg 1))
-  ;; Move lines first
-  (when (/= arg 1)
-    (let ((line-move-visual nil))
-      (forward-line (1- arg))))
-  (let ((orig-point (point)))
-    (back-to-indentation)
-    (when (= orig-point (point))
-      (move-beginning-of-line 1))))
-;; remap C-a to `smarter-move-beginning-of-line'
-(global-set-key [remap move-beginning-of-line]
-                'smarter-move-beginning-of-line)
-
-(defun smart-open-line ()
-  "Insert an empty line after the current line.
-  Position the cursor at its beginning, according to the current mode."
-  (interactive)
-  (move-end-of-line nil)
-  (newline-and-indent))
-
-
 (defun my-buffer-predicate (buffer)
   (if (string-match "helm" (buffer-name buffer))
       nil
     t))
 (set-frame-parameter nil 'buffer-predicate 'my-buffer-predicate)
 
-(defun duplicate-current-line (arg)
-  "Duplicate current line, leaving point in lower line."
-  (interactive "*p")
-
-  ;; save the point for undo
-  (setq buffer-undo-list (cons (point) buffer-undo-list))
-
-  ;; local variables for start and end of line
-  (let ((bol (save-excursion (beginning-of-line) (point)))
-        eol)
-    (save-excursion
-
-      ;; don't use forward-line for this, because you would have
-      ;; to check whether you are at the end of the buffer
-      (end-of-line)
-      (setq eol (point))
-
-      ;; store the line and disable the recording of undo information
-      (let ((line (buffer-substring bol eol))
-            (buffer-undo-list t)
-            (count arg))
-        ;; insert the line arg times
-        (while (> count 0)
-          (newline)         ;; because there is no newline in 'line'
-          (insert line)
-          (setq count (1- count)))
-        )
-
-      ;; create the undo information
-      (setq buffer-undo-list (cons (cons eol (point)) buffer-undo-list)))
-    )) ; end-of-let
-;; put the point in the lowest line and return
-;; (next-line arg)
-
-(defun avy-goto-word-forward-crt-line ()
-  (interactive)
-  (avy-goto-word-crt-line)
-  (forward-word)
-  )
 
 ;;;;;CURSOR
 (defvar hcz-set-cursor-color-color "")
@@ -648,57 +447,6 @@ indentation levels."
       (setq hcz-set-cursor-color-buffer (buffer-name)))))
 
 ;;;;;DELETE FUNCTIONS
-(defun backward-delete-word (arg)
-  "Delete characters backward until encountering the beginning of a word.
-  With argument ARG, do this that many times."
-  (interactive "p")
-  (delete-region (point) (progn (backward-word arg) (point))))
-(defun delete-word (arg)
-  "Delete characters forwards until encountering the beginning of a word.
-  With argument ARG, do this that many times."
-  (interactive "p")
-  (delete-region (point) (progn (forward-word arg) (point))))
-
-(defun backward-delete-line (arg)
-  "Delete (not kill) the current line, backwards from cursor.
-  With argument ARG, do this that many times."
-  (interactive "p")
-  (delete-region (point) (progn (beginning-of-visual-line arg) (point))))
-
-(defun delete-line (arg)
-  "Delete (not kill) the current line, forwards from cursor.
-  With argument ARG, do this that many times."
-  (interactive "p")
-  (delete-region (point) (progn (end-of-visual-line arg) (point))))
-(defun my-delete-whole-line (&optional arg)
-  "Delete current line.
-  With prefix ARG, delete that many lines starting from the current line.
-  If ARG is negative, delete backward.  Also delete the preceding newline.
-  \(This is meant to make \\[repeat] work well with negative arguments.)
-  If ARG is zero, delete current line but exclude the trailing newline."
-  (interactive "p")
-  (or arg (setq arg 1))
-  (if (and (> arg 0) (eobp) (save-excursion (forward-visible-line 0) (eobp)))
-      (signal 'end-of-buffer nil))
-  (if (and (< arg 0) (bobp) (save-excursion (end-of-visible-line) (bobp)))
-      (signal 'beginning-of-buffer nil))
-  (cond ((zerop arg)
-         ;; I just need to understand elisp to discard what it's not needed
-         (save-excursion
-           (delete-region (point) (progn (forward-visible-line 0) (point))))
-         (delete-region (point) (progn (end-of-visible-line) (point))))
-        ((< arg 0)
-         (save-excursion
-           (delete-region (point) (progn (end-of-visible-line) (point))))
-         (delete-region (point)
-                        (progn (forward-visible-line (1+ arg))
-                               (unless (bobp) (backward-char))
-                               (point))))
-        (t
-         (save-excursion
-           (delete-region (point) (progn (forward-visible-line 0) (point))))
-         (delete-region (point)
-                        (progn (forward-visible-line arg) (point))))))
 
 (defvar movement-syntax-table
   (let ((st (make-syntax-table)))
@@ -709,10 +457,10 @@ indentation levels."
     (modify-syntax-entry ?{ "." st)  ;; { = punctuation
     (modify-syntax-entry ?} "." st)  ;; } = punctuation
     (modify-syntax-entry ?\" "." st) ;; " = punctuation
-  (modify-syntax-entry ?\\ "_" st) ;; \ = symbol
-  (modify-syntax-entry ?\$ "_" st) ;; $ = symbol
-  (modify-syntax-entry ?\% "_" st) ;; % = symbol
-  st)
+    (modify-syntax-entry ?\\ "_" st) ;; \ = symbol
+    (modify-syntax-entry ?\$ "_" st) ;; $ = symbol
+    (modify-syntax-entry ?\% "_" st) ;; % = symbol
+    st)
   "Syntax table used while executing custom movement functions.")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -98,6 +98,195 @@
          ("diff" "different")
          )))
   (mapc (lambda (x) (define-global-abbrev (car x) (cadr x))) mymy-abbrevs))
+;;* Functions
+(defvar killed-file-list nil
+  "List of recently killed files.")
+
+(defun add-file-to-killed-file-list ()
+  "If buffer is associated with a file name, add that file to the
+  `killed-file-list' when killing the buffer."
+  (when buffer-file-name
+    (push buffer-file-name killed-file-list)))
+
+(add-hook 'kill-buffer-hook #'add-file-to-killed-file-list)
+
+(defun reopen-killed-file ()
+  "Reopen the most recently killed file, if one exists."
+  (interactive)
+  (if killed-file-list
+      (find-file (pop killed-file-list))
+    (error "No recently-killed files to reopen")))
+
+(defun reopen-killed-file-fancy ()
+  "Pick a file to revisit from a list of files killed during this
+  Emacs session."
+  (interactive)
+  (if killed-file-list
+      (let ((file (completing-read "Reopen killed file: " killed-file-list
+                                   nil nil nil nil (car killed-file-list))))
+        (when file
+          (setq killed-file-list (cl-delete file killed-file-list :test #'equal))
+          (find-file file)))
+    (error "No recently-killed files to reopen")))
+
+(defun my-save-word ()
+  (interactive)
+  (let ((current-location (point))
+        (word (flyspell-get-word)))
+    (when (consp word)
+      (flyspell-do-correct 'save nil (car word) current-location (cadr word) (caddr word) current-location))))
+
+(defun smarter-move-beginning-of-line (arg)
+  "Move point back to indentation of beginning of line.
+  Move point to the first non-whitespace character on this line.
+  If point is already there, move to the beginning of the line.
+  Effectively toggle between the first non-whitespace character and
+  the beginning of the line.
+  If ARG is not nil or 1, move forward ARG - 1 lines first.  If
+  point reaches the beginning or end of the buffer, stop there."
+  (interactive "^p")
+  (setq arg (or arg 1))
+  ;; Move lines first
+  (when (/= arg 1)
+    (let ((line-move-visual nil))
+      (forward-line (1- arg))))
+  (let ((orig-point (point)))
+    (back-to-indentation)
+    (when (= orig-point (point))
+      (move-beginning-of-line 1))))
+;; remap C-a to `smarter-move-beginning-of-line'
+(global-set-key [remap move-beginning-of-line]
+                'smarter-move-beginning-of-line)
+
+;;** Delete functions
+(defun backward-delete-word (arg)
+  "Delete characters backward until encountering the beginning of a word.
+  With argument ARG, do this that many times."
+  (interactive "p")
+  (delete-region (point) (progn (backward-word arg) (point))))
+(defun delete-word (arg)
+  "Delete characters forwards until encountering the beginning of a word.
+  With argument ARG, do this that many times."
+  (interactive "p")
+  (delete-region (point) (progn (forward-word arg) (point))))
+
+(defun backward-delete-line (arg)
+  "Delete (not kill) the current line, backwards from cursor.
+  With argument ARG, do this that many times."
+  (interactive "p")
+  (delete-region (point) (progn (beginning-of-visual-line arg) (point))))
+
+(defun delete-line (arg)
+  "Delete (not kill) the current line, forwards from cursor.
+  With argument ARG, do this that many times."
+  (interactive "p")
+  (delete-region (point) (progn (end-of-visual-line arg) (point))))
+
+(defun my-delete-whole-line (&optional arg)
+  "Delete current line.
+  With prefix ARG, delete that many lines starting from the current line.
+  If ARG is negative, delete backward.  Also delete the preceding newline.
+  \(This is meant to make \\[repeat] work well with negative arguments.)
+  If ARG is zero, delete current line but exclude the trailing newline."
+  (interactive "p")
+  (or arg (setq arg 1))
+  (if (and (> arg 0) (eobp) (save-excursion (forward-visible-line 0) (eobp)))
+      (signal 'end-of-buffer nil))
+  (if (and (< arg 0) (bobp) (save-excursion (end-of-visible-line) (bobp)))
+      (signal 'beginning-of-buffer nil))
+  (cond ((zerop arg)
+         ;; I just need to understand elisp to discard what it's not needed
+         (save-excursion
+           (delete-region (point) (progn (forward-visible-line 0) (point))))
+         (delete-region (point) (progn (end-of-visible-line) (point))))
+        ((< arg 0)
+         (save-excursion
+           (delete-region (point) (progn (end-of-visible-line) (point))))
+         (delete-region (point)
+                        (progn (forward-visible-line (1+ arg))
+                               (unless (bobp) (backward-char))
+                               (point))))
+        (t
+         (save-excursion
+           (delete-region (point) (progn (forward-visible-line 0) (point))))
+         (delete-region (point)
+                        (progn (forward-visible-line arg) (point))))))
+
+(defun duplicate-current-line (arg)
+  "Duplicate current line, leaving point in lower line."
+  (interactive "*p")
+
+  ;; save the point for undo
+  (setq buffer-undo-list (cons (point) buffer-undo-list))
+
+  ;; local variables for start and end of line
+  (let ((bol (save-excursion (beginning-of-line) (point)))
+        eol)
+    (save-excursion
+
+      ;; don't use forward-line for this, because you would have
+      ;; to check whether you are at the end of the buffer
+      (end-of-line)
+      (setq eol (point))
+
+      ;; store the line and disable the recording of undo information
+      (let ((line (buffer-substring bol eol))
+            (buffer-undo-list t)
+            (count arg))
+        ;; insert the line arg times
+        (while (> count 0)
+          (newline) ;; because there is no newline in 'line'
+          (insert line)
+          (setq count (1- count))))
+
+      ;; create the undo information
+      (setq buffer-undo-list (cons (cons eol (point)) buffer-undo-list))))) ; end-of-let
+;; put the point in the lowest line and return
+;; (next-line arg)
+
+(defun replace-next-line ()
+  "Replace the next line with kill ring."
+  (interactive)
+  (save-excursion
+    (forward-line)
+    (beginning-of-line)
+    (delete-line 1)
+    (yank)))
+
+(defun replace-current-line ()
+  "Replace current line with kill ring"
+  (interactive)
+  (beginning-of-line)
+  (delete-line 1)
+  (yank))
+
+(defun paste-primary-selection ()
+  (interactive)
+  (insert (gui-get-primary-selection)))
+
+(defun yank-at-point ()
+  "Yank but do not move the point"
+  (interactive)
+  (yank)
+  (pop-global-mark))
+
+(defun smart-open-line ()
+  "Insert an empty line after the current line.
+  Position the cursor at its beginning, according to the current mode."
+  (interactive)
+  (move-end-of-line nil)
+  (newline-and-indent))
+
+(defun switch-to-last-buffer ()
+  (interactive)
+  (switch-to-buffer nil))
+
+(defun create-scratch-buffer nil
+  "create a scratch buffer"
+  (interactive)
+  (switch-to-buffer (get-buffer-create "*scratch*"))
+  (lisp-interaction-mode))
+
 ;;* Keys
 
 ;; Same as global-set-key
