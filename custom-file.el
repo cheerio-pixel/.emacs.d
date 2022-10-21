@@ -3,10 +3,24 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("9584533e7ca091a59f88e7f2acc2f8ce9124753d7b82aad6d4526ccf77787975" default))
+ '(org-agenda-files
+   '("~/Dropbox (Maestral)/Creativè/Notes/2022-01-09-12-38-23-zettelkasten.org" "/home/cheerio-pixel/Dropbox (Maestral)/Creativè/Notes/Projects/20210715113548-projects.org"))
  '(org-modules
    '(ol-bbdb ol-bibtex ol-docview ol-doi ol-eww ol-gnus ol-info ol-irc ol-mhe ol-rmail ol-w3m org-checklist))
  '(safe-local-variable-values
-   '((eval progn
+   '((haskell-compiler-type quote stack)
+     (haskell-process-type quote stack)
+     (lsp-haskell-server-path . "stack exec -- haskell-language-server-wrapper --lsp -d -l /tmp/hls.log")
+     (projectile-project-run-cmd . "mvn compile && java -cp target/classes com.cheerio_pixel.temperature_converter.App")
+     (eval when
+           (featurep 'flycheck)
+           (flycheck-mode -1))
+     (org-roam-db-autosync-mode)
+     (elisp-lint-indent-specs
+      (when-let . 1))
+     (eval progn
            (pp-buffer)
            (indent-buffer))
      (eval add-to-list 'load-path
@@ -22,11 +36,11 @@
       (magit-insert-section . defun)
       (magit-section-case . 0)
       (org-roam-with-file . 2))
-     (elisp-lint-ignored-validators "byte-compile" "package-lint"))))
- )
+     (elisp-lint-ignored-validators "byte-compile" "package-lint")))
+ '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 130 :width normal)))))
+ '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 120 :width normal)))))
