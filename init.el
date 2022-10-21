@@ -22,6 +22,10 @@
 (eval-when-compile (require 'use-package))
 ;;* Require
 (require 'cl-lib)
+
+;;* Load path
+(add-to-list 'load-path "~/.emacs.d/elisp/")
+
 ;;* Important packages
 ;; This packages need to be loaded before all the others
 (use-package ryo-modal
