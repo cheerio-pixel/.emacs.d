@@ -43,6 +43,8 @@
 
 (use-package el-patch)
 
+(use-package dash :config (global-dash-fontify-mode))
+
 ;;* Configs
 (set-frame-parameter nil 'fullscreen 'fullboth) ; Fullscreen
 (setq redisplay-dont-pause t)
