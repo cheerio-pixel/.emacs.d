@@ -1,4 +1,16 @@
 ;; -*- lexical-binding: t; -*-
+;;* Early
+;; https://github.com/bkaestner/.emacs.d/blob/37c75bfe3a199594ad89504d870e68f6f424764f/early-init.el
+(setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
+      gc-cons-percentage 0.6)
+;; After Emacs has completely started, reset the values to more sensible ones.
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold 100000000
+                  gc-cons-percentage 0.1)))
+
+(setq straight-check-for-modifications '(check-on-save find-when-checking))
+
 ;;* Straight bootstrap
 (defvar bootstrap-version)
 (let ((bootstrap-file
@@ -22,22 +34,18 @@
 (eval-when-compile (require 'use-package))
 ;;* Require
 (require 'cl-lib)
+
+;;* Load path
+(add-to-list 'load-path "~/.emacs.d/elisp/")
+
 ;;* Important packages
 ;; This packages need to be loaded before all the others
-(use-package ryo-modal
-  ;; TODO: Make ryo-modal-key create a function when passed a lambda
-  ;; The name of the function will be from the keyword :lambda-name
-  ;; So ryo-modal-key will check if TARGET is a lambda and then theck
-  ;; if lambda-name exists, if not then complain
-  :config
-  (define-globalized-minor-mode ryo-modal-global-mode ryo-modal-mode
-    (lambda ()
-      (if (not (minibufferp (current-buffer)))
-          (ryo-modal-mode t)))))
 
 (use-package general)
 
 (use-package el-patch)
+
+(use-package dash :config (global-dash-fontify-mode))
 
 ;;* Configs
 (set-frame-parameter nil 'fullscreen 'fullboth) ; Fullscreen
@@ -51,6 +59,13 @@
 (setq custom-file "~/.emacs.d/custom-file.el")
 (load custom-file)
 (setq save-abbrevs 'silently)
+(setq-default abbrev-mode t)
+(setq native-comp-async-report-warnings-errors 'silent)
+(setq create-lockfiles nil)
+(setq ring-bell-function 'ignore)
+(setq abbrev-suggest t)
+(setq source-directory "~/.local/src/emacs/src/")
+
 ;;* Modes
 (global-hl-line-mode)
 (global-whitespace-mode)
@@ -74,8 +89,8 @@
 ;; TODO: Set all of this in the defconst or defvar form
 (setq dropbox-dir
       (pcase system-type
-        ('windows-nt (concat "C:/Users/" (user-login-name) "/Dropbox/"))
-        ('gnu/linux (or "~/Dropbox (Maestral)/"))))
+        ('windows-nt "c:/Users/frail/Dropbox/")
+        ('gnu/linux "~/Dropbox (Maestral)/")))
 (setq main-dropbox-dir (concat dropbox-dir "Creativè/"))
 (setq mymy-org-roam-dir (concat main-dropbox-dir "Notes/"))
 (defvar mymy-index-id "cd6174d3-3589-4286-8a1d-9f7254e22c33"
@@ -83,11 +98,393 @@
 (with-eval-after-load 'org-roam
   (defvar mymy-index-node (org-roam-node-from-id mymy-index-id)
     "The org-roam node of my index note"))
-(when (file-directory-p dropbox-dir)
-  (ignore-errors (mkdir (concat dropbox-dir "emacs")))
-  (setq abbrev-file-name (concat dropbox-dir "emacs/abbrev_defs")))
-;;* Load path
-(add-to-list 'load-path "~/.emacs.d/elisp/")
+
+;;* Variables
+
+(put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
+(put 'narrow-to-region 'disabled nil)
+(put 'dired-find-alternate-file 'disabled nil)
+
+;;* Abbrevs
+(setq abbrev-file-name (concat dropbox-dir "emacs/abbrev_defs"))
+
+(let ((mymy-abbrevs
+       '(("bc" "because")
+         ("wo" "without")
+         ("ex" "For example,")
+         ("zk" "Zettelkasten")
+         ("col" "collection")
+         ("perm" "permanent")
+         ("lit" "literature")
+         ("sd" "software development")
+         ("diff" "different")
+         ("pv" "previous")
+         ("bf" "before")
+         ("hw" "however")
+         )))
+  (mapc (lambda (x) (define-global-abbrev (car x) (cadr x))) mymy-abbrevs))
+;;* Functions
+(defvar killed-file-list nil
+  "List of recently killed files.")
+
+(defun add-file-to-killed-file-list ()
+  "If buffer is associated with a file name, add that file to the
+  `killed-file-list' when killing the buffer."
+  (when buffer-file-name
+    (push buffer-file-name killed-file-list)))
+
+(add-hook 'kill-buffer-hook #'add-file-to-killed-file-list)
+
+(defun reopen-killed-file ()
+  "Reopen the most recently killed file, if one exists."
+  (interactive)
+  (if killed-file-list
+      (find-file (pop killed-file-list))
+    (error "No recently-killed files to reopen")))
+
+(defun reopen-killed-file-fancy ()
+  "Pick a file to revisit from a list of files killed during this
+  Emacs session."
+  (interactive)
+  (if killed-file-list
+      (let ((file (completing-read "Reopen killed file: " killed-file-list
+                                   nil nil nil nil (car killed-file-list))))
+        (when file
+          (setq killed-file-list (cl-delete file killed-file-list :test #'equal))
+          (find-file file)))
+    (error "No recently-killed files to reopen")))
+
+(defun my-save-word ()
+  (interactive)
+  (let ((current-location (point))
+        (word (flyspell-get-word)))
+    (when (consp word)
+      (flyspell-do-correct 'save nil (car word) current-location (cadr word) (caddr word) current-location))))
+
+(defun smarter-move-beginning-of-line (arg)
+  "Move point back to indentation of beginning of line.
+  Move point to the first non-whitespace character on this line.
+  If point is already there, move to the beginning of the line.
+  Effectively toggle between the first non-whitespace character and
+  the beginning of the line.
+  If ARG is not nil or 1, move forward ARG - 1 lines first.  If
+  point reaches the beginning or end of the buffer, stop there."
+  (interactive "^p")
+  (setq arg (or arg 1))
+  ;; Move lines first
+  (when (/= arg 1)
+    (let ((line-move-visual nil))
+      (forward-line (1- arg))))
+  (let ((orig-point (point)))
+    (back-to-indentation)
+    (when (= orig-point (point))
+      (move-beginning-of-line 1))))
+;; remap C-a to `smarter-move-beginning-of-line'
+(global-set-key [remap move-beginning-of-line]
+                'smarter-move-beginning-of-line)
+
+;;** Delete functions
+(defun backward-delete-word (arg)
+  "Delete characters backward until encountering the beginning of a word.
+  With argument ARG, do this that many times."
+  (interactive "p")
+  (delete-region (point) (progn (backward-word arg) (point))))
+(defun delete-word (arg)
+  "Delete characters forwards until encountering the beginning of a word.
+  With argument ARG, do this that many times."
+  (interactive "p")
+  (delete-region (point) (progn (forward-word arg) (point))))
+
+(defun backward-delete-line (arg)
+  "Delete (not kill) the current line, backwards from cursor.
+  With argument ARG, do this that many times."
+  (interactive "p")
+  (delete-region (point) (progn (beginning-of-visual-line arg) (point))))
+
+(defun delete-line (arg)
+  "Delete (not kill) the current line, forwards from cursor.
+  With argument ARG, do this that many times."
+  (interactive "p")
+  (delete-region (point) (progn (end-of-visual-line arg) (point))))
+
+(defun my-delete-whole-line (&optional arg)
+  "Delete current line.
+  With prefix ARG, delete that many lines starting from the current line.
+  If ARG is negative, delete backward.  Also delete the preceding newline.
+  \(This is meant to make \\[repeat] work well with negative arguments.)
+  If ARG is zero, delete current line but exclude the trailing newline."
+  (interactive "p")
+  (or arg (setq arg 1))
+  (if (and (> arg 0) (eobp) (save-excursion (forward-visible-line 0) (eobp)))
+      (signal 'end-of-buffer nil))
+  (if (and (< arg 0) (bobp) (save-excursion (end-of-visible-line) (bobp)))
+      (signal 'beginning-of-buffer nil))
+  (cond ((zerop arg)
+         ;; I just need to understand elisp to discard what it's not needed
+         (save-excursion
+           (delete-region (point) (progn (forward-visible-line 0) (point))))
+         (delete-region (point) (progn (end-of-visible-line) (point))))
+        ((< arg 0)
+         (save-excursion
+           (delete-region (point) (progn (end-of-visible-line) (point))))
+         (delete-region (point)
+                        (progn (forward-visible-line (1+ arg))
+                               (unless (bobp) (backward-char))
+                               (point))))
+        (t
+         (save-excursion
+           (delete-region (point) (progn (forward-visible-line 0) (point))))
+         (delete-region (point)
+                        (progn (forward-visible-line arg) (point))))))
+
+(defun duplicate-current-line (arg)
+  "Duplicate current line, leaving point in lower line."
+  (interactive "*p")
+
+  ;; save the point for undo
+  (setq buffer-undo-list (cons (point) buffer-undo-list))
+
+  ;; local variables for start and end of line
+  (let ((bol (save-excursion (beginning-of-line) (point)))
+        eol)
+    (save-excursion
+
+      ;; don't use forward-line for this, because you would have
+      ;; to check whether you are at the end of the buffer
+      (end-of-line)
+      (setq eol (point))
+
+      ;; store the line and disable the recording of undo information
+      (let ((line (buffer-substring bol eol))
+            (buffer-undo-list t)
+            (count arg))
+        ;; insert the line arg times
+        (while (> count 0)
+          (newline) ;; because there is no newline in 'line'
+          (insert line)
+          (setq count (1- count))))
+
+      ;; create the undo information
+      (setq buffer-undo-list (cons (cons eol (point)) buffer-undo-list))))) ; end-of-let
+;; put the point in the lowest line and return
+;; (next-line arg)
+
+(defun replace-next-line ()
+  "Replace the next line with kill ring."
+  (interactive)
+  (save-excursion
+    (forward-line)
+    (beginning-of-line)
+    (delete-line 1)
+    (yank)))
+
+(defun replace-current-line ()
+  "Replace current line with kill ring"
+  (interactive)
+  (beginning-of-line)
+  (delete-line 1)
+  (yank))
+
+(defun paste-primary-selection ()
+  (interactive)
+  (insert (gui-get-primary-selection)))
+
+(defun yank-at-point ()
+  "Yank but do not move the point"
+  (interactive)
+  (yank)
+  (pop-global-mark))
+
+(defun smart-open-line ()
+  "Insert an empty line after the current line.
+  Position the cursor at its beginning, according to the current mode."
+  (interactive)
+  (move-end-of-line nil)
+  (newline-and-indent))
+
+(defun switch-to-last-buffer ()
+  (interactive)
+  (switch-to-buffer nil))
+
+(defun create-scratch-buffer nil
+  "create a scratch buffer"
+  (interactive)
+  (switch-to-buffer (get-buffer-create "*scratch*"))
+  (lisp-interaction-mode))
+
+;;* Ryo modal
+
+(use-package ryo-modal
+  ;; DONE: Make ryo-modal-key create a function when passed a lambda
+  ;; The name of the function will be from the keyword :lambda-name
+  ;; So ryo-modal-key will check if TARGET is a lambda and then theck
+  ;; if lambda-name exists, if not then complain
+  :commands ryo-modal-mode
+  :bind
+  ("S-SPC" . ryo-modal-global-mode)
+  ("ç" . ryo-modal-global-mode)
+  ("C-t" . ryo-modal-global-mode)
+  :config
+  (setq ryo-modal-cursor-color nil)
+  (setq ryo-modal-cursor-type 'hollow)
+  :config
+  (require 'ryo-modal-patch)
+  ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Advice-Combinators.html
+  ;; (defun mymy-ryo-modal-key-careful (key target &rest args)
+  ;;   "Use ryo-modal-key but first check if the key is already binded.
+  ;; If you are sure you want to override a binding pass :force as an arg."
+  ;;   (when (memq :force args)
+  ;;     (apply #'ryo-modal-key key target (remove :force args)))
+  ;;   (let ((cmd (lookup-key (or (plist-get args :mode) ryo-modal-mode-map) (kbd key))))
+  ;;     (if (and cmd (not (eq cmd target)))
+  ;;         (user-error "Do you want to rebind this shortcut?")
+  ;;       (apply #'ryo-modal-key key target (remove :force args)))))
+
+  ;; (defun ryo-modal-key-careful (orig-f &rest args)
+  ;;   "Use ryo-modal-key but first check if the key is already binded.
+  ;; If you are sure you want to override a binding pass :force as an arg."
+  ;;   (let* ((key (car args))
+  ;;          (target (cadr args))
+  ;;          (cmd (lookup-key (or (plist-get args :mode) ryo-modal-mode-map) (kbd key))))
+  ;;     (when (memq :force args)
+  ;;       (apply orig-f key target (remove :force args)))
+  ;;     (if (and cmd (not (or (string-match-p (format "%S" target) (format "%S" cmd))
+  ;;                           (string-match-p (format "%s" (plist-get args :name)) (format "%S" cmd)))))
+  ;;         (user-error "Do you want to rebind this shortcut?")
+  ;;       (apply orig-f key target (remove :force args)))))
+  ;; (advice-add #'ryo-modal-key :around #'ryo-modal-key-careful)
+  ;; (ryo-modal-key "f" #'next-line)
+  ;; (ryo-modal-key "f" #'iedit-mode)
+  ;; Bug: Force doesn't work
+
+  (define-globalized-minor-mode ryo-modal-global-mode ryo-modal-mode
+    (lambda ()
+      (if (not (minibufferp (current-buffer)))
+          (ryo-modal-mode t))))
+  :config
+  ;; r, s, R, S are reserved for major modes
+  (with-eval-after-load 'iedit-mode
+    (ryo-modal-key "f" #'iedit-mode))
+  (ryo-modal-keys
+   ("C-\\" toggle-input-method :exit 1)
+   ("gd" remember)
+   ("gD" remember-notes)
+   ("gi" quoted-insert)
+   ("/" undo)
+   ("p" keyboard-quit)
+   ("," ryo-modal-repeat)
+   ("m" newline)
+   ("M" (("o" split-line)
+         ("m" smart-open-line)
+         ("n" open-line)))
+   ("z" (("u" upcase-char)
+         ("U" upcase-region)
+         ("v" upcase-initials-region)
+         ("n" downcase-dwim)))
+   ("Z" (("v" fill-region)
+         ("s" my-save-word))))
+  (ryo-modal-keys
+   ("ot" (("s" bookmark-set)
+          ("d" bookmark-delete))))
+  (ryo-modal-keys ;;; Navigation
+   (:norepeat t)
+   ("n" next-line)
+   ("u" previous-line)
+   ("N" backward-char)
+   ("U" forward-char)
+   ("M-n" forward-sentence)
+   ("M-u" backward-sentence)
+   ("a" smarter-move-beginning-of-line)
+   ("e" end-of-line)
+   ("A" point-to-register)
+   ;; ("E" jump-to-register)
+   ("E" (lambda () (interactive)
+          (cond ((looking-at "\\s\(")
+                 (forward-list))
+                ((looking-back "\\s\)")
+                 (backward-list))
+                (t nil)))
+    :name "lispy-different")
+   ("c" forward-to-word)
+   ("C" forward-word)
+   ("X" backward-to-word)
+   ("x" backward-word)
+   ("g" (("a" beginning-of-buffer)
+         ("e" end-of-buffer)
+         ("u" scroll-down)
+         ("n" scroll-up))))
+  ;; delete
+  (ryo-modal-keys
+   ("D" (("t" my-delete-whole-line)
+         ("d" backward-delete-word)
+         ("v" delete-region)
+         ("f" delete-word)
+         ("s" delete-char)
+         ("r" backward-delete-char)
+         ("h" delete-line)
+         ("(" delete-pair)
+         ("SPC" delete-horizontal-space)
+         ("/" delete-blank-lines))))
+  ;; kill
+  (ryo-modal-keys
+   ("k" kill-line)
+   ("K" (("a" kill-whole-line)
+         ("v" kill-region)
+         ("w" kill-ring-save))))
+  ;; yank
+  (ryo-modal-keys
+   ("y" yank)
+   ("Y" (("an" duplicate-current-line)
+         ("nd" replace-next-line)
+         ("ad" replace-current-line)
+         ("m" paste-primary-selection)
+         ("M" yank-at-point))))
+  ;; Goodies
+  (ryo-modal-keys
+   ("o" (("k" (("u" kill-buffer)
+               ("n" switch-to-last-buffer)
+               ("c" kill-current-buffer)
+               ("s" save-buffer)
+               ("l" create-scratch-buffer)
+               ("x" reopen-killed-file)
+               ("X" reopen-killed-file-fancy)
+               ) :name "Buffers, Files & and M-x")
+         ("a" (("t" ignore :read t :name "insert text")
+               ("c" comment-dwim :name "Comment")
+               ("i" string-rectangle)) :name "Insert")
+         ("w" (("r" split-window-below)
+               ("s" split-window-right)
+               ("d" delete-window)
+               ("a" delete-other-windows)
+               ("t" make-frame)) :name "Windows"))))
+  ;; digit-arguments
+  (ryo-modal-keys
+   ;; first argument to ryo-modal-keys may be a list of keywords.
+   ;; these keywords will be applied to all keybindings.
+   (:norepeat t)
+   ("0" "M-0")
+   ("1" "M-1")
+   ("2" "M-2")
+   ("3" "M-3")
+   ("4" "M-4")
+   ("5" "M-5")
+   ("6" "M-6")
+   ("7" "M-7")
+   ("8" "M-8")
+   ("9" "M-9"))
+  ;; Region
+  (ryo-modal-keys
+   (:norepeat t)
+   ("v" set-mark-command)
+   ("V" (("v" rectangle-mark-mode)
+         ("c" exchange-point-and-mark))))
+  ;; emacs-lisp
+  (ryo-modal-major-mode-keys
+   'emacs-lisp-mode
+   ("s" (("s" eval-buffer)
+         ("r" eval-region)
+         ("f" eval-defun)))))
 
 ;;* Keys
 
@@ -106,7 +503,8 @@
   "C-M-p"
   "C-M-f"
   "C-c C-b"
-  "C-d")
+  "C-d"
+  "M-f")
 ;;** global-set
 (general-define-key
  "C-M-y" 'duplicate-current-line
@@ -142,8 +540,16 @@
  "C-c s u" 'straight-use-package
  "C-c s g" 'straight-get-recipe
  "C-;" 'iedit-mode
- "C-x a E" 'edit-abbrevs
- )
+ "C-x C-y" 'pp-macroexpand-last-sexp)
+
+;;** general-override-map
+;; git: Override S-SPC with general.el
+(general-define-key
+ :keymaps 'override
+ "S-SPC" 'ryo-modal-global-mode
+ "C-t" 'ryo-modal-global-mode)
+
+
 ;;** dired-mode-map
 (general-define-key
  :keymaps 'dired-mode-map
@@ -186,21 +592,19 @@
 
 ;;* Set the font
 (custom-set-faces
- `(default
-    ((t ( :family "Fantasque Sans Mono"
-          :foundry "outline"
-          :slant normal
-          :weight normal
-          :height ,(cond
-                    ((<= (x-display-pixel-width) 1280)
-                     130)
-                    ((> (x-display-pixel-width) 1280)
-                     110))
-          :width normal)))))
-
-
+ `(default ((t (:family "Fantasque Sans Mono"
+                        :foundry "outline"
+                        :slant normal
+                        :weight normal
+                        :height 120
+                        ;; :height ,(let ((h (display-pixel-width)))
+                        ;;            (cond
+                        ;;             ((>= 1280 h) 130)
+                        ;;             ((< 1280 h) 110)))
+                        :width normal)))))
 ;;* Emacs theme
 (use-package dracula-theme
+  :no-require
   :config
   (load-theme 'dracula t)
   (custom-theme-set-faces
@@ -212,10 +616,35 @@
   (custom-theme-set-faces
    'dracula
    '(font-lock-doc-face ((t (:foreground "spring green"))) t))
-  (set-face-attribute 'region nil :background "#a3b32e"))
+  (set-face-attribute 'region nil :background "#a3b32e")
+  )
+
+
 ;;* Normal Packages
 ;;** Niceties
-(use-package hydra)
+(use-package hydra
+  :config
+  (ryo-modal-key
+   "q f" :hydra
+   '(hydra-fastmoving ()
+                      "Generic fast moving"
+                      ("n" scroll-up)
+                      ("u" scroll-down)
+                      ("U" ccm-scroll-down)
+                      ("N" ccm-scroll-up)
+                      ("]" forward-paragraph)
+                      ("[" backward-paragraph)
+                      ("q" nil "cancel" :color blue)))
+  (ryo-modal-key
+   "q i" :hydra
+   '(hydra-indent ()
+                  "Indent Mode"
+                  ("n" mymy/elpy-nav-move-line-or-region-down)
+                  ("u" mymy/elpy-nav-move-line-or-region-up)
+                  ("N" shift-left)
+                  ("U" shift-right)
+                  ("q" nil "cancel" :color blue)))
+  )
 
 (use-package electric-operator)
 (use-package highlight-indentation)
@@ -267,15 +696,16 @@
   :init
   (defun mymy/smartparens-hook ()
     (smartparens-global-mode)
-    (show-smartparens-global-mode)
-    (smartparens-global-strict-mode))
+    (show-smartparens-global-mode))
   (setq mymy-lisp-modes '(emacs-lisp-mode clojure-mode cider-mode slime-mode lisp-mode))
   :config (sp-local-pair mymy-lisp-modes "'" "'" :actions nil)
-  :hook ((after-init . mymy/smartparens-hook)))
+  :hook ((after-init . mymy/smartparens-hook)
+         (prog-mode . smartparens-strict-mode)))
 
 (use-package golden-ratio
   :config (golden-ratio-mode t)
-  (add-to-list 'golden-ratio-extra-commands 'ace-window))
+  (add-to-list 'golden-ratio-extra-commands 'ace-window)
+  (ryo-modal-key "gr" #'golden-ratio-mode))
 
 ;;** Spaceline
 
@@ -301,6 +731,7 @@
   (spaceline-compile))
 ;;** PDF
 (use-package pdf-tools
+  :defer 5
   :ryo
   (:mode 'pdf-view-mode)
   ("n" pdf-view-next-line-or-next-page)
@@ -328,17 +759,20 @@
   (setq org-noter-always-create-frame nil)
   (setq org-noter-notes-search-path '("~/Sync/Notes/"))
   (setq org-noter-default-notes-file-names nil)
-  :ryo
-  (:mode 'pdf-view-mode)
-  ("i" org-noter-insert-note)
-  ("I" org-noter-insert-precise-note))
+  (ryo-modal-major-mode-keys
+   'pdf-view-mode
+   ("i" org-noter-insert-note)
+   ("I" org-noter-insert-precise-note)))
 ;;** Vterm
 (use-package vterm
-  ;; I prefer to open a terminal before opening this
-  ;; Good package though
-  :disabled
-  :bind
-  (("C-x l" . vterm))
+  ;; Git: Use vterm
+  ;; Comment: now that I use java, vterm is more comfortable than
+  ;; opening a terminal
+  ;; ;; I prefer to open a terminal before opening this
+  ;; ;; Good package though
+  ;; :disabled
+  ;; :bind
+  ;; ;; ("C-x l" . vterm)
   :config
   (defun mymy/vterm-hook ()
     (centered-cursor-mode -1))
@@ -347,7 +781,7 @@
 
 ;;** calibredb
 (use-package calibredb
-  :defer t
+  :defer 5
   :config
 ;;; Moved to the sections keys of ryo modal
   ;; (ryo-modal-key "Sb" 'calibredb-find-helm)
@@ -403,6 +837,22 @@
     (when (region-active-p)
       (deactivate-mark t))
     (el-patch-swap (undo) (undo-tree-undo)))
+  (defun tmp-lispy-fix ()
+    (interactive)
+    (if ryo-modal-global-mode
+        (progn
+          (ryo-modal-global-mode 0)
+          (lispy-mode 1))
+      (ryo-modal-global-mode 1)
+      (lispy-mode -1)))
+  (ryo-modal-major-mode-keys
+   'clojure-mode
+   ("S-SPC" tmp-lispy-fix)
+   ("C-t" tmp-lispy-fix))
+  (ryo-modal-major-mode-keys
+   'lisp-mode
+   ("S-SPC" tmp-lispy-fix)
+   ("C-t" tmp-lispy-fix))
   :hook
   (clojure-mode . lispy-mode)
   (emacs-lisp-mode . lispy-mode)
@@ -418,9 +868,31 @@
 (use-package flycheck-clj-kondo)
 
 (use-package cider
-  :defer
-  :custom
-  (cider-test-show-report-on-success t)
+  :defer 5
+  :config
+  (defun cider-find-and-clear-repl-buffer ()
+    (interactive)
+    (cider-find-and-clear-repl-output t))
+  (defun cider-pprint-eval-defun-at-point-to-comment ()
+    (interactive)
+    (cider-pprint-eval-defun-at-point t))
+  :config
+  (setq cider-test-show-report-on-success t)
+  (ryo-modal-major-mode-keys
+   'clojure-mode
+   ("r" (("r" cider-run)
+         ("f" cider-pprint-eval-defun-at-point)
+         ("c" cider-find-and-clear-repl-output)
+         ("C" cider-find-and-clear-repl-buffer)
+         ("p" cider-eval-defun-to-comment)
+         ("P" cider-pprint-eval-defun-at-point-to-comment))))
+  (with-eval-after-load 'outline
+    (ryo-modal-major-mode-keys
+     'clojure-mode
+     ("M-RET" outline-insert-heading)
+     ("M-N" outline-promote)
+     ("M-U" outline-demote)
+     ("M-e" outline-toggle-children)))
   :hook
   (clojure-mode . cider-mode)
   (cider-repl-mode . aggressive-indent-mode)
@@ -429,13 +901,14 @@
   (cider-mode . cider-company-enable-fuzzy-completion))
 
 (use-package clojure-mode
+  :defer 5
   :config (require 'flycheck-clj-kondo))
 ;;** lsp
 (use-package lsp-mode
+  :defer 5
   :init
   (setq lsp-keymap-prefix "C-c l")
-  (setenv "LSP_USE_PLISTS" "true")
-  (setq lsp-use-plists t)
+  ;; (setq lsp-use-plists t)
   :config
   ;; For debugging
   ;; (setq lsp-log-io t)
@@ -458,21 +931,27 @@
   :commands lsp-ui-mode)
 
 (use-package lsp-pyright
-  :hook
-  ;; If i were to delete this section, it will not make my init fail
-  ((python-mode . lsp)
-   (python-mode . (lambda () (require 'lsp-pyright)))))
+  :after lsp-mode
+  :config
+  (add-hook 'python-mode-hook #'lsp)
+  (add-hook 'python-mode-hook (lambda () (require 'lsp-pyright))))
 
 (use-package lsp-haskell
+  ;; :defer 5
+  :after lsp-mode
   ;; Uncontable tales i have of how this monster have ruined my day, not
   ;; because of itself, but because Of how much ram it needs and how my
   ;; little School-gorverment-given computer hogs from the effort of
   ;; keeping this thing afloat
-  ;; :hook
-  ;; (haskell-mode . lsp)
-  ;; (haskell-literate-mode . lsp)
+  :config
+  (add-hook 'haskell-mode-hook #'lsp)
+  (add-hook 'haskell-literate-mode-hook #'lsp)
   )
-(use-package lsp-java)
+(use-package lsp-java
+  :after lsp-mode
+  :config
+  (add-hook 'java-mode-hook #'lsp)
+  )
 ;;** Kotlin
 (use-package kotlin-mode
   :config
@@ -579,6 +1058,23 @@
 
 ;;** flycheck
 (use-package flycheck
+  :config
+  (ryo-modal-keys
+   (:norepeat t)
+   ("!"
+    (("c" flycheck-buffer :name "Check buffer")
+     ("e" flycheck-explain-error-at-point :name "Explain error at point")
+     ("l" flycheck-list-errors :name "List errors")
+     ("x" flycheck-disable-checker :name "Disable checker")
+     ("o" flycheck-mode :name "Toggle mode"))))
+  (ryo-modal-key
+   "q ; f" :hydra
+   '(hydra-syntaxcheck ()
+                       "SyntaxCheck Mode"
+                       ("n" flycheck-next-error :name "Next error")
+                       ("u" flycheck-previous-error :name "Previous error")
+                       ("ev" flycheck-buffer)
+                       ("q" nil "cancel" :color blue)))
   :bind (:map flycheck-mode-map
               ("M-n" . flycheck-next-error)
               ("M-u" . flycheck-previous-error)))
@@ -592,7 +1088,8 @@
   (setq helm-bookmark-show-location t)
   (setq helm-buffers-fuzzy-matching t)
   ;; TODO: Move this to org mode
-  (setq org-cycle-include-plain-lists 'integrate)
+  ;; (setq org-cycle-include-plain-lists 'integrate)
+  (setq org-cycle-include-plain-lists t)
   (setq helm-mini-default-sources
         '(helm-source-buffers-list
           helm-source-recentf
@@ -630,10 +1127,26 @@
    :keymaps 'helm-map
    "C-n" 'helm-next-line
    "C-u" 'helm-previous-line)
+  (ryo-modal-keys
+   ;; ("b" isearch-backward)
+   ("F" helm-swoop)
+   ("B" helm-semantic-or-imenu)
+   ("Yu" helm-show-kill-ring)
+   ("ol" helm-locate)
+   ("ot" (("t" helm-register)
+          ("p" helm-bookmarks)))
+   ("ok" (("e" helm-mini)
+          ("k" helm-complex-command-history)
+          ("m" helm-find-files :name "Find file")
+          ("y" find-name-dired)
+          ("r" helm-find :name "Find file recursively") ;; Find files recursively
+          ("i" helm-M-x)
+          ("o" helm-apropos))))
   :hook
   (helm-minibuffer-set-up . helm-exchange-minibuffer-and-header-line))
 
 (use-package helm-lsp
+  :after lsp-mode
   :after helm)
 
 ;;** ispell
@@ -656,7 +1169,7 @@
   (unless (file-exists-p ispell-personal-dictionary)
     (write-region "" nil ispell-personal-dictionary nil 0)))
 ;;** Magit
-(use-package magit)
+(use-package magit :defer 5)
 
 ;;** Dired
 (use-package dired+)
@@ -666,11 +1179,21 @@
 (use-package dired-collapse
   :hook
   ((dired-mode . dired-collapse-mode)))
+(use-package dirvish
+  :disabled
+  :init
+  (dirvish-override-dired-mode)
+  :config
+  (setq dirvish-preview-dispatchers (remove 'archive dirvish-preview-dispatchers))
+  (setq dirvish-attributes '(file-size hl-line all-the-icons))
+  ;; (setq dirvish-attributes nil)
+  :bind
+  (:map dired-mode-map ("C-l" . dired-up-directory)))
 
 ;; TODO: Put this in org roam section
 (use-package git-auto-commit-mode)
 ;;** Ledger mode
-(use-package ledger-mode)
+(use-package ledger-mode :defer 5)
 ;;** Music
 (use-package emms
   ;; Overkill, but extremely nice
@@ -710,6 +1233,7 @@
   (setq org-clock-string-limit 25)
   (setq spaceline-org-clock-format-function 'dwim/org-clock-get-string)
   (require 'org-habit)
+  (setq org-habit-graph-column 80)
   (require 'ob-clojure)
   (setq org-babel-clojure-backend 'cider)
   (org-babel-do-load-languages
@@ -734,19 +1258,39 @@
   :config
   ;; For org roam
   (require 'org-protocol)
-  (define-key org-mode-map (kbd "C-j") '())
-  ;; Unneeded
-  ;; (define-key org-mode-map (kbd "C-j") (lambda (count)
-  ;;                                        (interactive "p")
-  ;;                                        ))
   ;; (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
   ;; (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags . helm-org-completing-read-tags))
   (defun mymy-refile-to-done ()
     (interactive)
     (my/refile (concat org-roam-directory "2021-12-05-08-48-44-done.org") "Done"))
-  (org-id-find 'add2b103-aa51-4d04-a741-7c2136bbca69)
+
   (advice-add 'org-clock-get-clocked-time :around (lambda (f) (if (org-clocking-p) (funcall f) 0)))
+
   ;; (add-hook 'org-capture-mode-hook #'(lambda () (make-frame) (delete-window)))
+
+  (defvar mymy-org-auto-fill-excluded-elements '(latex-environment latex-fragment link)
+    "Elements that shouldn't break line.")
+
+
+  (el-patch-defun org-auto-fill-function ()
+    "Auto-fill function."
+    ;; Check if auto-filling is meaningful.
+    (let ((fc (current-fill-column)))
+      (when (and fc (> (current-column) fc))
+        (let* ((fill-prefix (org-adaptive-fill-function))
+               ;; Enforce empty fill prefix, if required.  Otherwise, it
+               ;; will be computed again.
+               (adaptive-fill-mode (not (equal fill-prefix ""))))
+          ;; Could use wrap but I'm to lazy for that
+          (when (el-patch-remove fill-prefix)
+            ;; https://stackoverflow.com/questions/26849364/paragraph-filling-for-org-mode-inside-latex-environment
+            (el-patch-add (and (not (memq (org-element-type (org-element-context)) mymy-org-auto-fill-excluded-elements))
+                               fill-prefix))
+            (do-auto-fill))))))
+
+  ;; For latex-math-mode
+  ;; (use-package auctex :no-require :config (require 'latex))
+
   (defun mymy-org-mode-agenda ()
     (interactive)
     (let ((org-agenda-window-setup 'only-window))
@@ -761,72 +1305,222 @@
         (org-mode)
         (goto-char (point-min))
         (funcall (or parser #'org-element-parse-buffer)))))
+
   (defun mymy-org-element-parse-link (link)
     (mymy-org-element-parse-string link #'org-element-link-parser))
   (setq org-columns-default-format "%25ITEM %TODO %3PRIORITY %TAGS %6CLOCKSUM(Clock) %8Effort(Effort)")
   ;; Press C-c to deactivate this temporarily
   (setq org-fast-tag-selection-single-key t)
-  :custom
-  (org-latex-pdf-process
-   ;; -pdfxe: use xelatex -pdflua: use luatex -bibtex use bibtex when needed
-   ;; -xelatex use xelatex for processing files to pdf and turn dvi/ps modes off
-   ;; -f: Force -pdf output pdf -bibtex
-   ;; (list "latexmk -bibtex -f -pdf %f")
-   (list "latexmk -f -pdf -%latex -interaction=nonstopmode -output-directory=%o %f"))
+  (setq org-archive-location "%s_archive::* Archive")
+;;; Testing
+  (require 'org-depend)
+  (defun org-summary-todo (n-done n-not-done)
+    "Switch entry to DONE when all subentries are done, to TODO otherwise."
+    (let (org-log-done org-log-states)  ; turn off logging
+      ;; Prefer next because that means that I'm working on the task
+      (org-todo (if (= n-not-done 0) "DONE" "NEXT"))))
+
+  (add-hook 'org-after-todo-statistics-hook #'org-summary-todo)
+  ;; End of Testings
+
+  ;; To be used outside of emacs
+  (defun mymy-org-clock-toggle ()
+    (interactive)
+    (if (org-clocking-p)
+        (org-clock-out)
+      (org-clock-in-last)))
+  ;; Prefix C-c c
+  (general-define-key "C-c c c" 'mymy-org-clock-toggle)
+
+  (defun +org-toggle-inline-image-at-point ()
+    "Toggle inline image at point."
+    (interactive)
+    (if-let* ((bounds (and (not org-inline-image-overlays)
+                           (org-in-regexp org-link-any-re nil t)))
+              (beg (car bounds))
+              (end (cdr bounds)))
+        (org-display-inline-images nil nil beg end)
+      (org-toggle-inline-images)))
+
+  (defun org-dblock-write:tagcount (params)
+    (let ((total))
+      ;;; Get the tags defined in #+TAGS:
+      (--> org-current-tag-alist
+           ;; Do some preparations in the tag alist
+           (--remove (keywordp (car it)) it)
+           (-map #'car it)
+           ;; Start counting
+           (--map (org-count-subentries nil nil it nil (plist-get params :level)) it)
+           (--map `(,(car it) ,(1+ (cadr it))) it)
+           ;; Keep a record of the total
+           (prog1 it
+             (setq total (->> it
+                              (-map #'cadr)
+                              (apply #'+))))
+           ;; Do some preparations before
+           (--sort (> (cadr it) (cadr other)) it)
+           ;; Prepare string representation
+           (--map (format "|%s|%s|%.2f|\n"
+                          (car it)
+                          (cadr it)
+                          (* 100 (/ (float (cadr it)) total)))
+                  it)
+           (push "|-|\n" it)
+           (push "|Tags|Count|Percentage|\n" it)
+           (push "|-|\n" it)
+           (append it (list "|-|\n" (format "|Total|%s|\n" total)
+                            "|-|"))
+           ;; Insert
+           (-map #'insert it)))
+    (org-table-align))
+
+  (defun org-dblock-write:block-update-time (params)
+    (let ((fmt (or (plist-get params :format) "%d. %m. %Y")))
+      (insert "Last block update at: "
+              (format-time-string fmt))))
+
+  (ryo-modal-keys
+   (:norepeat t)
+   ("O" (("a" org-agenda)
+         ("u" org-clock-goto))))
+  (with-eval-after-load 'expand-region
+    (ryo-modal-major-mode-keys
+     'org-mode
+     ("s" (("p" er/mark-org-element)
+           ("T" er/mark-org-parent)))))
+  (ryo-modal-major-mode-keys
+   'org-mode
+   ;; avalible r s
+   ("M-m" org-meta-return)
+   ("M-M" org-insert-heading-respect-content)
+   ("M-c" org-toggle-checkbox)
+   ("C-M-m" org-insert-heading-respect-content)
+   ("M-U" org-metaright)
+   ("M-N" org-metaleft)
+   ;; Also works with a region
+   ("Zv" org-fill-paragraph)
+   ("m" org-return)
+   ("r" (("s" org-preview-latex-fragment)
+         ("t" org-latex-preview)
+         ("l" org-toggle-link-display)
+         ("o" org-open-at-point)
+         ("i" +org-toggle-inline-image-at-point)))
+   ("s" (;; ("a" org-agenda-archive-subtree)
+         ("A" org-agenda-toggle-archive-tag)
+         ("t" outline-up-heading)
+         ("g" org-agenda-goto)
+         ("ne" org-narrow-to-element)
+         ("nv" narrow-to-region)
+         ("nw" widen)
+         ("m" outline-show-children)
+         ("k" outline-show-branches)))
+   ("Y" (("y" org-paste-special)))
+   ("V" (("b" org-mark-subtree)))
+   ("K" (("V" org-cut-special)
+         ("W" org-copy-special)))
+   ("a" org-beginning-of-line)
+   ("e" org-end-of-line)
+   ("O" (("o" org-clock-out)
+         ("i" org-clock-in)
+         ("r" org-refile)
+         ("s" org-set-tags-command)
+         ("e" org-agenda-clock-cancel)
+         ("d" org-insert-drawer)
+         ("g" org-mark-ring-goto)
+         ("c" org-columns)
+         ("t" org-toggle-archive-tag)
+         ("T" org-archive-subtree)
+         ("w" (lambda () (interactive) (if org-timer-start-time
+                                           (org-timer-stop) (org-timer-start)))
+          :name "Toggle timer")
+         ("ke" (lambda () (interactive) (org-set-property "TRIGGER" "chain-siblings(NEXT)")) :name "Make subtree trigger next")
+         ("y" (lambda () (interactive) (org-latex-export-to-pdf nil t nil nil nil)) :name "Export subtree")))
+   ("O R" :hydra
+    '(hydra-org-refile ()
+                       "Org refile"
+                       ("r" (lambda () (interactive) (my/refile "notebook.org" "=What I'm Doing Now=")))
+                       ("s" (lambda () (interactive) (my/refile "notebook.org" "=What I've Done Today=")))
+                       ("t" (lambda () (interactive) (my/refile "notebook.org" "Completed task")))
+                       ("n" next-line)
+                       ("u" previous-line)
+                       ("N" backward-char)
+                       ("U" forward-char)
+                       ("a" smarter-move-beginning-of-line)
+                       ("e" end-of-line)
+                       ("ga" beginning-of-buffer)
+                       ("ge" end-of-buffer)
+                       ("q" nil "cancel" :color blue)))
+   ("q n" :hydra
+    '(hydra-org-heading-move ()
+                             "Heading move Mode"
+                             ("n" org-forward-heading-same-level)
+                             ("u" org-backward-heading-same-level)
+                             ("U" org-metaup)
+                             ("N" org-metadown)
+                             ("q" nil "cancel" :color blue))))
+
+  (setq org-latex-pdf-process
+        ;; -pdfxe: use xelatex -pdflua: use luatex -bibtex use bibtex when needed
+        ;; -xelatex use xelatex for processing files to pdf and turn dvi/ps modes off
+        ;; -f: Force -pdf output pdf -bibtex
+        ;; (list "latexmk -bibtex -f -pdf %f")
+        (list "latexmk -f -pdf -%latex -interaction=nonstopmode -output-directory=%o %f"))
   ;; ▶, ▼, ↴, ⬎, ⤷, and ⋱
-  (org-ellipsis "▶")
-  (org-log-done t)
+  (setq org-ellipsis "▶")
+  (setq org-log-done t)
   ;; (org-hide-emphasis-markers t)
-  (org-refile-targets '((nil :maxlevel . 2)))
-  (org-catch-invisible-edits 'error)
-  (org-special-ctrl-a/e t)
-  (org-habit-show-all-today t)
-  (org-return-follows-link nil)
+  (setq org-refile-targets '((nil :maxlevel . 2)))
+  (setq org-catch-invisible-edits 'error)
+  (setq org-special-ctrl-a/e t)
+  (setq org-habit-show-all-today t)
+  (setq org-return-follows-link nil)
   ;; In collapsed view, hide empty lines between subtrees
-  (org-cycle-separator-lines 0)
+  (setq org-cycle-separator-lines 0)
   ;; Theres seems to be a bug where i can't set new emphasis keywords
   ;; So the only way to set one is overwriting one (org-emphasis-alist
   ;; (btw, i can just modify org-font-lock-extra-keywords but i will not
   ;; get (org-hide-emphasis-markers t) with my current knowledge
-  (org-emphasis-alist
-   '(("*" (bold :foreground "magenta"))
-     ("/" italic)
-     ("_" underline)
-     ("=" (underline org-code))
-     ("~" org-code verbatim)
-     ("+"
-      (:strike-through t))))
-  (org-startup-folded t)
-  (org-default-notes-file (concat main-dropbox-dir "agenda.org"))
-  (org-todo-keyword-faces
-   '(("CANCELLED" . (:foreground "red" :weight bold))
-     ("ABANDONED" . (:foreground "red" :weight bold))
-     ("CLASS" . (:foreground "purple" :weight bold))
-     ("NEXT" . (:foreground "blue" :weight bold))
-     ("HABIT" . (:foreground "yellow" :weight italic))
-     ;; As in alloted time
-     ("BOOK" . (:foreground "white" :weight bold))
-     ))
-  (org-todo-keywords
-   '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(s)")
-     (type "HABIT(h)" "|" "CANCELLED(c)" "ABANDONED(a)")))
+  (setq org-emphasis-alist
+        '(("*" (bold :foreground "magenta"))
+          ("/" italic)
+          ("_" underline)
+          ("=" (underline org-code))
+          ("~" org-code verbatim)
+          ("+"
+           (:strike-through t))))
+  (setq org-startup-folded t)
+  (setq org-default-notes-file (concat main-dropbox-dir "agenda.org"))
+  (setq org-todo-keyword-faces
+        '(("CANCELLED" . (:foreground "red" :weight bold))
+          ("ABANDONED" . (:foreground "red" :weight bold))
+          ("WAITING" . (:foreground "yellow" :weight bold))
+          ("CLASS" . (:foreground "purple" :weight bold))
+          ("NEXT" . (:foreground "blue" :weight bold))
+          ("HABIT" . (:foreground "yellow" :weight italic))
+          ;; As in alloted time
+          ("BOOK" . (:foreground "white" :weight bold))
+          ))
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "|" "DONE(s)")
+          (type "HABIT(h)" "|" "CANCELLED(c)" "ABANDONED(a)")))
   ;; (org-capture-templates
   ;;  ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
   ;;  ;; https://orgmode.org/manual/Template-elements.html#Template-elements
   ;;  '(
   ;;    )
   ;;  )
-  (org-enforce-todo-dependencies t)
-  (org-tag-faces
-   '(("Hold" (:foreground "yellow" :weight bold))
-     ("Kobo" (:foreground "red" :weight bold))))
-  (org-format-latex-options '(plist-put org-format-latex-options :scale 2.0 :background auto :foreground "white"))
-  (org-highlight-latex-and-related '(latex script entities))
-  (org-image-actual-width nil)
-  (org-log-into-drawer t)
-  :bind (("C-c o c" . org-capture)
-         :map org-mode-map
-         (("C-M-k" . company-files)))
+  (setq org-enforce-todo-dependencies t)
+  (setq org-tag-faces
+        '(("Hold" (:foreground "yellow" :weight bold))
+          ("Kobo" (:foreground "red" :weight bold))))
+  (setq org-format-latex-options '(plist-put org-format-latex-options :scale 2.0 :background auto :foreground "white"))
+  (setq org-highlight-latex-and-related '(latex script entities))
+  (setq org-image-actual-width nil)
+  (setq org-log-into-drawer t)
+  :bind
+  (("C-c o c" . org-capture)
+   :map org-mode-map
+   (("C-M-k" . company-files)))
   :hook
   (org-mode . org-superstar-mode)
   (org-mode . prettify-symbols-mode)
@@ -925,6 +1619,7 @@
   (setq org-agenda-start-day "1d")
   (setq org-super-agenda-groups
         '((:name "Doing" :todo "NEXT")
+          (:name "Active Projects" :children "NEXT")
           (:name "Projects" :children todo)
           (:auto-priority)
           (:discard (:todo "DONE"))
@@ -970,6 +1665,7 @@
   :config
   (org-superstar-configure-like-org-bullets)
   (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄)))
+
 (use-package elisp-slime-nav
   :config
   ;; elisp-slime-nav-describe-elisp-thing-at-point C-c C-d C-d
@@ -978,8 +1674,12 @@
     (bind-key "M-." 'elisp-slime-nav-find-elisp-thing-at-point))
   :hook
   (emacs-lisp-mode . elisp-slime-nav-mode))
-(use-package csv-mode)
-(use-package yasnippet-snippets)
+(use-package csv-mode
+  :config
+  (ryo-modal-major-mode-keys
+   'csv-mode
+   ("st" csv-align-fields))
+  )
 (use-package org-roam-ui
   ;; :disabled
   :straight (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
@@ -1054,10 +1754,12 @@
 (use-package bibtex
   :config
   (setq bibtex-autokey-year-length 4))
+
 (use-package org-ref
+  :defer 5
   :config
   ;; (setq bibtex-completion-bibliography (list (concat main-dropbox-dir "Main.bib")))
-  (setq bibtex-completion-bibliography '("~/tmp/ZoteroToEbib/MyLibrary/MyLibrary.bib"))
+  (setq bibtex-completion-bibliography `(,(concat dropbox-dir "My Library/MyLibrary.bib")))
   (setq bibtex-completion-pdf-field "file"))
 
 (use-package ebib
@@ -1067,6 +1769,7 @@
 The key is prepended with the string \"Custom_id:\", so that it
 can be used in a :PROPERTIES: block."
     (format (el-patch-swap ":Custom_id: %s" ":ROAM_REFS: [[cite:&%s]]") key))
+
   (el-patch-defun ebib-create-org-description (key db)
     "Return a description for an Org mode note for KEY in DB.
 The title is formed from the author(s) or editor(s) of the entry,
@@ -1083,11 +1786,11 @@ string."
         (remove ?\n (format (el-patch-swap "%s (%s): %s" "Title: %s\nDate: %s\nAuthor: %s")
                             (el-patch-swap author title) (el-patch-swap year date) (el-patch-swap title author))))))
   :config
-  (setq ebib-preload-bib-files '("~/tmp/ZoteroToEbib/MyLibrary/MyLibrary.bib"))
+  (setq ebib-preload-bib-files `(,(concat dropbox-dir "My Library/MyLibrary.bib")))
   (setq ebib-bibtex-dialect 'biblatex)
   (setq ebib-file-associations '(("pdf" . "sioyek")
                                  ("ps" . "zathura")))
-  (setq ebib-default-directory "~/tmp/ZoteroToEbib/MyLibrary/")
+  (setq ebib-default-directory (concat dropbox-dir "My Library/"))
   (setq ebib-popup-entry-window t)
   (setq ebib-layout 'index-only)
   (setq ebib-reading-list-file (concat main-dropbox-dir "ReadingList.org"))
@@ -1105,6 +1808,7 @@ string."
                  (file+olp ,ebib-notes-default-file "Zettelkästen" "lit notes")
                  #'ebib-notes-create-org-template))
   :bind (;; ("C-c n" . ebib)
+         ("C-c n e" . ebib)
          :map ebib-index-mode-map
          ("u" . ebib-prev-entry)
          ("p" . ebib-browse-url)
@@ -1279,7 +1983,7 @@ collection."
 
   (defun mymy-delve-export--zettel-to-link (z &optional args)
     "Return zettel Z as an Org link pointing to its headline with the
-    format that i like.
+format that i like.
 Optional argument ARGS is ignored."
     (ignore args)
     (concat (org-link-make-string (concat "id:" (delve--zettel-id z))
@@ -1310,6 +2014,53 @@ Optional argument ARGS is ignored."
   multiple options available, let the user choose the proper
   backend.")
 
+  ;; Work like find-file; untested
+  (el-patch-defun delve-find-storage-file ((el-patch-add file-name))
+    "Visit a Delve storage file or create a new Delve buffer.
+    If the user selects a non-storage file, pass to `find-file'."
+    (interactive (progn (delve--set-storage-dir) (expand-file-name (read-file-name "Find Delve storage or other file: " delve--last-storage-dir))))
+    (el-patch-remove (delve--set-storage-dir))
+    (el-patch-splice 2 0
+      (let* ((file-name (expand-file-name (read-file-name "Find Delve storage or other file: " delve--last-storage-dir))))
+        (pcase file-name
+          ((pred delve--storage-p)
+           (progn
+             (switch-to-buffer (delve--read-storage-file file-name))
+             ;; We set storage-dir here instead in the low level
+             ;; functions, because else it would mess up the user's
+             ;; workflow.
+             (delve--set-storage-dir file-name)))
+          ((pred delve--storage-file-name-p)
+           (progn
+             (switch-to-buffer (delve--new-buffer (file-name-base file-name)))
+             ;; see above
+             (delve--set-storage-dir file-name)))
+          (_
+           (find-file file-name))))))
+  (defun mymy-delve--key--open-zettel (zettel &optional prefix)
+    "A little function to do something before opening a zettel"
+    (interactive (list (delve--current-item-or-error 'delve--zettel)))
+    (delve--key--sync lister-local-ewoc '(4))
+    ;; (delve--key--open-zettel zettel prefix)
+    ;; Copied from org-roam-node-open. Omitted the part where it pushes the mark
+    (let ((node (delve--zettel-node zettel)))
+      (let ((m (org-roam-node-marker node))
+            (cmd (or (cdr
+                      (assq
+                       (cdr (assq 'file org-link-frame-setup))
+                       '((find-file . switch-to-buffer)
+                         (find-file-other-window . switch-to-buffer-other-window)
+                         (find-file-other-frame . switch-to-buffer-other-frame))))
+                     'switch-to-buffer-other-window)))
+        (if (not (equal (current-buffer) (marker-buffer m)))
+            (funcall cmd (marker-buffer m)))
+        (when (not (equal (org-roam-node-id node)
+                          (org-roam-id-at-point)))
+          (goto-char m))
+        (move-marker m nil))
+      (org-show-context)
+      (when (> (org-outline-level) 0)
+        (org-show-entry))))
   :config
   (setq delve-dashboard-tags '("entry"))
   (setq delve-display-path nil)
@@ -1340,7 +2091,14 @@ Optional argument ARGS is ignored."
    ("M-u" lister-mode-up)
    ("M-N" lister-mode-left)
    ("M-U" lister-mode-right)
-   ("d" delve--key--multi-delete))
+   ("d" delve--key--multi-delete)
+   ("g" (lambda () (interactive) "Force update current delve-zettel" (delve--key--sync lister-local-ewoc '(4)))))
+  (general-define-key
+   :keymaps 'delve-mode-map
+   "<tab>" 'ignore
+   "C-<return>" 'mymy-delve--key--open-zettel
+   "C-j" 'delve--key--tab
+   )
   ;; This two can wait
   ;; TODO: Make a function that copies the name of the current node
   ;; TODO: Make a function that insert a description list as a node with a description
@@ -1395,6 +2153,59 @@ Optional argument ARGS is ignored."
                 (when (boundp 'native-comp-async-env-modifier-form)
                   native-comp-async-env-modifier-form)
                 `(defvar org-roam-v2-ack ,org-roam-v2-ack)))
+  (el-patch-defconst org-roam-db--table-schemata
+    '((files
+       [(file :unique :primary-key)
+        title
+        (hash :not-null)
+        (atime :not-null)
+        (mtime :not-null)])
+
+      (nodes
+       ([(id :not-null :primary-key)
+         (file :not-null)
+         (level :not-null)
+         (pos :not-null)
+         todo
+         priority
+         (scheduled text)
+         (deadline text)
+         title
+         properties
+         olp
+         (el-patch-add backlinkcount)
+         ]
+        (:foreign-key [file] :references files [file] :on-delete :cascade)))
+      (aliases
+       ([(node-id :not-null)
+         alias]
+        (:foreign-key [node-id] :references nodes [id] :on-delete :cascade)))
+
+      (citations
+       ([(node-id :not-null)
+         (cite-key :not-null)
+         (pos :not-null)
+         properties]
+        (:foreign-key [node-id] :references nodes [id] :on-delete :cascade)))
+
+      (refs
+       ([(node-id :not-null)
+         (ref :not-null)
+         (type :not-null)]
+        (:foreign-key [node-id] :references nodes [id] :on-delete :cascade)))
+
+      (tags
+       ([(node-id :not-null)
+         tag]
+        (:foreign-key [node-id] :references nodes [id] :on-delete :cascade)))
+
+      (links
+       ([(pos :not-null)
+         (source :not-null)
+         (dest :not-null)
+         (type :not-null)
+         (properties :not-null)]
+        (:foreign-key [source] :references nodes [id] :on-delete :cascade)))))
   :config
   (setq org-agenda-files (list (concat mymy-org-roam-dir "Projects/20210715113548-projects.org")))
   (require 'org-roam-patch)
@@ -1418,10 +2229,10 @@ Optional argument ARGS is ignored."
   ;; Make use only of notes that are in the zettelaksten
   (el-patch-defun org-roam-node-random (&optional other-window filter-fn)
     "Find and open a random Org-roam node.
-With prefix argument OTHER-WINDOW, visit the node in another
-window instead.
-FILTER-FN is a function to filter out nodes: it takes an `org-roam-node',
-and when nil is returned the node will be filtered out."
+  With prefix argument OTHER-WINDOW, visit the node in another
+  window instead.
+  FILTER-FN is a function to filter out nodes: it takes an `org-roam-node',
+  and when nil is returned the node will be filtered out."
     (interactive current-prefix-arg)
     (org-roam-node-visit
      (cdr (seq-random-elt (org-roam-node-read--completions #'mymy-org-roam-in-zettelaksten)))
@@ -1582,14 +2393,31 @@ and when nil is returned the node will be filtered out."
     (org-hide-entry)
     (org-forward-heading-same-level (or arg 1))
     (org-show-entry))
+
+  ;; (benchmark-run 1000 (mymy-org-roam-get-link))
+  ;; Benchmark 1000 repetitions
+  ;; GC: 100000000
+  ;; With org roam: 7.888778214
+  ;; Without org roam: 2.5779902160000003
+  ;; Didn't change because of the performance, only because of the
+  ;; universality
   (defun mymy-org-roam-get-link (&optional arg)
     "Insert node at point as a link in the kill ring, with `C-u' copy
 the name of the node"
     (interactive "P")
-    (let* ((node (org-roam-node-at-point))
-           (node-id (org-roam-node-id node))
-           (node-name (org-roam-node-title node))
-           (node-name (or node-name (org-entry-get nil "ITEM"))))
+    (let* (;; (node (org-roam-node-at-point))
+           ;; (node-id (org-roam-node-id node))
+           ;; (node-name (org-roam-node-title node))
+           (entry-id (org-entry-get nil "ID"))
+           (node-id (or entry-id
+                        (org-with-wide-buffer (goto-char (point-min)) (org-id-get))
+                        (user-error "No id near.")))
+           (entry-name (org-entry-get nil "ITEM"))
+           (node-name (or (when entry-id
+                            (when (string-empty-p entry-name) (user-error "Heading without a name"))
+                            entry-name)
+                          (cadar (org-collect-keywords '("TITLE")))
+                          (user-error "No name."))))
       (kill-new
        (if (equal arg '(4))
            node-name
@@ -1605,8 +2433,7 @@ the name of the node"
   (defun mymy-org-id-get-create-with-roam-exclude (&optional force)
     (interactive)
     (org-entry-put (point) "ROAM_EXCLUDE" "t")
-    (org-id-get-create force)
-    )
+    (org-id-get-create force))
   ;; my org roam preview at point
   (defun mymy-org-id-open-without-push-mark (id)
     "Slight modification to org-id-open"
@@ -1649,6 +2476,7 @@ Like `org-id-open', but additionally uses the Org-roam database."
       (el-patch-add (when (org-current-level) (org-show-entry)))))
 
   (defun mymy-org-roam-preview-node ()
+    "Return a string representing the preview of node."
     (let* ((context (org-element-context))
            (type (org-element-type context))
            ;; (beg (org-element-property :begin context))
@@ -1659,16 +2487,14 @@ Like `org-id-open', but additionally uses the Org-roam database."
       (when (and (eq type 'link) (string-equal link-type "id"))
         ;; Never forget then they or you are in the same file
         (save-excursion
-          (if  (< 0 (caar (org-roam-db-query [:select level :from nodes :where (= id $s1)] id)))
+          (if (< 0 (caar (org-roam-db-query [:select level :from nodes :where (= id $s1)] id)))
               ;; Headline
               (save-window-excursion
                 (mymy-org-id-open-without-push-mark id)
                 (let* ((headline-context (org-element-context))
                        (beg (org-element-property :begin headline-context))
                        (end (org-element-property :end headline-context)))
-                  (buffer-substring-no-properties beg end)
-                  )
-                )
+                  (buffer-substring-no-properties beg end)))
             ;; File
             (save-window-excursion
               (mymy-org-id-open-without-push-mark id)
@@ -1687,19 +2513,21 @@ Like `org-id-open', but additionally uses the Org-roam database."
     (interactive)
     (when-let ((node-preview (mymy-org-roam-preview-node)))
       (when (string-empty-p node-preview)
-        (error "Nothing to show")
-        )
+        (error "Nothing to show"))
       (let ((buf (get-buffer-create "*mymy-org-roam-preview*")))
         (with-current-buffer buf
           (org-mode)
           (erase-buffer)
           (insert node-preview)
           (goto-char (point-min))
-          (org-show-all))
+          (org-show-entry)
+          ;; (org-show-all)
+          )
         (posframe-show buf
                        :poshandler 'posframe-poshandler-frame-top-right-corner
                        :hidehandler 'mymy-posframe-hidehandler-org-roam-hide-preview
                        :border-width 1 :border-color "blue"))))
+
   (defun mymy-posframe-hidehandler-org-roam-hide-preview (info)
     (and (not (string-equal "id" (org-element-property :type (org-element-context))))
          (get-buffer (cdr (plist-get info :posframe-parent-buffer)))))
@@ -1713,18 +2541,17 @@ Like `org-id-open', but additionally uses the Org-roam database."
     (next-line)
     (goto-char (org-element-property :end (org-element-context)))
     (newline)
-    (previous-line)
-    )
+    (previous-line))
 
 
   ;; Found this somewhere else, the core idea is not mine but the
   ;; other things are mine
-  (defun org-count-subentries (&optional pos match scope level)
+  (defun org-count-subentries (&optional message pos match scope level)
     "Return number of subentries for entry at POS.
 MATCH and SCOPE are the same as for `org-map-entries', but
 SCOPE defaults to 'tree.
 By default, all subentries are counted; restrict with LEVEL."
-    (interactive)
+    (interactive t)
     (save-excursion
       (goto-char (or pos (point)))
       ;; If we are in the middle of an entry, use the current heading.
@@ -1739,7 +2566,8 @@ By default, all subentries are counted; restrict with LEVEL."
                                        (or (not maxlevel)
                                            (<= (org-current-level) maxlevel)))
                                      match (or scope 'tree)))))))
-        (message (concat (when match (concat match ": ")) "%s subentries") subentries)
+        (when message
+          (message (concat (when match (concat match ": ")) "%s subentries") subentries))
         (when match
           (save-match-data
             (pcase match
@@ -1751,8 +2579,8 @@ By default, all subentries are counted; restrict with LEVEL."
                (list match subentries))
               ((pred stringp)
                (list (intern (concat ":" match)) subentries))
-              (_ t)))))))
-
+              ;; If match is t then return the subentries
+              (_ subentries)))))))
 
   (defun mymy-org-move-prev-heading ()
     (interactive)
@@ -1764,9 +2592,6 @@ By default, all subentries are counted; restrict with LEVEL."
     (interactive)
     (org-id-get-create)
     (mymy-org-roam-update-headline))
-  (defun mymy-say-back-link-count ()
-    (interactive)
-    (message (number-to-string (mymy-org-roam-get-backlinks))))
   (defun mymy-org-roam-goto-index (&optional other-window force)
     "Go to index file
 When interactive, FORCE is "
@@ -1789,6 +2614,12 @@ _._: Quit _q_: Quit
     ("b" (message (number-to-string (mymy-org-roam-get-backlinks))))
     ("." nil :color blue)
     ("q" nil :color blue))
+  ;; (if (equal (car target) 'closure)
+  ;;     (let* ((mode-name (ignore-errors (symbol-name mode)))
+  ;;            (name (intern (concat "ryo" (and mode-name (format "-%s" mode-name)) (format "/lambda-%s" key)))))
+  ;;       (defalias name target)
+  ;;       (ryo-modal-key key name args))
+  ;;   other-clause)
   (ryo-modal-keys
    ("S"
     (("l" org-roam-buffer-toggle)
@@ -1799,7 +2630,9 @@ _._: Quit _q_: Quit
        ("k" mymy-org-roam-get-link)
        ("y" hydra-zettel/body)
        ("e" mymy-org-roam-insert-next-heading)
-       ("b" mymy-say-back-link-count)))
+       ("b" (lambda () (interactive)
+              (message (number-to-string (mymy-org-roam-get-backlinks))))
+        :name "Say number of backlinks")))
      ("k"
       (("f" org-roam-dailies-goto-today)
        ("F" mymy-org-roam-dailies-secondary-goto-today)))
@@ -1828,6 +2661,26 @@ _._: Quit _q_: Quit
      ("i"
       ;; (format-time-string "%c" (seconds-to-time 1645577664))
       (("i" mymy-insert-unix-date)
+       ("e" (lambda (start end) (interactive "r")
+              (thread-last (buffer-substring-no-properties start end)
+                           ;; Returns 0 in case is not a number
+                           (string-to-number)
+                           (seconds-to-time)
+                           (format-time-string "%c")
+                           (message))))
+       ("l" (lambda () (interactive)
+              (let ((link (current-kill 0)))
+                (org-meta-return)
+                (mymy-insert-unix-date)
+                (end-of-line)
+                (newline)
+                (insert link)
+                (end-of-line)
+                (newline)
+                (org-meta-return)
+                (org-demote)))
+        :name "Insert literature note"
+        )
        ;; ("e" mymy-insert-exact-date-in-unix-as-link)
        ))
      ("r" mymy-refile-to-done))))
@@ -1837,6 +2690,7 @@ _._: Quit _q_: Quit
     "Sn" "org-roam node"
     "St" "org-roam tags"
     )
+  (gsetq org-roam-db-node-include-function (lambda () (not (member "ARCHIVE" (org-get-tags)))))
   :hook
   (after-init . winner-mode)
   ;; (org-mode . org-hide-properties)
@@ -1925,13 +2779,22 @@ Author: %^{author}
       )
      ("b" "Buffer" entry "* TODO Read [[%L][S]] %?\n"
       :prepend t
-      :target (file+olp ,(concat org-roam-directory "20210715113548-projects.org")
+      :target (file+olp ,(concat org-roam-directory "Projects/20210715113548-projects.org")
                         ("Projects" "Stack")))
+     ("c" "Current pending task" entry "* NEXT %T %?\n"
+      :prepend t
+      :target (file+olp ,(concat org-roam-directory "Projects/20210715113548-projects.org")
+                        ("Projects" "Current pending list")))
 
      ;; New words
      ("e" "English" entry "* %?\n\n"
       :target (file+olp ,(concat org-roam-directory "2021-07-19-13-58-56-english.org")
-                        ("Dictionary"))
+                        ("Dictionary")))
+
+     ;; Time Capsule
+     ("f" "Future self" entry "* %?\n\n"
+      :target (file+olp ,(concat org-roam-directory "2021-10-16-13-47-38-future_self.org")
+                        ("Future self"))
       )
      ))
   :bind
@@ -1954,43 +2817,98 @@ Author: %^{author}
 (use-package asoc
   :straight (asoc :type git :host github :repo "troyp/asoc.el"))
 (use-package org-capture-ref
+  :defer 5
   :after org-roam
   :straight doct
   ;; :straight (asoc.el :type git :host github :repo "troyp/asoc.el")
   :straight (org-capture-ref :type git :host github :repo "yantar92/org-capture-ref")
   :config
-  (gsetq org-capture-ref-capture-target (concat mymy-org-roam-dir "inbox/capture.org")
+  ;; (org-capture-ref-generate-key-human-readable)
+  ;; (mymy-org-capture-ref-generate-key)
+  (defun mymy-org-capture-ref-generate-key ()
+    ;; To avoid recursion
+    ;; => org-capture-ref-format-bibtex
+    ;; => org-capture-ref-clean-bibtex
+    ;; => org-capture-ref-clean-bibtex-hook
+    ;; => org-capture-ref-create-key-maybe
+    ;; => org-capture-ref-generate-key
+    (let ((bibtex-string (prog2 (unless (org-capture-ref-get-bibtex-field :key)
+                                  (org-capture-ref-set-bibtex-field :key "placeholder"))
+                             (org-capture-ref-format-bibtex)
+                           (when (string= (org-capture-ref-get-bibtex-field :key) "placeholder")
+                             (org-capture-ref-set-bibtex-field :key nil 'force)))))
+      (with-temp-buffer
+        (bibtex-mode)
+        (bibtex-set-dialect 'BibTeX)
+        (insert bibtex-string)
+        (goto-char 1)
+        (cl-letf (((symbol-function 'bibtex-autokey-get-year) (condition-case err
+                                                                  `(lambda () ,(bibtex-autokey-get-year))
+                                                                (t (lambda () "")))))
+          (bibtex-generate-autokey)))))
+
+  (gsetq org-capture-ref-generate-key-functions '(mymy-org-capture-ref-generate-key))
+
+  (defmacro mymy-org-capture-ref-set-bibtex-fields (&rest arg-list)
+    "Set org-caputer-ref fields like setq"
+    (declare (indent 0))
+    (cons 'progn
+          (cl-loop for i in arg-list
+                   collect `(org-capture-ref-set-bibtex-field ,@i))))
+
+  ;; After using, add the function to org-capture-ref-get-bibtex-functions
+  (defmacro mymy-org-capture-ref-get-bibtex- (name link-match &rest body)
+    "Create a site specific parser"
+    (declare (indent defun))
+    `(defun ,(intern (format "org-capture-ref-get-bibtex-%s" name)) ()
+       (when-let ((link (org-capture-ref-get-bibtex-field :url)))
+         (when (string-match ,link-match link)
+           ,@body))))
+  :config
+
+  (mymy-org-capture-ref-get-bibtex- scott-young "scotthyoung\\.com"
+    (mymy-org-capture-ref-set-bibtex-fields
+      (:type "misc")
+      (:howpublished "Scott H Young")
+      (:doi org-capture-ref-placeholder-value)
+      (:author (org-capture-ref-query-dom :meta "author"))
+      (:title (org-capture-ref-query-dom :class "entry-title"))
+      (:year (org-capture-ref-query-dom :meta "article:published_time" :apply #'org-capture-ref-extract-year-from-string))))
+
+  (add-to-list 'org-capture-ref-get-bibtex-functions #'org-capture-ref-get-bibtex-scott-young t)
+
+  (gsetq org-capture-ref-capture-target (expand-file-name (concat mymy-org-roam-dir "2022-09-07-08-31-08-references.org"))
          org-capture-ref-capture-keys '("b" "B")
-         org-capture-ref-capture-template `(:group "Browser link"
-                                                   :type entry
-                                                   :file ,org-capture-ref-capture-target
-                                                   :fetch-bibtex (lambda () (org-capture-ref-process-capture)) ; this must run first
-                                                   :link-type (lambda () (org-capture-ref-get-bibtex-field :type))
-                                                   :extra (lambda () (if (org-capture-ref-get-bibtex-field :journal)
-                                                                         (s-join "\n"
-                                                                                 '("- [ ] download and attach pdf"
-                                                                                   "- [ ] [[elisp:org-attach-open][read paper capturing interesting references]]"
-                                                                                   "- [ ] [[elisp:(browse-url (url-encode-url (format \"https://www.semanticscholar.org/search?q=%s\" (org-entry-get nil \"TITLE\"))))][check citing articles]]"
-                                                                                   "- [ ] [[elisp:(browse-url (url-encode-url (format \"https://www.connectedpapers.com/search?q=%s\" (org-entry-get nil \"TITLE\"))))][check related articles]]"
-                                                                                   "- [ ] check if bibtex entry has missing fields"))
-                                                                       ""))
-                                                   :org-entry (lambda () (org-capture-ref-get-org-entry))
-                                                   :bibtex-string (lambda () (org-capture-ref-format-bibtex))
-                                                   :template
-                                                   ("%{fetch-bibtex}* TODO %?%{space}%{org-entry}"
-                                                    "%{extra}"
-                                                    "%{bibtex-string}"
-                                                    "- Keywords: #%{link-type}")
-                                                   :headline "References"
-                                                   :children (("Interactive link"
-                                                               :keys ,(car org-capture-ref-capture-keys)
-                                                               :clock-in t
-                                                               :space " "
-                                                               :clock-resume t)
-                                                              ("Silent link"
-                                                               :keys ,(cadr org-capture-ref-capture-keys)
-                                                               :space ""
-                                                               :immediate-finish t))))
+         org-capture-ref-capture-template `( :group "Browser link"
+                                             :type entry
+                                             :file ,org-capture-ref-capture-target
+                                             :fetch-bibtex (lambda () (org-capture-ref-process-capture)) ; this must run first
+                                             :link-type (lambda () (org-capture-ref-get-bibtex-field :type))
+                                             :extra (lambda () (if (org-capture-ref-get-bibtex-field :journal)
+                                                                   (s-join "\n"
+                                                                           '("- [ ] download and attach pdf"
+                                                                             "- [ ] [[elisp:org-attach-open][read paper capturing interesting references]]"
+                                                                             "- [ ] [[elisp:(browse-url (url-encode-url (format \"https://www.semanticscholar.org/search?q=%s\" (org-entry-get nil \"TITLE\"))))][check citing articles]]"
+                                                                             "- [ ] [[elisp:(browse-url (url-encode-url (format \"https://www.connectedpapers.com/search?q=%s\" (org-entry-get nil \"TITLE\"))))][check related articles]]"
+                                                                             "- [ ] check if bibtex entry has missing fields"))
+                                                                 ""))
+                                             :org-entry (lambda () (org-capture-ref-get-org-entry))
+                                             :bibtex-string (lambda () (org-capture-ref-format-bibtex))
+                                             :template
+                                             ("%{fetch-bibtex}* TODO %?%{space}%{org-entry}"
+                                              "%{extra}"
+                                              "%{bibtex-string}"
+                                              "- Keywords: #%{link-type}")
+                                             :headline "References"
+                                             :children (("Interactive link"
+                                                         :keys ,(car org-capture-ref-capture-keys)
+                                                         :clock-in t
+                                                         :space " "
+                                                         :clock-resume t)
+                                                        ("Silent link"
+                                                         :keys ,(cadr org-capture-ref-capture-keys)
+                                                         :space ""
+                                                         :immediate-finish t))))
   (let ((templates (doct org-capture-ref-capture-template)))
     (dolist (template templates)
       (asoc-put! org-capture-templates
@@ -2047,10 +2965,10 @@ Author: %^{author}
   (add-hook 'gnus-summary-mode-hook #'gnus-undo-mode)
   (setq gnus-asynchronous t))
 (use-package deft
-  :custom
-  (deft-extensions '("org"))
-  (deft-directory (concat main-dropbox-dir "org-roam/"))
-  (deft-recursive t))
+  :config
+  (setq deft-extensions '("org"))
+  (setq deft-directory (concat main-dropbox-dir "Notes"))
+  (setq deft-recursive t))
 
 (use-package anki-editor
   :disabled
@@ -2070,20 +2988,22 @@ Author: %^{author}
 
 (use-package org-drill :disabled)
 (use-package quickrun)
-(use-package olivetti :straight t)
+(use-package olivetti
+  :straight t
+  :config
+  (setq olivetti-body-width (+ 4 fill-column)))
 (use-package nov
   :disabled
   :config
   (add-to-list 'auto-mode-alist '("\\.epub\\'" . nov-mode))
+  (setq nov-text-width 60)
   :hook
   ((nov-mode . olivetti-mode)
    (nov-mode . (lambda () (face-remap-add-relative
                            'variable-pitch
                            :family "Liberation Serif"
                            :height 1.0)))
-   (nov-mode . (lambda () (whitespace-mode -1))))
-  :custom
-  (setq nov-text-width 60))
+   (nov-mode . (lambda () (whitespace-mode -1)))))
 (use-package projectile
   ;; TODO: Come here later
   :init
@@ -2110,7 +3030,13 @@ Author: %^{author}
           "*vterm*"
           ;; Poetry
           "*poetry*"))
-  ;; :config
+  (gsetq frames-only-mode-use-window-functions
+         '( calendar report-emacs-bug checkdoc-show-diagnostics checkdoc org-compile-file
+            embark-act))
+  :config
+  ;; This is a temporary solution
+  (unless (equal "DESKTOP-GTTJN7V" (system-name))
+    (add-hook 'after-init-hook #'frames-only-mode))
   ;; (advice-add 'org-roam-dailies-capture-today :around 'frames-only-mode-advice-use-windows)
   :config
   (with-eval-after-load 'gnus
@@ -2219,8 +3145,26 @@ Author: %^{author}
                                               (message 0.5)
                                               (mml-preview 1.0 point)))))))
 (use-package avy
-  :bind (("M-g g" . avy-goto-line)
-         ("M-g M-g" . avy-goto-line))
+  :config
+  (defun avy-goto-word-crt-line ()
+    "Jump to a word start on the current line only."
+    (interactive)
+    (avy-with avy-goto-word-0
+      (avy-goto-word-0 nil (line-beginning-position) (line-end-position))))
+  :config
+  (ryo-modal-keys ;;; Avy
+   ("I" avy-goto-word-1)
+   ("i" (("y" avy-goto-char)
+         ("u" avy-goto-char-2)
+         ("m" avy-goto-word-0)
+         ("l" helm-all-mark-rings)
+         ("k" avy-goto-word-1)
+         ("n" avy-goto-word-crt-line)
+         ("i" avy-goto-line)
+         ("/" (("m" avy-goto-word-0-below)
+               ("k" avy-goto-word-1-below)))
+         (";" (("m" avy-goto-word-0-above)
+               ("k" avy-goto-word-1-above))))))
   :init
   (setq avy-case-fold-search nil)
   (setq avy-keys '(?n ?e ?i ?k ?y ?m ?u ?c ?r ?s ?t))
@@ -2232,18 +3176,27 @@ Author: %^{author}
 (use-package ace-window
   :config
   (setq aw-keys '(?n ?e ?i ?o ?k ?m ?u ?y))
-  (ace-window-display-mode))
+  (ace-window-display-mode)
+  (ryo-modal-key "owf" #'ace-window))
 (use-package windmove
   :config
   (windmove-default-keybindings)
   (setq windmove-wrap-around t))
 
+(use-package yasnippet-snippets
+  :defer 5)
 (use-package yasnippet
   :bind (("C-l" . yas-expand))
   :config
   (add-to-list 'company-backends 'company-yasnippet t)
   ;; (add-to-list 'warning-suppress-types '(yasnippet backquote-change))
   (defun mymy-yasnippet-hook ()
+    (yas-define-snippets
+     'prog-mode
+     '(;; "Key" "Template" "Name"
+                                        ; git1: To give context the moment I do a commit
+                                        ; git2: Make "g" snippet use comment depending on the mode
+       ("g" "`(org-trim comment-start)` git: " "Git reminder")))
     (yas-define-snippets
      'emacs-lisp-mode
      '(;; "Key" "Template" "Name"
@@ -2266,19 +3219,24 @@ Author: %^{author}
        ("<co" "#+STARTUP: content" "Content")
        ("<n" "#+STARTUP: nofold" "No fold")
 
-       (":el" "\\begin{${1:env}}\n\\end{${1:$(yas-field-value 1)}}" "Enviroment")
-       (":a" "align" "Aling env")
-       (":a*" "align*" "Align* env")
-       (":e" "equation" "Equation env")
-       (":e*" "equation*" "Equation* env")
+       ;; Git: More easy to type
+       (">el" "\\begin{${1:env}}\n\\end{${1:$(yas-field-value 1)}}" "Enviroment")
+       (">a" "align" "Aling env")
+       (">a*" "align*" "Align* env")
+       (">e" "equation" "Equation env")
+       (">e*" "equation*" "Equation* env")
 
-       ("::frac" "\\frac{${1:a}}{${2:b}}" "Fraction")
-       ("::div" "{${1:a} \\div ${2:b}}" "Division")
-       ("::cdot" "{${1:a} \\cdot ${2:b}}" "Multiplication")
-       ("::=" "{${1:a} = ${2:b}}" "Equality")
-       ("::nck" "{${1:n} \\choose ${2:k}}" "Choose function")
-       ("::int" "\\int_{${1:a}}^{${2:b}} ${3:f(x)} \\,dx" "Integrals")
-       ("::sum" "\\sum_{${1:a}}^{${2:b}}" "Summation"))))
+       (">>frac" "\\frac{${1:a}}{${2:b}}" "Fraction")
+       (">>div" "{${1:a} \\div ${2:b}}" "Division")
+       (">>cdot" "{${1:a} \\cdot ${2:b}}" "Multiplication")
+       (">>=" "{${1:a} = ${2:b}}" "Equality")
+       (">>nck" "{${1:n} \\choose ${2:k}}" "Choose function")
+       (">>int" "\\int_{${1:a}}^{${2:b}} ${3:f(x)} \\,dx" "Integrals")
+       (">>sum" "\\sum_{${1:a}}^{${2:b}}" "Summation"))))
+
+  (ryo-modal-keys
+   ("gy" yas-visit-snippet-file)
+   ("Gy" yas-insert-snippet))
   :bind ((;; C-c y is reserved for yasnippets and, possibly, its
           ;; snippets shortcuts
           "C-c y y" . company-yasnippet))
@@ -2391,17 +3349,30 @@ Author: %^{author}
   :bind (:map selected-keymap
               ("q" . selected-off)
               ("" . count-words-region)))
-(use-package ace-mc)
-(use-package direx)
+(use-package ace-mc
+  :config
+  (ryo-modal-keys
+   ("i" (("a" ace-mc-add-multiple-cursors)
+         ("t" ace-mc-add-single-cursor)))))
+(use-package direx
+  :config
+  (ryo-modal-key "Okm" #'direx:jump-to-directory)
+  )
 (use-package nyan-mode ;; Nyan, simple nyan
   :diminish nyan-mode
   :init
   (setq nyan-animate-nyancat t
         nyan-wavy-trail t)
   :hook
-  ((after-init) . nyan-mode))
+  (after-init . nyan-mode))
 (use-package centaur-tabs
   :demand
+  :config
+  (defun toggle-centaur-grouping ()
+    (interactive)
+    (if (eq centaur-tabs-buffer-groups-function 'centaur-tabs-projectile-buffer-groups)
+        (centaur-tabs-group-buffer-groups)
+      (centaur-tabs-group-by-projectile-project)))
   :config
   (centaur-tabs-mode t)
   (centaur-tabs-change-fonts "Fantasque Sans Mono" 160)
@@ -2421,6 +3392,9 @@ Author: %^{author}
   ;;         :action '(("Switch to group" . centaur-tabs-switch-group))))
   ;; (add-to-list 'helm-mini-default-sources 'helm-source-centaur-tabs-group)
   (centaur-tabs-get-groups)
+  (ryo-modal-keys
+   (">>" centaur-tabs-move-current-tab-to-right)
+   ("<<" centaur-tabs-move-current-tab-to-left))
   :bind
   ("C-S-<iso-lefttab>" . centaur-tabs-backward)
   ("C-<tab>" . centaur-tabs-forward)
@@ -2434,9 +3408,49 @@ Author: %^{author}
   (setq which-key-side-window-max-width 0.66)
   :config
   (push '((nil . "ryo:.*:") . (nil . "")) which-key-replacement-alist)
-  (which-key-mode))
+  (which-key-mode)
+  (which-key-add-key-based-replacements
+    "ok" "Buffers, Files & and M-x"
+    "oa" "Insert"
+    "op" "Projectile"
+    "ow" "Windows"
+    "ot" "Bookmarks & Registers")
+  (which-key-add-major-mode-key-based-replacements 'python-mode
+    "sye" "Send statment"
+    "syf" "Send function"
+    "syc" "Send class"
+    "sys" "Send top-statment"
+    "syg" "Send group"
+    "syw" "Send cell"
+    "syr" "Send region"
+    "syb" "Send buffer"
+    "sy" "Eval code section"
+    "s@" "HideShow"
+    "rd" "Debugging"
+    "rr" "Refractoring"
+    )
+  )
 (use-package expand-region
-  :bind (("C-'" . er/expand-region)))
+  :init
+  (ryo-modal-key "\'" #'er/expand-region)
+  :config
+  (ryo-modal-keys
+   ("\'" er/expand-region)
+   ("On" (("c" er/mark-comment)
+          ("d" er/mark-defun)
+          ("w" er/mark-word)
+          ("m" er/mark-method-call)
+          ("s" er/mark-symbol)
+          ("a" er/mark-symbol-with-prefix)
+          ("q" (("i" er/mark-inside-quotes)
+                ("o" er/mark-outside-quotes)))
+          ("p" (("i" er/mark-inside-pairs)
+                ("o" er/mark-outside-pairs)))
+          ("n" er/mark-next-accessor) ;; skips over one period and mark next symbol
+          )))
+  :bind
+  ("C-'" . er/expand-region))
+
 (use-package yequake
   :after org-roam
   :config
@@ -2574,8 +3588,8 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 ;; Emacs, why is this so LOW
 (setq mark-ring-max (* 1024 8))
 
-;; Is better to accept that in reality, i don't need this
-(setq line-move-visual nil)
+;; It doesn't do any harm
+(setq line-move-visual t)
 
 (setq highlight-nonselected-windows t)
 (setq use-dialog-box nil) ; Text-based options are better
@@ -2732,21 +3746,23 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (ryo-modal-keys
  ("z+" increment-number-at-point)
  ("z-" decrement-number-at-point))
-(define-minor-mode mymy-mode
-  "Define all keys to have a preference to override others"
-  :init-value nil
-  :lighter " mymy"
-  :keymap
-  (let ((keymap (make-sparse-keymap)))
-    (define-key keymap (kbd "S-SPC") 'ryo-modal-global-mode)
-    (define-key keymap (kbd "M-t") 'ryo-modal-global-mode)
-    keymap)
-  :group 'mymy)
-(define-globalized-minor-mode mymy-global-mode mymy-mode
-  (lambda ()
-    (if (not (minibufferp (current-buffer)))
-        (mymy-mode t))))
-(add-hook 'after-init-hook 'mymy-global-mode)
+;; git: Remove mymy-mode
+;; Comment: General alredy provides a way of doing this
+;; (define-minor-mode mymy-mode
+;;   "Define all keys to have a preference to override others"
+;;   :init-value nil
+;;   :lighter " mymy"
+;;   :keymap
+;;   (let ((keymap (make-sparse-keymap)))
+;;     (define-key keymap (kbd "S-SPC") 'ryo-modal-global-mode)
+;;     (define-key keymap (kbd "M-t") 'ryo-modal-global-mode)
+;;     keymap)
+;;   :group 'mymy)
+;; (define-globalized-minor-mode mymy-global-mode mymy-mode
+;;   (lambda ()
+;;     (if (not (minibufferp (current-buffer)))
+;;         (mymy-mode t))))
+;; (add-hook 'after-init-hook 'mymy-global-mode)
 
 
 
@@ -2789,12 +3805,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 
 ;; Load all functions
 (require 'functions)
-;; ;; Load the maped ryo-modal
-(require 'MyMy-mode)
-(put 'upcase-region 'disabled nil)
-(put 'downcase-region 'disabled nil)
-(put 'narrow-to-region 'disabled nil)
 (ryo-modal-global-mode t)
-(put 'dired-find-alternate-file 'disabled nil)
 
 ;; Init.el ends here
+

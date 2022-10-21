@@ -4,60 +4,6 @@
 (require 'cl-lib)
 
 ;; Here begins all that i have done to have backlink-counts
-(el-patch-defconst org-roam-db--table-schemata
-  '((files
-     [(file :unique :primary-key)
-      title
-      (hash :not-null)
-      (atime :not-null)
-      (mtime :not-null)])
-
-    (nodes
-     ([(id :not-null :primary-key)
-       (file :not-null)
-       (level :not-null)
-       (pos :not-null)
-       todo
-       priority
-       (scheduled text)
-       (deadline text)
-       title
-       properties
-       olp
-       (el-patch-add backlinkcount)
-       ]
-      (:foreign-key [file] :references files [file] :on-delete :cascade)))
-    (aliases
-     ([(node-id :not-null)
-       alias]
-      (:foreign-key [node-id] :references nodes [id] :on-delete :cascade)))
-
-    (citations
-     ([(node-id :not-null)
-       (cite-key :not-null)
-       (pos :not-null)
-       properties]
-      (:foreign-key [node-id] :references nodes [id] :on-delete :cascade)))
-
-    (refs
-     ([(node-id :not-null)
-       (ref :not-null)
-       (type :not-null)]
-      (:foreign-key [node-id] :references nodes [id] :on-delete :cascade)))
-
-    (tags
-     ([(node-id :not-null)
-       tag]
-      (:foreign-key [node-id] :references nodes [id] :on-delete :cascade)))
-
-    (links
-     ([(pos :not-null)
-       (source :not-null)
-       (dest :not-null)
-       (type :not-null)
-       (properties :not-null)]
-      (:foreign-key [source] :references nodes [id] :on-delete :cascade)))))
-
 (cl-defstruct (org-roam-node (:constructor org-roam-node-create)
                              (:copier nil))
   "A heading or top level file with an assigned ID property."

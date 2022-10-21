@@ -10,6 +10,7 @@
         backward-delete-char
         backward-delete-word
         backward-to-word
+        company-complete
         delete-current-line
         delete-horizontal-space
         delete-pair
@@ -18,6 +19,7 @@
         forward-to-word
         god-mode-self-insert
         handle-switch-frame
+        haskell-indentation-common-electric-command
         helm-confirm-and-exit-minibuffer
         helm-mini
         hydra-git/body
@@ -43,14 +45,17 @@
         lispy-move-beginning-of-line
         lispy-move-end-of-line
         lispy-parens
+        lispy-quotes
         lispy-space
         lispy-tick
         lispy-yank
+        lsp-rename
         my-delete-whole-line
         org-beginning-of-line
         org-cycle
         org-delete-char
         org-end-of-line
+        org-force-self-insert
         org-kill-line
         org-meta-return
         org-metaright
@@ -58,9 +63,11 @@
         org-self-insert-command
         org-todo
         org-yank
+        paste-primary-selection
         rectangle-backward-char
         rectangle-forward-char
         rectangle-mark-mode
+        ryo:085ed6482dfe2416f758b8ed90262cd0:insert\ text
         ryo:6c0b5bec3522d2e495ff80ad83791864:insert-quotes
         ryo:d77df2a102a270b1c4ab1b70c78e1fd0:insert\ text
         ryo:d80a40411c8db939213101425d5bc549:Comment
@@ -74,8 +81,10 @@
         sp-wrap-round
         special-lispy-ace-subword
         special-lispy-ace-symbol
+        special-lispy-barf
         special-lispy-different
         special-lispy-mark-list
+        special-lispy-move-down
         special-lispy-move-up
         special-lispy-new-copy
         special-lispy-other-mode
@@ -87,6 +96,8 @@
         switch-to-last-buffer
         upcase-char
         wdired--self-insert
+        wdired-finish-edit
+        yas-expand
         ))
 
 (setq mc/cmds-to-run-once
@@ -99,6 +110,7 @@
         ace-mc-do-keyboard-reset
         ace-mc-quick-exchange
         beginning-of-buffer
+        centaur-tabs-forward
         describe-key
         god-mode-all
         helm-M-x
@@ -110,4 +122,5 @@
         special-lispy-ace-paren
         special-lispy-narrow
         special-lispy-occur
+        special-lispy-tab
         ))
