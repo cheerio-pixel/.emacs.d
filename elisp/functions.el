@@ -272,12 +272,9 @@ indentation levels."
 
 
 (defun strip-<p>-html (paragraph contents info)
-  (string-remove-suffix
-   "</p>"
-   (string-remove-prefix
-    "<p>"
-    (org-html-paragraph paragraph contents info)))
-  )
+  (thread-last (org-html-paragraph paragraph contents info)
+               (string-remove-prefix "<p>")
+               (string-remove-suffix "</p>")))
 
 (defun revert-buffer-no-confirm ()
   "Revert buffer without confirmation."
