@@ -171,6 +171,45 @@ make sure the name of the created command is unique."
                 (add-to-list 'ryo-modal-mode-keymaps mode))
               (define-key (eval (intern map-name)) (kbd key) func))
           (define-key ryo-modal-mode-map (kbd key) func))
-        (add-to-list 'ryo-modal-bindings-list `(,key ,name ,@args)))))))
+        (add-to-list 'ryo-modal-bindings-list `(,key ,name ,@args))))))
+
+  (el-patch-defmacro ryo-modal-major-mode-keys (mode &rest args)
+    "Bind several keys in `ryo-modal-mode', but only if major mode is MODE.
+ARGS is the same as `ryo-modal-keys'."
+    (el-patch-add (declare (indent defun)))
+    `(progn
+       ,@(mapcar (lambda (x)
+                   `(ryo-modal-key ,(car x)
+                                   (if ,(stringp (cadr x))
+                                       ,(cadr x)
+                                     (quote ,(cadr x)))
+                                   ,@(nthcdr 2 x)
+                                   :mode ,mode))
+                 args)))
+
+  (el-patch-defmacro ryo-modal-keys (&rest args)
+    "Bind several keys in `ryo-modal-mode'.
+Typically each element in ARGS should be of the form (key target [keywords]).
+The target should not be quoted.
+The first argument may be a list of keywords; they're applied to all keys:
+
+  \(:exit t :then '(kill-region)).
+
+See `ryo-modal-key' for more information."
+    (el-patch-add (declare (indent defun)))
+    (let ((kw-list
+           (if (symbolp (caar args))
+               (pop args)
+             nil)))
+      `(progn
+         ,@(mapcar (lambda (x)
+                     `(ryo-modal-key ,(car x)
+                                     ,(if (stringp (cadr x))
+                                          (cadr x)
+                                        `(quote ,(cadr x)))
+                                     ,@(nthcdr 2 x)
+                                     ,@kw-list))
+                   args))))
+  )
 
 (provide 'ryo-modal-patch)
