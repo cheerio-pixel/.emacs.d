@@ -358,15 +358,21 @@
   ;;                           (string-match-p (format "%s" (plist-get args :name)) (format "%S" cmd)))))
   ;;         (user-error "Do you want to rebind this shortcut?")
   ;;       (apply orig-f key target (remove :force args)))))
+
   ;; (advice-add #'ryo-modal-key :around #'ryo-modal-key-careful)
   ;; (ryo-modal-key "f" #'next-line)
   ;; (ryo-modal-key "f" #'iedit-mode)
   ;; Bug: Force doesn't work
+  (defvar ryo-modal-excluded-modes '()
+    "A list of modes that the global mode should exclude.
+By default the minibuffer is excluded."
+    )
 
   (define-globalized-minor-mode ryo-modal-global-mode ryo-modal-mode
     (lambda ()
-      (if (not (minibufferp (current-buffer)))
-          (ryo-modal-mode t))))
+      (when (and (not (minibufferp (current-buffer)))
+                 (not (member major-mode ryo-modal-excluded-modes)))
+        (ryo-modal-mode t))))
   :config
   ;; r, s, R, S are reserved for major modes
   (with-eval-after-load 'iedit-mode
