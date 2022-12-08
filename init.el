@@ -125,6 +125,11 @@
          )))
   (mapc (lambda (x) (define-global-abbrev (car x) (cadr x))) mymy-abbrevs))
 ;;* Functions
+
+;; I use this too much
+(defun mymy-kill-new (s)
+  (kill-new (format "%S" s)))
+
 (defvar killed-file-list nil
   "List of recently killed files.")
 
