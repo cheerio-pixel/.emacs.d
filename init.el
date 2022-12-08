@@ -335,17 +335,32 @@
   (setq ryo-modal-cursor-type 'hollow)
   :config
   (require 'ryo-modal-patch)
-  ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Advice-Combinators.html
-  ;; (defun mymy-ryo-modal-key-careful (key target &rest args)
-  ;;   "Use ryo-modal-key but first check if the key is already binded.
-  ;; If you are sure you want to override a binding pass :force as an arg."
-  ;;   (when (memq :force args)
-  ;;     (apply #'ryo-modal-key key target (remove :force args)))
-  ;;   (let ((cmd (lookup-key (or (plist-get args :mode) ryo-modal-mode-map) (kbd key))))
-  ;;     (if (and cmd (not (eq cmd target)))
-  ;;         (user-error "Do you want to rebind this shortcut?")
-  ;;       (apply #'ryo-modal-key key target (remove :force args)))))
 
+  (defun mymy-replace-ryo-modal-key-to-my-careful ()
+    (unless (eq (symbol-function #'ryo-modal-key) 'mymy-ryo-modal-key-careful)
+      (defalias 'old-ryo-modal-key (symbol-function #'ryo-modal-key)))
+    (defun mymy-ryo-modal-key-careful (key target &rest args)
+      "Use ryo-modal-key but first check if the key is already binded.
+  If you are sure you want to override a binding pass :force as an arg."
+      (when (memq :force args)
+        (apply #'old-ryo-modal-key key target (remove :force args)))
+      (let ((cmd (lookup-key (or (plist-get args :mode) ryo-modal-mode-map) (kbd key)))
+            hash hash-name)
+
+        (when (plist-get args :name)
+          (setq hash (secure-hash 'md5 (format "%s%s" target args)))
+          (setq hash-name (concat "ryo:" hash ":" (plist-get args :name))))
+        (if (and cmd
+                 (or (not (eq cmd target))
+                     (not (eq hash-name (format "%s" cmd))))
+                 (not (keymapp cmd)))
+            (user-error (format "Do you want to rebind this shortcut? Old command: %s New command: %s" cmd target))
+          (apply #'old-ryo-modal-key key target (remove :force args)))))
+    (defalias 'ryo-modal-key #'mymy-ryo-modal-key-careful))
+
+  ;; (mymy-replace-ryo-modal-key-to-my-careful)
+
+  ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Advice-Combinators.html
   ;; (defun ryo-modal-key-careful (orig-f &rest args)
   ;;   "Use ryo-modal-key but first check if the key is already binded.
   ;; If you are sure you want to override a binding pass :force as an arg."
