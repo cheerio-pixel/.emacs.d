@@ -64,6 +64,7 @@
 (setq create-lockfiles nil)
 (setq ring-bell-function 'ignore)
 (setq abbrev-suggest t)
+;; (setq lsp-use-plists t)
 
 ;;* Modes
 (global-hl-line-mode)
@@ -907,7 +908,6 @@
   :defer 5
   :init
   (setq lsp-keymap-prefix "C-c l")
-  ;; (setq lsp-use-plists t)
   :config
   ;; For debugging
   ;; (setq lsp-log-io t)
