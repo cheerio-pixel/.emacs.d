@@ -1,4 +1,5 @@
 (setq package-enable-at-startup nil)
+(setq source-directory "~/.local/src/emacs/")
 
 ;; ;; https://github.com/bkaestner/.emacs.d/blob/37c75bfe3a199594ad89504d870e68f6f424764f/early-init.el
 ;; (setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes

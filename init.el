@@ -64,7 +64,6 @@
 (setq create-lockfiles nil)
 (setq ring-bell-function 'ignore)
 (setq abbrev-suggest t)
-(setq source-directory "~/.local/src/emacs/src/")
 
 ;;* Modes
 (global-hl-line-mode)
