@@ -2861,6 +2861,36 @@ Like `org-id-open', but additionally uses the Org-roam database."
         (when (org-current-level)
           (mymy-org-show-headline)))))
 
+  ;; (el-patch-defun org-roam-id-find (id &optional markerp)
+  ;;     "Return the location of the entry with the id ID using the Org-roam db.
+  ;; The return value is a cons cell (file-name . position), or nil
+  ;; if there is no entry with that ID.
+  ;; With optional argument MARKERP, return the position as a new marker."
+  ;;     (cond
+  ;;      ((symbolp id) (setq id (symbol-name id)))
+  ;;      ((numberp id) (setq id (number-to-string id))))
+  ;;     (let ((node (org-roam-populate (org-roam-node-create :id id))))
+
+  ;;       ;; Try to fix the inconsistency of position
+  ;;       ;; The main problem is that the slot point is updated with the db
+  ;;       (el-patch-add
+  ;;         (let ((file (org-roam-node-file node)))
+  ;;           (if (eq (buffer-file-name) file)
+  ;;               (setf (org-roam-node-point node) (org-find-entry-with-id id))
+  ;;             (with-current-buffer (or (find-buffer-visiting file)
+  ;;                                      (find-file-noselect file))
+  ;;               (setf (org-roam-node-point node) (org-find-entry-with-id id)))))
+  ;;         )
+
+  ;;       (when-let ((file (org-roam-node-file node)))
+  ;;         (if markerp
+  ;;             (unwind-protect
+  ;;                 (let ((buffer (or (find-buffer-visiting file)
+  ;;                                   (find-file-noselect file))))
+  ;;                   (with-current-buffer buffer
+  ;;                     (move-marker (make-marker) (org-roam-node-point node) buffer))))
+  ;;           (cons (org-roam-node-file node)
+  ;;                 (org-roam-node-point node))))))
 
   (defun mymy-org-roam-preview-node ()
     "Return a string representing the preview of node."
