@@ -3261,6 +3261,11 @@ Author: %^{author}
       :target (file+olp ,(concat org-roam-directory "2021-10-16-13-47-38-future_self.org")
                         ("Future self")))
 
+     ;; Standard Operating Procedures
+     ("o" "SOP" entry "* %?\n\n"
+      :target (file+olp ,(concat org-roam-directory "2022-08-03-06-17-18-standard_operating_procedures.org")
+                        ("Standard operating procedures"))))
+   )
   :bind
   (("C-c n l" . org-roam-buffer-toggle)
    ("C-c n f" . org-roam-node-find)
