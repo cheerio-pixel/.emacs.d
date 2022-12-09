@@ -1682,6 +1682,26 @@ Changing this requires a restart of Emacs to work correctly."
       (insert "Last block update at: "
               (format-time-string fmt))))
 
+  (defun mymy-org-link-activate-link (start end _path bracketp)
+    "Make the link [[PATH][DESC]] show like [[DESC]]"
+    (when bracketp
+      (let ((visible-start (or (match-beginning 3) (match-beginning 2)))
+            (visible-end (or (match-end 3) (match-end 2))))
+        (remove-text-properties start (1+ start) '(invisible nil))
+        (remove-text-properties (1- visible-start) visible-start '(invisible nil))
+        (remove-text-properties visible-end end '(invisible nil)))))
+
+  (org-link-set-parameters "id" :activate-func #'mymy-org-link-activate-link)
+  (org-link-set-parameters "cite" :activate-func #'mymy-org-link-activate-link)
+
+  (defun mymy-org-link-activate-link-alt (start end _path bracketp)
+    "Make the link [[PATH][DESC]] show like [DESC]"
+    (when bracketp
+      (let ((visible-start (or (match-beginning 3) (match-beginning 2)))
+            (visible-end (or (match-end 3) (match-end 2))))
+        (remove-text-properties start (1+ start) '(invisible nil))
+        (remove-text-properties (1- end) end '(invisible nil)))))
+
   (ryo-modal-keys
     (:norepeat t)
     ("O" (("a" org-agenda)
