@@ -1076,6 +1076,176 @@ By default the minibuffer is excluded."
   :bind (:map flycheck-mode-map
               ("M-n" . flycheck-next-error)
               ("M-u" . flycheck-previous-error)))
+;;** Vertico
+
+(use-package vertico
+  :straight vertico-posframe
+  :init
+  (vertico-mode)
+  :config
+  (setq enable-recursive-minibuffers t)
+  ;; For one week without this [2022-11-01 Tue]
+  ;; (vertico-posframe-mode -1)
+  ;; (vertico-posframe-cleanup)
+  ;; Kind of buggy for long lines
+  ;; (gsetq vertico-posframe-poshandler #'posframe-poshandler-frame-top-center)
+  (gsetq vertico-posframe-poshandler #'posframe-poshandler-frame-center)
+  ;; (setq vertico-posframe-parameters
+  ;;       '((left-fringe . 8)
+  ;;         (right-fringe . 8)))
+  (with-eval-after-load 'hotfuzz
+    (hotfuzz-vertico-mode))
+  )
+
+(use-package consult
+  :straight consult-projectile
+  :config
+  ;; From https://www.reddit.com/r/emacs/comments/re31i6/comment/ho7ctf3/
+  (defun up-directory (arg)
+    "Move up a directory (delete backwards to /)."
+    (interactive "p")
+    (if (string-match-p "/." (minibuffer-contents))
+        ;; zap-up-to-char but deletes the region instead of killing it.
+        ;; This addition was by me.
+        (let ((char ?/)
+              (arg (- arg)))
+          (let ((direction (if (>= arg 0) 1 -1)))
+            (delete-region (point)
+                           (progn
+                             (forward-char direction)
+                             (unwind-protect
+                                 (search-forward (char-to-string char) nil nil arg)
+                               (backward-char direction))
+                             (point)))))
+      (delete-minibuffer-contents)))
+
+  (general-define-key
+   :keymaps 'vertico-map
+   "C-l" 'up-directory)
+
+  (defun mymy-consult-line-using-region (start end)
+    (interactive "r")
+    (consult-line (when (region-active-p) (buffer-substring-no-properties start end))
+                  (not (not current-prefix-arg))))
+
+  (defun mymy-consult-line-using-thing-at-point ()
+    (interactive)
+    (consult-line (thing-at-point 'symbol)
+                  (not (not current-prefix-arg))))
+
+  (defun mymy-consult-line-cycle ()
+    (interactive)
+    (let ((vertico-cycle t))
+      (call-interactively #'consult-line)))
+
+  :config
+  (recentf-mode 1)
+  ;; With this package I can embark-export consult-line candidates and
+  ;; then edit with occur-edit-mode (e). Also, the export buffer
+  ;; becomes a occur buffer.
+  (use-package embark-consult)
+  (general-define-key
+   "M-x" 'execute-extended-command
+   "C-x b" 'consult-buffer
+   "C-x C-f" 'find-file
+   "C-c h s" 'consult-line
+   "C-c t h" 'consult-projectile)
+
+  :config
+  (ryo-modal-keys
+    ;; ("F" mymy-consult-line-using-thing-at-point)
+    ;; ("F" mymy-consult-line-using-region)
+    ;; ("F" mymy-consult-line-cycle)
+    ("F" consult-line)
+    ;; Remember that ! SPC negates the focus
+    ("f" consult-keep-lines)
+    ("B" consult-mark)
+    ("b" consult-outline)
+    ("Yu" consult-yank-from-kill-ring)
+    ;; Doesn't change selected to the current one
+    ;; ("Yu" consult-yank-pop)
+    ("ol" consult-locate)
+    ("ot" (("t" consult-register)
+           ("p" consult-bookmark)))
+    ("ok" (;; ("e" helm-mini)
+           ;; Offers something like the configuration of helm-mini
+           ;; Recent files
+           ("e" consult-buffer)
+           ("f" consult-grep)
+           ;; ("k" helm-complex-command-history)
+           ("k" consult-complex-command)
+           ("m" find-file :name "Find file")
+           ("y" find-name-dired)
+           ;; ("r" helm-find :name "Find file recursively") ;; Find files recursively
+           ("r" consult-find :name "Find file recursively") ;; Find files recursively
+           ;; ("i" helm-M-x)
+           ("i" execute-extended-command)
+           ;; ("o" helm-apropos)
+           ("o" consult-apropos))))
+  )
+
+(use-package consult-org-roam
+  ;; For some reason, he preview started to move the point.
+  :disabled
+  :config
+  ;; Why? Live previewing
+  (consult-org-roam-mode))
+
+;; Even though this package is only one commit and is from 2021/8/24,
+;; I'm going to keep it since it's really simple.
+(use-package consult-bibtex
+  :straight (:type git :host github :repo "mohkale/consult-bibtex")
+  :config
+  (require 'consult-bibtex-embark)
+  (ryo-modal-key "Seb" 'consult-bibtex)
+  (setq consult-bibtex-default-action #'consult-bibtex-edit-notes)
+  (define-key consult-bibtex-embark-map "RET" #'consult-bibtex)
+  (add-to-list 'embark-become-keymaps 'consult-bibtex-embark-map)
+  )
+
+(use-package marginalia
+  :config
+  (marginalia-mode))
+
+(use-package embark
+  :config
+  (general-define-key
+   "C-," 'embark-act
+   "M-," 'embark-dwim)
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none))))
+  (gsetq embark-verbose-indicator-display-action '(display-buffer-at-bottom))
+  (gsetq embark-verbose-indicator-display-action '(display-buffer-reuse-window))
+  )
+
+;; Good old fuzzy search
+(use-package hotfuzz
+  ;; I don't know what to do about you
+  ;; I try to match "kill emacs" and you find nothing. But not only
+  ;; that, you also have to not play nice with orderless.
+  ;; Sorry, hotfuzz. I was supposed to use it without spaces. So
+  ;; orderless gets activated if I start separating with spaces.
+  ;; But this is still uncomfortable.
+  :disabled
+  :config
+  (add-to-list 'completion-styles 'hotfuzz t)
+  )
+
+(use-package orderless
+  :config
+  ;; Put orderless at last since orderless put me things almost at random.
+  ;; (add-to-list 'completion-styles 'orderless t)
+  (setq completion-styles '(basic partial-completion orderless))
+  ;; matching characters in order, but non-consecutively
+  ;; (add-to-list 'orderless-matching-styles 'orderless-flex t)
+  (gsetq orderless-matching-styles '(orderless-literal orderless-regexp orderless-prefixes))
+  ;; (setq orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex))
+  (gsetq completion-category-overrides '((file (styles basic partial-completion))))
+  )
+
+
 ;;** Helm
 (use-package helm
   :disabled
