@@ -3410,6 +3410,17 @@ If a keyword from the template is missing, it will remain empty."
 
   (add-to-list 'org-capture-ref-get-bibtex-functions #'org-capture-ref-get-bibtex-scott-young t)
 
+  (mymy-org-capture-ref-get-bibtex- zettelkasten-de "zettelkasten\\.de"
+    (mymy-org-capture-ref-set-bibtex-fields
+      (:type "Online")
+      (:doi org-capture-ref-placeholder-value)
+      (:author (org-capture-ref-query-dom :meta "author"))
+      (:title (org-capture-ref-query-dom :meta "og:title"))
+      (:date (org-capture-ref-query-dom :meta "og:article:published_time" :apply #'mymy-org-capture-ref-get-date))
+      (:year (org-capture-ref-query-dom :meta "og:article:published_time" :apply #'org-capture-ref-extract-year-from-string))))
+
+  (add-to-list 'org-capture-ref-get-bibtex-functions #'org-capture-ref-get-bibtex-zettelkasten-de t)
+
   (gsetq org-capture-ref-capture-target (expand-file-name (concat mymy-org-roam-dir "2022-09-07-08-31-08-references.org"))
          org-capture-ref-capture-keys '("b" "B")
          org-capture-ref-capture-template `( :group "Browser link"
