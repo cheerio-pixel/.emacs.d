@@ -3528,6 +3528,13 @@ If a keyword from the template is missing, it will remain empty."
   :straight t
   :config
   (setq olivetti-body-width (+ 4 fill-column)))
+
+;; I would normally take screenshots of org mode and source code and
+;; send it through whatsapp
+(use-package screenshot
+  :straight (:type git :host github :repo "tecosaur/screenshot")
+  )
+
 (use-package nov
   :disabled
   :config
