@@ -3405,6 +3405,7 @@ If a keyword from the template is missing, it will remain empty."
       (:doi org-capture-ref-placeholder-value)
       (:author (org-capture-ref-query-dom :meta "author"))
       (:title (org-capture-ref-query-dom :class "entry-title"))
+      (:date (org-capture-ref-query-dom :meta "article:published_time" :apply #'mymy-org-capture-ref-get-date))
       (:year (org-capture-ref-query-dom :meta "article:published_time" :apply #'org-capture-ref-extract-year-from-string))))
 
   (add-to-list 'org-capture-ref-get-bibtex-functions #'org-capture-ref-get-bibtex-scott-young t)
