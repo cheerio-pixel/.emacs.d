@@ -1820,13 +1820,16 @@ Changing this requires a restart of Emacs to work correctly."
           ("ABANDONED" . (:foreground "red" :weight bold))
           ("WAITING" . (:foreground "yellow" :weight bold))
           ("CLASS" . (:foreground "purple" :weight bold))
+          ;; From NEXT to HOLD to mean that another NEXT, more
+          ;; important, it's taking lead.
+          ("HOLD" . (:foreground "yellow" :weight bold))
           ("NEXT" . (:foreground "blue" :weight bold))
           ("HABIT" . (:foreground "yellow" :weight italic))
           ;; As in alloted time
           ("BOOK" . (:foreground "white" :weight bold))
           ))
   (setq org-todo-keywords
-        '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "|" "DONE(s)")
+        '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "HOLD(o)" "|" "DONE(s)")
           (type "HABIT(h)" "|" "CANCELLED(c)" "ABANDONED(a)")))
   ;; (org-capture-templates
   ;;  ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
