@@ -2405,6 +2405,38 @@ Optional argument ARGS is ignored."
       (org-show-context)
       (when (> (org-outline-level) 0)
         (org-show-entry))))
+
+  (defun mymy-delve--buffer-modified-p (&optional buffer tokens)
+    (let* ((buf (or buffer (current-buffer)))
+           (_ (delve--assert-buf buf))
+           (l (or tokens (lister-map (lister-get-ewoc buf)  #'delve-store--tokenize-object)))
+           (file-name (or (buffer-file-name buf) (error "This buffer is not associated with any file"))))
+      (not (equal (delve-store--read file-name) l))))
+
+  ;; Temporal functionality of backup
+  ;; (progn
+  ;;   (el-patch-defun delve--do-save-buffer (buf file-name)
+  ;;     "Store the Delve list of BUF in FILE-NAME."
+  ;;     ;; store list:
+  ;;     (let ((l (lister-map (lister-get-ewoc buf)  #'delve-store--tokenize-object)))
+  ;;       (unless (file-exists-p file-name)
+  ;;         (make-empty-file file-name t))
+  ;;       ;; Only save when modified
+  ;;       (el-patch-wrap 1 0
+  ;;         (when (el-patch-add (mymy-delve--buffer-modified-p buf l))
+  ;;           (delve-store--write file-name l)
+  ;;           ;; For git-auto-commit-mode
+  ;;           (el-patch-add (run-hooks 'after-save-hook))
+  ;;           ;; link buffer to file:
+  ;;           (delve--setup-file-buffer buf file-name)))))
+
+  ;;   (defun mymy-delve-hook ()
+  ;;     ;; For some reason, this is not set
+  ;;     (when-let ((buf (buffer-local-value 'delve-local-storage-file (current-buffer))))
+  ;;       (setq buffer-file-name buf))
+  ;;     (git-auto-commit-mode))
+
+  ;;   (add-hook 'delve-mode-hook 'mymy-delve-hook))
   :config
   (setq delve-dashboard-tags '("entry"))
   (setq delve-display-path nil)
