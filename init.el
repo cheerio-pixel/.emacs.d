@@ -2926,12 +2926,16 @@ Like `org-id-open', but additionally uses the Org-roam database."
   ;; Could be anywhere
   (setq org-tags-column 0)
 
+  (defvar mymy-org-roam-preview-current-link nil
+    "Link we are previewing.")
+
   (defun mymy-org-roam-show-preview ()
     (interactive)
     (when-let ((node-preview (mymy-org-roam-preview-node)))
       (when (string-empty-p node-preview)
         (error "Nothing to show"))
       (let ((buf (get-buffer-create "*mymy-org-roam-preview*")))
+        (setq mymy-org-roam-preview-current-link (org-element-property :raw-link (org-element-context)))
         (with-current-buffer buf
           (org-mode)
           (erase-buffer)
@@ -2947,7 +2951,8 @@ Like `org-id-open', but additionally uses the Org-roam database."
                        :border-width 1 :border-color "blue"))))
 
   (defun mymy-posframe-hidehandler-org-roam-hide-preview (info)
-    (and (not (string-equal "id" (org-element-property :type (org-element-context))))
+    (and (not (string-equal mymy-org-roam-preview-current-link
+                            (org-element-property :raw-link (org-element-context))))
          (get-buffer (cdr (plist-get info :posframe-parent-buffer)))))
 
   (setq org-insert-heading-respect-content nil)
