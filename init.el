@@ -2841,7 +2841,7 @@ Like `org-id-open', but additionally uses the Org-roam database."
             (or
              (cdr
               (assq
-               (cdr (assq 'file (el-patch-swap
+               (cdr (assq 'file (el-patch-swap ; For files
                                   org-link-frame-setup
                                   (if (equal arg '(4))
                                       org-link-frame-setup
