@@ -1576,6 +1576,15 @@ Changing this requires a restart of Emacs to work correctly."
                                fill-prefix))
             (do-auto-fill))))))
 
+  ;; FINALLLYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+  (defun mymy-org-fill-exclude-filling-p ()
+    (memq (org-element-type (org-element-context)) mymy-org-auto-fill-excluded-elements))
+
+  (defun mymy-org-fill-hook ()
+    (add-to-list 'fill-nobreak-predicate #'mymy-org-fill-exclude-filling-p))
+
+  (add-hook 'org-mode-hook #'mymy-org-fill-hook)
+
   ;; For latex-math-mode
   ;; (use-package auctex :no-require :config (require 'latex))
 
