@@ -4129,7 +4129,12 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (setenv "PATH" (let ((current (getenv "PATH"))
                      (new (concat (getenv "HOME") "/.local/bin")))
                  (if current (concat new ":" current) new)))
-(setq lsp-java-java-path (concat (getenv "JAVA_HOME") "bin/java"))
+
+(let ((java-env (getenv "JAVA_HOME")))
+  (if java-env
+      (setq lsp-java-java-path (concat (getenv "JAVA_HOME") "bin/java"))
+    (setq lsp-java-java-path "java")))
+
 (setq default-fill-column 74)
 ;; To remind me that this thing is posible
 ;; I yet don't feel worthy of such power
