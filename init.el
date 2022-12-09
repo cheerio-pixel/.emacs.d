@@ -3386,6 +3386,16 @@ If a keyword from the template is missing, it will remain empty."
        (when-let ((link (org-capture-ref-get-bibtex-field :url)))
          (when (string-match ,link-match link)
            ,@body))))
+
+  (defun mymy-org-capture-ref-get-date (string-or-dom)
+    (let ((string (cond
+                   ((stringp string-or-dom) string-or-dom)
+                   ((stringp (car string-or-dom)) (mapconcat #'identity string-or-dom ""))
+                   (t (dom-texts string-or-dom)))))
+      (save-match-data
+        (when (and string (string-match "[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}" string))
+          (match-string 0 string)))))
+
   :config
 
   (mymy-org-capture-ref-get-bibtex- scott-young "scotthyoung\\.com"
