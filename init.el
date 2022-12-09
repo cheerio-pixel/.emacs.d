@@ -2966,6 +2966,48 @@ Like `org-id-open', but additionally uses the Org-roam database."
     (newline)
     (previous-line))
 
+  (defun mymy-org-roam-propagate-state-to-link-inside-heading ()
+    "Mark all links to headings with a TODO to current org-state"
+    (save-excursion
+      (org-back-to-heading t)
+      (let ((title (org-element-property :raw-value (org-element-context)))
+            link-list)
+        ;; Set list of link's id in link-list
+        (with-temp-buffer
+          (insert title)
+          (org-mode)
+          (goto-char (point-min))
+
+          ;; Get all the links in content
+          (setq link-list
+                (org-element-map (org-element-parse-buffer) 'link
+                  (lambda (link)
+                    (when (string= (org-element-property :type link) "id")
+                      (org-element-property :path link))))))
+        (when link-list
+          (->> link-list
+               ;; Get context from id
+               (--map (save-window-excursion (mymy-org-id-open-without-push-mark it) (org-element-context)))
+               ;; Only keep the headlines
+               (--filter (eq 'headline (car it)))
+               ;; Remove the headlines without TODO keyword
+               (--remove (not (org-element-property :todo-keyword it)))
+               ;; Finally, change the state of the headline.
+               (--map (save-window-excursion
+                        (mymy-org-id-open-without-push-mark (org-element-property :ID it))
+                        (let ((org-log-done 'time))
+                          (org-todo (substring-no-properties org-state))))))))))
+
+  (add-hook 'org-after-todo-state-change-hook #'mymy-org-roam-propagate-state-to-link-inside-heading)
+
+  ;; This was the intended behaviour, but I changed course and went
+  ;; for a general implementation. I'm keeping this just in case.
+  (defun mymy-org-roam-mark-done-inside-link ()
+    "Mark all nodes in heading as done if current is marked as done"
+    ;; Remember to compare using string= because it ignores the text
+    ;; properties
+    (when (string= "DONE" org-state)
+      (mymy-org-roam-propagate-state-to-link-inside-heading)))
 
   ;; Found this somewhere else, the core idea is not mine but the
   ;; other things are mine
