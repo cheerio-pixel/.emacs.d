@@ -2120,14 +2120,45 @@ string."
                `("r" "bibliopraphic reference" entry
                  (file+olp ,ebib-notes-default-file "Zettelkästen" "lit notes")
                  #'ebib-notes-create-org-template))
-  :bind (;; ("C-c n" . ebib)
-         ("C-c n e" . ebib)
-         :map ebib-index-mode-map
-         ("u" . ebib-prev-entry)
-         ("p" . ebib-browse-url)
-         :map ebib-entry-mode-map
-         ("u" . ebib-prev-entry)
-         ("p" . ebib-browse-url)))
+  ;; controls what to do in org note
+  ;; ebib-notes-open-note-after-hook
+  :config
+  ;; (add-to-list 'ryo-modal-excluded-modes 'ebib-index-mode)
+  ;; (add-to-list 'ryo-modal-excluded-modes 'ebib-entry-mode)
+  (ryo-modal-major-mode-keys 'ebib-index-mode
+    ;; ("z" ebib-leave-ebib-windows)
+    ;; ("Z" ebib-lower)
+    ;; ("oks" ebib-save-current-database)
+    ;; ("e" ebib-edit-entry)
+    ;; ("E" end-of-line)
+    ;; ("q" ebib-quit)
+    ;; ("." ebib-quit)
+    ("okc" ignore)
+    )
+  (ryo-modal-major-mode-keys 'ebib-entry-mode
+    ;; ("e" ebib-edit-current-field)
+    ;; ("E" end-of-line)
+    ;; ("q" ebib-quit-entry-buffer)
+    ;; ("." ebib-quit-entry-buffer)
+    ("okc" ignore)
+    )
+  (general-define-key
+   :keymaps 'ebib-index-mode-map
+   "u" 'ebib-prev-entry
+   "p" 'ebib-browse-url
+   "q" 'ebib-quit
+   "." 'ebib-quit
+   "." 'ebib-index-c
+   )
+  (general-define-key
+   :keymaps 'ebib-entry-mode-map
+   "u" 'ebib-prev-field
+   "p" 'ebib-browse-url
+   "q" 'ebib-quit-entry-buffer
+   "." 'ebib-quit-entry-buffer
+   )
+  :bind (("C-c n e" . ebib))
+  )
 (use-package ebib-biblio
   :disabled
   :after (ebib biblio)
