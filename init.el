@@ -4178,7 +4178,6 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (setq-default frame-title-format "%b %& emacs")
 (setq-default garbage-collection-messages t)
 (setq-default indent-tabs-mode nil)
-(setq-default tab-width 4)
 (setq scroll-error-top-bottom t)
 (setq-default
  prettify-symbols-alist
