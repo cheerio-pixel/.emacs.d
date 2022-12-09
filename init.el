@@ -3427,22 +3427,14 @@ If a keyword from the template is missing, it will remain empty."
                                              :type entry
                                              :file ,org-capture-ref-capture-target
                                              :fetch-bibtex (lambda () (org-capture-ref-process-capture)) ; this must run first
-                                             :link-type (lambda () (org-capture-ref-get-bibtex-field :type))
-                                             :extra (lambda () (if (org-capture-ref-get-bibtex-field :journal)
-                                                                   (s-join "\n"
-                                                                           '("- [ ] download and attach pdf"
-                                                                             "- [ ] [[elisp:org-attach-open][read paper capturing interesting references]]"
-                                                                             "- [ ] [[elisp:(browse-url (url-encode-url (format \"https://www.semanticscholar.org/search?q=%s\" (org-entry-get nil \"TITLE\"))))][check citing articles]]"
-                                                                             "- [ ] [[elisp:(browse-url (url-encode-url (format \"https://www.connectedpapers.com/search?q=%s\" (org-entry-get nil \"TITLE\"))))][check related articles]]"
-                                                                             "- [ ] check if bibtex entry has missing fields"))
-                                                                 ""))
-                                             :org-entry (lambda () (org-capture-ref-get-org-entry))
+                                             :extra "- [ ] Check bibtex entry for missing fields and incorrect metadata"
                                              :bibtex-string (lambda () (org-capture-ref-format-bibtex))
+                                             :org-entry (lambda () (funcall org-capture-ref-headline-format-function))
                                              :template
                                              ("%{fetch-bibtex}* TODO %?%{space}%{org-entry}"
-                                              "%{extra}"
+                                              ;; "%{extra}"
                                               "%{bibtex-string}"
-                                              "- Keywords: #%{link-type}")
+                                              )
                                              :headline "References"
                                              :children (("Interactive link"
                                                          :keys ,(car org-capture-ref-capture-keys)
