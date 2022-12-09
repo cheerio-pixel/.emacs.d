@@ -3316,6 +3316,35 @@ This runs `org-capture-ref-clean-bibtex-hook', unless NO-HOOK is non-nil."
           (key (org-capture-ref-set-bibtex-field key (replace-regexp-in-string "\n[ \t]*" " " (cdr field))))))
       (buffer-string)))
 
+  (el-patch-defcustom org-capture-ref-default-bibtex-template (el-patch-concat "@${:type}{${:key},
+      typealt     = {${:typealt}},
+      author       = {${:author}},
+      title        = {${:title}},
+      journal      = {${:journal}},
+      school      = {${:school}},
+      volume       = {${:volume}},
+      number       = {${:number}},
+      pages        = {${:pages}},
+      year         = {${:year}}," (el-patch-add "
+      date         = {${:date}},") "
+      doi          = {${:doi}},
+      isbn          = {${:isbn}},
+      url          = {${:url}},
+      howpublished = {${:howpublished}},
+      publisher = {${:publisher}},
+      keywords     = {${:keywords}},
+      note         = {Online; accessed ${:urldate}},
+      created         = {${:created}},
+      effort       = {${:effort}},
+      link         = {${:link}},
+      rss          = {${:rss}}
+      }"
+      )
+    "Default template used to format BiBTeX entry.
+If a keyword from the template is missing, it will remain empty."
+    :type 'string
+    :group 'org-capture-ref)
+
   ;; (org-capture-ref-generate-key-human-readable)
   ;; (mymy-org-capture-ref-generate-key)
   (defun mymy-org-capture-ref-generate-key ()
