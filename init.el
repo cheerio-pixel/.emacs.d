@@ -945,6 +945,7 @@ By default the minibuffer is excluded."
   (add-hook 'haskell-mode-hook #'lsp)
   (add-hook 'haskell-literate-mode-hook #'lsp)
   )
+
 (use-package lsp-java
   :after lsp-mode
   :config
@@ -1501,6 +1502,7 @@ By default the minibuffer is excluded."
   ("okc" org-agenda-exit)
   :init
   (setq org-clock-string-limit 25)
+
   (el-patch-defcustom org-mark-ring-length 4
     "Number of different positions to be recorded in the ring.
 Changing this requires a restart of Emacs to work correctly."
@@ -2013,6 +2015,7 @@ Changing this requires a restart of Emacs to work correctly."
         org-roam-ui-follow t
         org-roam-ui-update-on-save t
         org-roam-ui-open-on-start t))
+
 (use-package git-timemachine
   :straight t
   :ryo
@@ -2040,6 +2043,7 @@ Changing this requires a restart of Emacs to work correctly."
     ("c" git-timemachine-show-commit)
     ("? " git-timemachine-help)
     ("." nil :color blue)))
+
 (use-package vulpea :after org-roam
   :disabled
   :config
@@ -2811,6 +2815,7 @@ the name of the node"
     (interactive)
     (org-entry-put (point) "ROAM_EXCLUDE" "t")
     (org-id-get-create force))
+
   ;; my org roam preview at point
   (defun mymy-org-id-open-without-push-mark (id)
     "Slight modification to org-id-open"
@@ -2822,6 +2827,7 @@ the name of the node"
       (goto-char m)
       (move-marker m nil)
       (org-show-context)))
+
   (el-patch-defun org-roam-id-open (id (el-patch-swap _ arg))
     "Go to the entry with id ID.
 Like `org-id-open', but additionally uses the Org-roam database."
@@ -3057,6 +3063,7 @@ By default, all subentries are counted; restrict with LEVEL."
     (interactive)
     (org-id-get-create)
     (mymy-org-roam-update-headline))
+
   (defun mymy-org-roam-goto-index (&optional other-window force)
     "Go to index file
 When interactive, FORCE is "
@@ -3278,6 +3285,7 @@ Author: %^{author}
    :map org-mode-map
    ("C-c C-j" . mymy-org-roam-dailies-secondary-capture-today)))
 (use-package org-transclusion)
+
 (use-package org-roam-bibtex
   :config
   (setq orb-roam-ref-format 'org-ref-v3)
@@ -3398,6 +3406,7 @@ If a keyword from the template is missing, it will remain empty."
 
   :config
 
+
   (mymy-org-capture-ref-get-bibtex- scott-young "scotthyoung\\.com"
     (mymy-org-capture-ref-set-bibtex-fields
       (:type "Online")
@@ -3500,6 +3509,7 @@ If a keyword from the template is missing, it will remain empty."
   (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
   (add-hook 'gnus-summary-mode-hook #'gnus-undo-mode)
   (setq gnus-asynchronous t))
+
 (use-package deft
   :config
   (setq deft-extensions '("org"))
@@ -4373,4 +4383,5 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (ryo-modal-global-mode t)
 
 ;; Init.el ends here
+
 
