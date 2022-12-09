@@ -3400,7 +3400,7 @@ If a keyword from the template is missing, it will remain empty."
 
   (mymy-org-capture-ref-get-bibtex- scott-young "scotthyoung\\.com"
     (mymy-org-capture-ref-set-bibtex-fields
-      (:type "misc")
+      (:type "Online")
       (:howpublished "Scott H Young")
       (:doi org-capture-ref-placeholder-value)
       (:author (org-capture-ref-query-dom :meta "author"))
