@@ -3361,7 +3361,7 @@ If a keyword from the template is missing, it will remain empty."
                              (org-capture-ref-set-bibtex-field :key nil 'force)))))
       (with-temp-buffer
         (bibtex-mode)
-        (bibtex-set-dialect 'BibTeX)
+        (bibtex-set-dialect 'biblatex)
         (insert bibtex-string)
         (goto-char 1)
         (cl-letf (((symbol-function 'bibtex-autokey-get-year) (condition-case err
