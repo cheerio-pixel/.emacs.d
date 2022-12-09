@@ -2115,6 +2115,7 @@ string."
   (setq ebib-notes-use-org-capture "r")
   ;; Double %% for org expansions
   (setq ebib-notes-template "* lit %%<%%s>%%?\n:PROPERTIES:\n:ID:         %%(org-id-new)\n%K\n:END:\n%T\n\n\n")
+  (add-to-list 'ebib-file-search-dirs "~/Attachments/bibliography/")
   (add-to-list 'org-capture-templates
                `("r" "bibliopraphic reference" entry
                  (file+olp ,ebib-notes-default-file "Zettelkästen" "lit notes")
