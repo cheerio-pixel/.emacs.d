@@ -3295,6 +3295,27 @@ Author: %^{author}
   ;; :straight (asoc.el :type git :host github :repo "troyp/asoc.el")
   :straight (org-capture-ref :type git :host github :repo "yantar92/org-capture-ref")
   :config
+  (el-patch-defun org-capture-ref-clean-bibtex (string &optional no-hook)
+    "Make sure that BiBTeX entry STRING is a valid BiBTeX.
+Return the new entry string.
+
+This runs `org-capture-ref-clean-bibtex-hook', unless NO-HOOK is non-nil."
+    (with-temp-buffer
+      (bibtex-mode)
+      (bibtex-set-dialect (el-patch-swap 'BibTeX 'biblatex))
+      (when string (insert string))
+      (goto-char 1)
+      (unless no-hook
+        (run-hooks 'org-capture-ref-clean-bibtex-hook))
+      (goto-char 1)
+      (dolist (field (bibtex-parse-entry 'content))
+        (pcase (intern (concat ":" (car field)))
+          (':=type= (org-capture-ref-set-bibtex-field :type (cdr field)))
+          (':=key= (org-capture-ref-set-bibtex-field :key (cdr field)))
+          ;; Other fields may contain unwanted newlines.
+          (key (org-capture-ref-set-bibtex-field key (replace-regexp-in-string "\n[ \t]*" " " (cdr field))))))
+      (buffer-string)))
+
   ;; (org-capture-ref-generate-key-human-readable)
   ;; (mymy-org-capture-ref-generate-key)
   (defun mymy-org-capture-ref-generate-key ()
