@@ -3122,7 +3122,6 @@ _._: Quit _q_: Quit
         ("n" mymy-org-roam-ref-find)
         ;; Substitute for org-ref-insert-cite-link
         ("i" org-ref-insert-cite-link)
-        ("a" mymy-org-roam-ref-add-cite)
         ))
       ("o" mymy-org-id-roam-create)
       ("i"
