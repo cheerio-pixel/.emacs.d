@@ -606,11 +606,6 @@ By default the minibuffer is excluded."
 (general-define-key
  :keymaps 'lispy-mode-map
  "e" 'special-lispy-different)
-;;** Ryo-modal through general
-(general-define-key
- :keymaps 'ryo-modal-mode-map
- :prefix "S"
- "b" 'calibredb-find-helm)
 ;;** python-mode-map
 (general-define-key
  :keymaps 'python-mode-map
@@ -809,8 +804,6 @@ By default the minibuffer is excluded."
 (use-package calibredb
   :defer 5
   :config
-;;; Moved to the sections keys of ryo modal
-  ;; (ryo-modal-key "Sb" 'calibredb-find-helm)
   (defun mymy-calibredb-update-list ()
     (interactive)
     (setq calibredb-search-entries (calibredb-candidates))
@@ -818,27 +811,7 @@ By default the minibuffer is excluded."
   (setq calibredb-root-dir "~/Sync/CalibreLibrary/")
   (setq calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
   (setq calibredb-library-alist '(("~/Sync/")))
-  (setq calibredb-helm-actions
-        (helm-make-actions
-         "Open file" 'calibredb-find-file
-         "View details" 'calibredb-show-entry
-         "Open file other frame" 'calibredb-find-file-other-frame
-         "Open file with default tool" (lambda (candidate)
-                                         (calibredb-open-file-with-default-tool nil candidate))
-         "Open Cover Page" 'calibredb-find-cover
-         "Set tags" 'calibredb-set-metadata--tags
-         "Set comments" 'calibredb-set-metadata--comments
-         "List fileds" 'calibredb-set-metadata--list-fields
-         "Show metadata" 'calibredb-show-metadata
-         "Export" 'calibredb-export
-         "Remove" 'calibredb-remove
-         "Insert an org link" (lambda (candidate)
-                                (unless (featurep 'org)
-                                  (require 'org))
-                                (if (fboundp 'org-insert-link)
-                                    (kill-new (format "[[%s][]]" (calibredb-getattr candidate :file-path)))))
-         "Mail Add attachment" (lambda (candidate)
-                                 (mail-add-attachment (calibredb-getattr candidate :file-path))))))
+  )
 
 ;;** Spreedsheet
 ;; Will keep this two just in case
@@ -1105,6 +1078,7 @@ By default the minibuffer is excluded."
               ("M-u" . flycheck-previous-error)))
 ;;** Helm
 (use-package helm
+  :disabled
   :straight t
   :straight helm-swoop helm-projectile
   :diminish helm-mode
@@ -1122,25 +1096,26 @@ By default the minibuffer is excluded."
   (spaceline-helm-mode t)
   (spaceline-toggle-helm-number-on)
   (helm-mode)
+  ;;*** Patches
   :config
   ;; Randomly found in
   ;; https://emacs.stackexchange.com/questions/15051/can-helm-apropos-display-the-key-bindings-for-commands-the-way-helm-m-x-does
   (el-patch-defun helm-def-source--emacs-commands (&optional default)
     (helm-build-in-buffer-source "Commands"
-      :init (lambda ()
-              (helm-apropos-init 'commandp default))
-      :fuzzy-match helm-apropos-fuzzy-match
-      :filtered-candidate-transformer (and (null helm-apropos-fuzzy-match)
-                                           'helm-apropos-default-sort-fn)
-      :display-to-real 'helm-symbolify
-      (el-patch-add :candidate-transformer 'helm-M-x-transformer-1)
-      :nomark t
-      :persistent-action (lambda (candidate)
-                           (helm-elisp--persistent-help
-                            candidate 'helm-describe-function))
-      :persistent-help "Toggle describe command"
-      :action 'helm-type-function-actions))
-  :config
+                                 :init (lambda ()
+                                         (helm-apropos-init 'commandp default))
+                                 :fuzzy-match helm-apropos-fuzzy-match
+                                 :filtered-candidate-transformer (and (null helm-apropos-fuzzy-match)
+                                                                      'helm-apropos-default-sort-fn)
+                                 :display-to-real 'helm-symbolify
+                                 (el-patch-add :candidate-transformer 'helm-M-x-transformer-1)
+                                 :nomark t
+                                 :persistent-action (lambda (candidate)
+                                                      (helm-elisp--persistent-help
+                                                       candidate 'helm-describe-function))
+                                 :persistent-help "Toggle describe command"
+                                 :action 'helm-type-function-actions))
+  ;;*** Key bindings
   (general-define-key
    "M-x" 'helm-M-x
    "C-x b" 'helm-mini
@@ -1153,26 +1128,123 @@ By default the minibuffer is excluded."
    "C-n" 'helm-next-line
    "C-u" 'helm-previous-line)
   (ryo-modal-keys
-   ;; ("b" isearch-backward)
-   ("F" helm-swoop)
-   ("B" helm-semantic-or-imenu)
-   ("Yu" helm-show-kill-ring)
-   ("ol" helm-locate)
-   ("ot" (("t" helm-register)
-          ("p" helm-bookmarks)))
-   ("ok" (("e" helm-mini)
-          ("k" helm-complex-command-history)
-          ("m" helm-find-files :name "Find file")
-          ("y" find-name-dired)
-          ("r" helm-find :name "Find file recursively") ;; Find files recursively
-          ("i" helm-M-x)
-          ("o" helm-apropos))))
+    ;; ("b" isearch-backward)
+    ("F" helm-swoop)
+    ("B" helm-semantic-or-imenu)
+    ("Yu" helm-show-kill-ring)
+    ("il" helm-all-mark-rings)
+    ("ol" helm-locate)
+    ("ot" (("t" helm-register)
+           ("p" helm-bookmarks)))
+    ("ok" (("e" helm-mini)
+           ("k" helm-complex-command-history)
+           ("m" helm-find-files :name "Find file")
+           ("y" find-name-dired)
+           ("r" helm-find :name "Find file recursively") ;; Find files recursively
+           ("i" helm-M-x)
+           ("o" helm-apropos))))
+  ;;*** Other packages
+  ;; helm calibredb
+  (with-eval-after-load 'calibredb
+    (ryo-modal-key "Sb" 'calibredb-find-helm)
+    (setq calibredb-helm-actions
+          (helm-make-actions
+           "Open file" 'calibredb-find-file
+           "View details" 'calibredb-show-entry
+           "Open file other frame" 'calibredb-find-file-other-frame
+           "Open file with default tool" (lambda (candidate)
+                                           (calibredb-open-file-with-default-tool nil candidate))
+           "Open Cover Page" 'calibredb-find-cover
+           "Set tags" 'calibredb-set-metadata--tags
+           "Set comments" 'calibredb-set-metadata--comments
+           "List fileds" 'calibredb-set-metadata--list-fields
+           "Show metadata" 'calibredb-show-metadata
+           "Export" 'calibredb-export
+           "Remove" 'calibredb-remove
+           "Insert an org link" (lambda (candidate)
+                                  (unless (featurep 'org)
+                                    (require 'org))
+                                  (if (fboundp 'org-insert-link)
+                                      (kill-new (format "[[%s][]]" (calibredb-getattr candidate :file-path)))))
+           "Mail Add attachment" (lambda (candidate)
+                                   (mail-add-attachment (calibredb-getattr candidate :file-path))))))
+
+  ;; helm lsp mode
+  (with-eval-after-load 'lsp-mode
+    (use-package helm-lsp))
+
+  ;; helm posframe
+  (with-eval-after-load 'posframe
+    (use-package helm-posframe
+      :disabled ;; To damn slow
+      :config
+      (helm-posframe-enable)
+      ;; (helm-posframe-disable)
+      ;; https://www.reddit.com/r/emacs/comments/ovr6ti/preserve_minibuffer_focus/h7bavau/
+      (defun switch-to-minibuffer-window (&rest args)
+        "switch to minibuffer window (if active)"
+        (when (active-minibuffer-window)
+          (select-frame-set-input-focus (window-frame (active-minibuffer-window)))
+          (select-window (active-minibuffer-window))))
+      (defun preserve-minibuffer-focus ()
+        "keep the minibuffer in focus"
+        (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
+          (switch-to-minibuffer-window)))))
+
+  ;; helm bibtex
+  (with-eval-after-load 'bibtex
+    (use-package helm-bibtex
+      :config
+      (ryo-modal-key "Seb" 'helm-bibtex)
+      (el-patch-defvar helm-source-bibtex
+        (helm-build-sync-source "BibTeX entries"
+                                :header-name (lambda (name)
+                                               (format "%s%s: " name (if helm-bibtex-local-bib " (local)" "")))
+                                :candidates 'helm-bibtex-candidates
+                                :filtered-candidate-transformer 'helm-bibtex-candidates-formatter
+                                :action (helm-make-actions
+                                         (el-patch-add "Edit notes"                 'helm-bibtex-edit-notes)
+                                         "Open PDF, URL or DOI"       'helm-bibtex-open-any
+                                         "Open URL or DOI in browser" 'helm-bibtex-open-url-or-doi
+                                         "Insert citation"            'helm-bibtex-insert-citation
+                                         "Insert reference"           'helm-bibtex-insert-reference
+                                         "Insert BibTeX key"          'helm-bibtex-insert-key
+                                         "Insert BibTeX entry"        'helm-bibtex-insert-bibtex
+                                         "Attach PDF to email"        'helm-bibtex-add-PDF-attachment
+                                         (el-patch-remove "Edit notes"                 'helm-bibtex-edit-notes)
+                                         "Show entry"                 'helm-bibtex-show-entry
+                                         "Add PDF to library"         'helm-bibtex-add-pdf-to-library))
+        "Source for searching in BibTeX files.")))
+
+  ;; helm org-roam
+  (with-eval-after-load 'org-roam
+    ;; (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
+    ;; (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags . helm-org-completing-read-tags))
+    ;; (add-to-list 'helm-completing-read-handlers-alist
+    ;;              '(org-roam-node-insert . helm-completing-read-sync-default-handler))
+    (add-to-list 'helm-completing-read-handlers-alist
+                 '(org-roam-node-find . helm-completing-read-sync-default-handler))
+    (add-to-list 'helm-completing-read-handlers-alist
+                 '(mymy-org-roam-node-insert-wrapper . helm-completing-read-sync-default-handler)))
+
+  ;; helm projectile
+  (with-eval-after-load 'projectile
+    (when helm-mode
+      (setq projectile-switch-project-action 'helm-projectile)))
+
+  ;; helm centaur tabs
+  (with-eval-after-load 'centaur-tabs
+    ;; (setq helm-source-centaur-tabs-group
+    ;;       (helm-build-sync-source "Centaur tabs groups"
+    ;;         :candidates #'centaur-tabs-get-groups
+    ;;         :action '(("Switch to group" . centaur-tabs-switch-group))))
+    ;; (add-to-list 'helm-mini-default-sources 'helm-source-centaur-tabs-group)
+    )
+
+  (with-eval-after-load 'org-ref
+    (ryo-modal-key "Sei" #'org-ref-insert-cite-link))
   :hook
   (helm-minibuffer-set-up . helm-exchange-minibuffer-and-header-line))
-
-(use-package helm-lsp
-  :after lsp-mode
-  :after helm)
 
 ;;** ispell
 (use-package ispell
@@ -1283,8 +1355,6 @@ By default the minibuffer is excluded."
   :config
   ;; For org roam
   (require 'org-protocol)
-  ;; (add-to-list 'helm-completing-read-handlers-alist '(org-capture . helm-org-completing-read-tags))
-  ;; (add-to-list 'helm-completing-read-handlers-alist '(org-set-tags . helm-org-completing-read-tags))
   (defun mymy-refile-to-done ()
     (interactive)
     (my/refile (concat org-roam-directory "2021-12-05-08-48-44-done.org") "Done"))
@@ -1661,21 +1731,7 @@ By default the minibuffer is excluded."
   :disabled
   :config
   (company-posframe-mode))
-(use-package helm-posframe
-  :disabled ;; To damn slow
-  :config
-  (helm-posframe-enable)
-  ;; (helm-posframe-disable)
-  ;; https://www.reddit.com/r/emacs/comments/ovr6ti/preserve_minibuffer_focus/h7bavau/
-  (defun switch-to-minibuffer-window (&rest args)
-    "switch to minibuffer window (if active)"
-    (when (active-minibuffer-window)
-      (select-frame-set-input-focus (window-frame (active-minibuffer-window)))
-      (select-window (active-minibuffer-window))))
-  (defun preserve-minibuffer-focus ()
-    "keep the minibuffer in focus"
-    (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
-      (switch-to-minibuffer-window))))
+
 (use-package org-journal
   ;; Dailies is a better alternative
   :disabled
@@ -1753,29 +1809,8 @@ By default the minibuffer is excluded."
       (when (seq-contains-p tags "Ref")
         (org-roam-tag-add '("literature_node")))))
   (add-hook 'vulpea-insert-handle-functions
-             #'my-vulpea-insert-handle))
+            #'my-vulpea-insert-handle))
 
-(use-package helm-bibtex
-  :config
-  (el-patch-defvar helm-source-bibtex
-    (helm-build-sync-source "BibTeX entries"
-      :header-name (lambda (name)
-                     (format "%s%s: " name (if helm-bibtex-local-bib " (local)" "")))
-      :candidates 'helm-bibtex-candidates
-      :filtered-candidate-transformer 'helm-bibtex-candidates-formatter
-      :action (helm-make-actions
-               (el-patch-add "Edit notes"                 'helm-bibtex-edit-notes)
-               "Open PDF, URL or DOI"       'helm-bibtex-open-any
-               "Open URL or DOI in browser" 'helm-bibtex-open-url-or-doi
-               "Insert citation"            'helm-bibtex-insert-citation
-               "Insert reference"           'helm-bibtex-insert-reference
-               "Insert BibTeX key"          'helm-bibtex-insert-key
-               "Insert BibTeX entry"        'helm-bibtex-insert-bibtex
-               "Attach PDF to email"        'helm-bibtex-add-PDF-attachment
-               (el-patch-remove "Edit notes"                 'helm-bibtex-edit-notes)
-               "Show entry"                 'helm-bibtex-show-entry
-               "Add PDF to library"         'helm-bibtex-add-pdf-to-library))
-    "Source for searching in BibTeX files."))
 (use-package bibtex
   :config
   (setq bibtex-autokey-year-length 4))
@@ -2347,12 +2382,6 @@ Optional argument ARGS is ignored."
   (setq mymy-org-roam-project-template '(("p" "project" plain "%?"
                                           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+category: ${title}\n#+filetags: TODO\n\n* ${title}")
                                           :unnarrowed t)))
-  (add-to-list 'helm-completing-read-handlers-alist
-               '(org-roam-node-find . helm-completing-read-sync-default-handler))
-  (add-to-list 'helm-completing-read-handlers-alist
-               '(mymy-org-roam-node-insert-wrapper . helm-completing-read-sync-default-handler))
-  ;; (add-to-list 'helm-completing-read-handlers-alist
-  ;;              '(org-roam-node-insert . helm-completing-read-sync-default-handler))
   (defface mymy-org-roam-title
     '((((class color) (background light)) (:underline t :bold t))
       (((class color) (background dark)) (:underline t :bold t))
@@ -3036,8 +3065,7 @@ Author: %^{author}
    :keymaps 'projectile-mode-map
    "C-c t" 'projectile-command-map)
   (setq-default projectile-project-search-path '("~/Projects/"))
-  (setq projectile-completion-system 'helm
-        projectile-switch-project-action 'helm-projectile)
+  (setq projectile-completion-system 'auto)
   :hook
   (after-init . projectile-mode))
 (use-package frames-only-mode
@@ -3182,7 +3210,6 @@ Author: %^{author}
    ("i" (("y" avy-goto-char)
          ("u" avy-goto-char-2)
          ("m" avy-goto-word-0)
-         ("l" helm-all-mark-rings)
          ("k" avy-goto-word-1)
          ("n" avy-goto-word-crt-line)
          ("i" avy-goto-line)
@@ -3411,11 +3438,6 @@ Author: %^{author}
   (setq uniquify-separator "/"
         uniquify-buffer-name-style 'forward)
   (centaur-tabs-group-by-projectile-project)
-  ;; (setq helm-source-centaur-tabs-group
-  ;;       (helm-build-sync-source "Centaur tabs groups"
-  ;;         :candidates #'centaur-tabs-get-groups
-  ;;         :action '(("Switch to group" . centaur-tabs-switch-group))))
-  ;; (add-to-list 'helm-mini-default-sources 'helm-source-centaur-tabs-group)
   (centaur-tabs-get-groups)
   (ryo-modal-keys
    (">>" centaur-tabs-move-current-tab-to-right)
