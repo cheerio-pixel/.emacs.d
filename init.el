@@ -2791,7 +2791,14 @@ the name of the node"
       (kill-new
        (if (equal arg '(4))
            node-name
-         (format "[[id:%s][%s]]" node-id node-name)))))
+         ;; Old way
+         ;; (format "[[id:%s][%s]]" node-id node-name)
+         ;; New way
+         ;; In this new way a link inside a link would not be copied
+         ;; literally, only its description.
+         (org-link-make-string
+          (concat "id:" node-id)
+          (org-link-display-format node-name))))))
 
   (defun mymy-org-roam-insert-next-heading (&optional arg)
     (interactive)
