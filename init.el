@@ -1501,6 +1501,22 @@ By default the minibuffer is excluded."
   ("okc" org-agenda-exit)
   :init
   (setq org-clock-string-limit 25)
+  (el-patch-defcustom org-mark-ring-length 4
+    "Number of different positions to be recorded in the ring.
+Changing this requires a restart of Emacs to work correctly."
+    ;; Why they don't do this and warn that this will reset your mark ring?
+    (el-patch-add
+      :set (lambda (var val)
+             (set var val)
+             (setq org-mark-ring nil)
+             (setq org-mark-ring-last-goto nil) ;in case file is reloaded
+
+             (dotimes (_ org-mark-ring-length) (push (make-marker) org-mark-ring))
+             (setcdr (nthcdr (1- org-mark-ring-length) org-mark-ring)
+                     org-mark-ring)
+             ))
+    :group 'org-link-follow
+    :type 'integer)
   (setq spaceline-org-clock-format-function 'dwim/org-clock-get-string)
   (require 'org-habit)
   (setq org-habit-graph-column 80)
