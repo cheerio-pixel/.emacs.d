@@ -1523,6 +1523,7 @@ Changing this requires a restart of Emacs to work correctly."
 
   (setq spaceline-org-clock-format-function 'dwim/org-clock-get-string)
   (require 'org-habit)
+  (require 'org-inlinetask)
   (setq org-habit-graph-column 80)
   (require 'ob-clojure)
   (setq org-babel-clojure-backend 'cider)
