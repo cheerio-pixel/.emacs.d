@@ -959,7 +959,10 @@ By default the minibuffer is excluded."
 (use-package python
   :bind (:map python-mode-map
               (("C-c C-q" . jupyter-eval-buffer)
-               ("C-c C-j" . jupyter-run-repl)))
+               ("C-c C-j" . jupyter-run-repl)
+               ;; M-t
+               ("M-e" . python-nav-forward-block)
+               ))
   :config
   (setq python-indent-guess-indent-offset-verbose nil)
   (setq python-shell-interpreter "ipython"
