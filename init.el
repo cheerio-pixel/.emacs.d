@@ -4117,6 +4117,10 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
     ("e" straight-prune-build)
     ("q" nil)))
 
+(use-package emacs
+  :config
+  )
+
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
 (set-terminal-coding-system 'utf-8)
