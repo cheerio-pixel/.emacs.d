@@ -3557,9 +3557,10 @@ If a keyword from the template is missing, it will remain empty."
   (setq projectile-completion-system 'auto)
   :hook
   (after-init . projectile-mode))
+
 (use-package frames-only-mode
   ;; Set this to non-nil value if you want to have frame functionality
-  :if (intern (getenv "EMACS_FRAMES"))
+  :if (intern (or (getenv "EMACS_FRAMES") "nil"))
   :hook
   (after-init . frames-only-mode)
   :init
