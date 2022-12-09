@@ -3687,6 +3687,19 @@ If a keyword from the template is missing, it will remain empty."
                                        (frame 1.0
                                               (message 0.5)
                                               (mml-preview 1.0 point)))))))
+
+;; One moment I just thought "Dynamic tiling." And emacs can do this,
+;; so maybe this will replace frames-only-mode
+;; https://github.com/ajgrf/edwina
+(use-package edwina
+  ;; For now.
+  :disabled
+  :config
+  (setq display-buffer-base-action '(display-buffer-below-selected))
+  ;; (edwina-setup-dwm-keys)
+  (edwina-mode 1)
+  )
+
 (use-package avy
   :config
   (defun avy-goto-word-crt-line ()
