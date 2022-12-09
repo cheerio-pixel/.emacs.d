@@ -1702,6 +1702,12 @@ Changing this requires a restart of Emacs to work correctly."
         (remove-text-properties start (1+ start) '(invisible nil))
         (remove-text-properties (1- end) end '(invisible nil)))))
 
+  (defun mymy-org-back-to-heading (arg)
+    (interactive "P")
+    (if (equal arg '(4))
+        (outline-up-heading 1)
+      (org-back-to-heading)))
+
   (ryo-modal-keys
     (:norepeat t)
     ("O" (("a" org-agenda)
