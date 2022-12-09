@@ -4158,7 +4158,11 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (setq font-lock-verbose nil)
 (setq byte-compile-verbose nil)
 (setq default-tab-width 4)
-(setq tab-width 4)
+;; (setq tab-width 4)
+(setq-default tab-width 4)
+;; Default one
+(setq tab-width 8)
+(setq-default tab-width 8)
 (setq inhibit-compacting-font-caches t)
 (setq use-package-always-demand (daemonp))
 (setq mouse-yank-at-point t)
