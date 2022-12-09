@@ -1517,6 +1517,10 @@ Changing this requires a restart of Emacs to work correctly."
              ))
     :group 'org-link-follow
     :type 'integer)
+
+  ;; I mean, this is useful once you start going
+  (gsetq org-mark-ring-length 100)
+
   (setq spaceline-org-clock-format-function 'dwim/org-clock-get-string)
   (require 'org-habit)
   (setq org-habit-graph-column 80)
