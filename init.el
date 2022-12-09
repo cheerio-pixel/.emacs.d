@@ -1549,6 +1549,11 @@ Changing this requires a restart of Emacs to work correctly."
   :config
   ;; For org roam
   (require 'org-protocol)
+
+  (defun mymy-org-show-headline ()
+    "Show like org-cycle does"
+    (progn (org-show-entry)
+           (org-show-children)))
   (defun mymy-refile-to-done ()
     (interactive)
     (my/refile (concat org-roam-directory "2021-12-05-08-48-44-done.org") "Done"))
@@ -2732,7 +2737,10 @@ Like `org-id-open', but additionally uses the Org-roam database."
       (goto-char m)
       (move-marker m nil)
       (org-show-context)
-      (el-patch-add (when (org-current-level) (org-show-entry)))))
+      (el-patch-add
+        (when (org-current-level)
+          (mymy-org-show-headline)))))
+
 
   (defun mymy-org-roam-preview-node ()
     "Return a string representing the preview of node."
@@ -2779,7 +2787,8 @@ Like `org-id-open', but additionally uses the Org-roam database."
           (erase-buffer)
           (insert node-preview)
           (goto-char (point-min))
-          (org-show-entry)
+          (mymy-org-show-headline)
+          ;; (org-show-entry)
           ;; (org-show-all)
           )
         (posframe-show buf
