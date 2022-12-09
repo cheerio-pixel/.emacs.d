@@ -2826,8 +2826,13 @@ the name of the node"
     "Go to the entry with id ID.
 Like `org-id-open', but additionally uses the Org-roam database."
     (org-mark-ring-push)
-    (let ((m (or (org-roam-id-find id 'marker)
-                 (org-id-find id 'marker)))
+    (let ((m (el-patch-swap
+               (or (org-roam-id-find id 'marker)
+                   (org-id-find id 'marker))
+               ;; org-id-find is more precise than the org-roam version
+               ;; but the org roam version works always in the org roam dir.
+               (or (org-id-find id 'marker)
+                   (org-roam-id-find id 'marker))))
           cmd)
       (unless m
         (error "Cannot find entry with ID \"%s\"" id))
