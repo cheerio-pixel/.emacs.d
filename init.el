@@ -2103,7 +2103,8 @@ string."
                                  ("ps" . "zathura")))
   (setq ebib-default-directory (concat dropbox-dir "My Library/"))
   (setq ebib-popup-entry-window t)
-  (setq ebib-layout 'index-only)
+  ;; (setq ebib-layout 'index-only)
+  (setq ebib-layout 'full)
   (setq ebib-reading-list-file (concat main-dropbox-dir "ReadingList.org"))
 
   ;; Ebib doesn't need to manage this
