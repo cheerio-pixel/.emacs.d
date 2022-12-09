@@ -3271,7 +3271,8 @@ Author: %^{author}
    ("C-c n f" . org-roam-node-find)
    ("C-c n g" . org-roam-graph)
    ("C-c n i" . org-roam-node-insert)
-   ("C-c n c" . org-roam-capture)
+   ;; ("C-c n c" . org-roam-capture)
+   ("C-c n c" . org-roam-dailies-capture-today)
    ;; Dailies
    ("C-c C-j" . mymy-org-roam-dailies-secondary-capture-today)
    :map org-mode-map
