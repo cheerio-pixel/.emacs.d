@@ -3241,8 +3241,7 @@ Author: %^{author}
      ("c" "Current pending list" entry "* NEXT %T %?\n"
       :prepend t
       :target (file+olp ,(concat org-roam-directory "Projects/20210715113548-projects.org")
-                        ("Projects" "Current pending list"))
-      )
+                        ("Projects" "Current pending list")))
      ("b" "Buffer" entry "* TODO Read [[%L][S]] %?\n"
       :prepend t
       :target (file+olp ,(concat org-roam-directory "Projects/20210715113548-projects.org")
@@ -3260,9 +3259,8 @@ Author: %^{author}
      ;; Time Capsule
      ("f" "Future self" entry "* %?\n\n"
       :target (file+olp ,(concat org-roam-directory "2021-10-16-13-47-38-future_self.org")
-                        ("Future self"))
-      )
-     ))
+                        ("Future self")))
+
   :bind
   (("C-c n l" . org-roam-buffer-toggle)
    ("C-c n f" . org-roam-node-find)
@@ -3279,7 +3277,9 @@ Author: %^{author}
   (setq orb-roam-ref-format 'org-ref-v3)
   (org-roam-bibtex-mode)
   (setq orb-preformat-templates t)
-  (setq orb-preformat-keywords '("title" "citekey" "entry-type" "date" "author")))
+  (setq orb-preformat-keywords '("title" "citekey" "entry-type" "date" "author"))
+  )
+
 (use-package asoc
   :straight (asoc :type git :host github :repo "troyp/asoc.el"))
 (use-package org-capture-ref
