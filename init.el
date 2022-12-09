@@ -2086,6 +2086,16 @@ string."
       (el-patch-splice 2 0 ;; Remove two from the front 0 from the rear
         (remove ?\n (format (el-patch-swap "%s (%s): %s" "Title: %s\nDate: %s\nAuthor: %s")
                             (el-patch-swap author title) (el-patch-swap year date) (el-patch-swap title author))))))
+
+  ;; Same function as ebib-notes-extract-org-ids but with roam_refs
+  ;; This function is necessary to not slow down ebib
+  (defun mymy-ebib-notes-extract-org-ids ()
+    "Return a list of all Org ROAM_REFSs in the current buffer."
+    (org-element-map (org-element-parse-buffer) 'headline
+      (lambda (headline)
+        (org-element-property :ROAM_REFS headline))))
+
+  (gsetq ebib-notes-get-ids-function #'mymy-ebib-notes-extract-org-ids)
   :config
   (setq ebib-preload-bib-files `(,(concat dropbox-dir "My Library/MyLibrary.bib")))
   (setq ebib-bibtex-dialect 'biblatex)
