@@ -2850,7 +2850,9 @@ Like `org-id-open', but additionally uses the Org-roam database."
                  (find-file-other-window . switch-to-buffer-other-window)
                  (find-file-other-frame . switch-to-buffer-other-frame))))
              'switch-to-buffer-other-window))
-      (if (not (equal (current-buffer) (marker-buffer m)))
+      (if (el-patch-wrap 1 1            ; For headings
+            (or (not (equal (current-buffer) (marker-buffer m)))
+                (equal arg '(4))))
           (funcall cmd (marker-buffer m)))
       (goto-char m)
       (move-marker m nil)
