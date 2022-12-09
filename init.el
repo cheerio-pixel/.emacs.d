@@ -1984,6 +1984,7 @@ Changing this requires a restart of Emacs to work correctly."
 (use-package org-superstar
   :config
   (org-superstar-configure-like-org-bullets)
+  (setq org-superstar-prettify-item-bullets nil)
   (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄)))
 
 (use-package elisp-slime-nav
