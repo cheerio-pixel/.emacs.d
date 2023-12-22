@@ -142,6 +142,12 @@
 ;;          )))
 ;;   (mapc (lambda (x) (define-global-abbrev (car x) (cadr x))) mymy-abbrevs))
 
+;;* Macros
+
+(defmacro comment (&rest args)
+  "Clojure-style comment block"
+  nil)
+
 ;;* Functions
 
 (defun increment-number-at-point (arg)
