@@ -1797,7 +1797,7 @@ be used to compile the project, spin up docker, ...."
   )
 
 (use-package orderless
-  :config
+  ;; :config
   ;; ;; Put orderless at last since orderless put me things almost at random.
   ;; ;; (add-to-list 'completion-styles 'orderless t)
   ;; ;; (setq completion-styles '(basic partial-completion orderless))
@@ -1813,13 +1813,16 @@ be used to compile the project, spin up docker, ...."
 (use-package fussy
   :config
   ;; (push 'fussy completion-styles)
-  (setq completion-styles '(fussy basic))
+  (setq completion-styles '(basic partial-completion fussy))
+  ;; Depending on the context, the normal one avoids throwing me
+  ;; garbage
   ;; (gsetq fussy-filter-fn #'fussy-filter-orderless)
   (gsetq fussy-filter-fn #'fussy-filter-orderless-flex)
 
-  ;;; Set to nil for fussy-score-threshold-to-filter-alist to take flace
-  (gsetq fussy-score-threshold-to-filter 37)
+;;; Set to nil for fussy-score-threshold-to-filter-alist to take flace
+  (gsetq fussy-score-threshold-to-filter 80) ;Stop throwing garbage
 
+  ;; I know this is not taking effect
   (gsetq fussy-score-threshold-to-filter-alist
          '((flx-score . -100)
            (fussy-fuz-score . -100)
