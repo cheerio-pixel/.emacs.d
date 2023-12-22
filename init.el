@@ -1380,12 +1380,13 @@ be used to compile the project, spin up docker, ...."
 (use-package vue-ts-mode
   :straight (:type git :host github :repo "8uff3r/vue-ts-mode")
   :config
-  (add-hook 'vue-ts-mode-hook #'lsp)
-  (use-package prettier-js
-    :config
-    (setq prettier-js-args '("--parser vue")))
-  ;; (mapc #'treesit-install-language-grammar '(vue css typescript))
-  )
+  (add-hook 'vue-ts-mode-hook #'lsp))
+
+(use-package prettier-js
+  :after vue-ts-mode
+  :config
+  (setq prettier-js-args '("--parser vue")))
+
 
 ;;** Python
 (use-package python
