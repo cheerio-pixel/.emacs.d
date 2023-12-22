@@ -3225,18 +3225,38 @@ Optional argument ARGS is ignored."
   ;; End of second dailies
 
   (emacsql-fix-vector-indentation)
+
+  ;; [BEGIN] Backlink count things
   (defun mymy-org-roam-get-backlinks (&optional id)
     (interactive)
-    (caar (org-roam-db-query
-           [:select (funcall count source)
-	    :from links
-	    :where (= dest $s1)
-	    :and (= type "id")]
-           (or id (org-id-get)))))
-  ;; (org-roam-node-backlink-count (org-roam-populate (org-roam-node-create :id (org-id-get))))
+    ;; If there is no entry, then that means we don't have any link
+    (or (gethash (or id (org-id-get)) mymy-backlinks-count-cache)
+        0))
+
+  (defvar mymy-backlinks-count-cache (make-hash-table
+                                      :test 'equal
+                                      :size (caar (org-roam-db-query
+                                                   [:select (funcall count id)
+                                                    :from nodes])))
+    "Hash table with all the pre-computed backlink count.")
+
+  (defun mymy-update-backlinks-count-cache (cache)
+    (--map
+     (puthash (car it) (cadr it) cache)
+     (org-roam-db-query
+      [:select [links:dest (as (funcall count links:source) backlinkcount)]
+       :from links
+       :where (= links:type "id")
+       :group :by links:dest
+       :order :by backlinkcount :desc
+       ])))
+
+  (mymy-update-backlinks-count-cache mymy-backlinks-count-cache)
 
   (cl-defmethod org-roam-node-backlinkcount ((node org-roam-node))
-    (format "[%d]" (org-roam-node-backlink-count node)))
+    (format "[%d]" (mymy-org-roam-get-backlinks (org-roam-node-id node))))
+
+  ;; [END]
 
   (setq mymy-org-roam-project-template '(("p" "project" plain "%?"
                                           :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+category: ${title}\n#+filetags: TODO\n\n* ${title}")
