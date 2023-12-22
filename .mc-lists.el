@@ -10,11 +10,17 @@
         backward-delete-char
         backward-delete-word
         backward-to-word
+        c-electric-colon
+        c-electric-semi&comma
+        c-indent-line-or-region
         company-complete
+        consult-yank-from-kill-ring
         delete-current-line
         delete-horizontal-space
         delete-pair
         delete-region
+        describe-symbol
+        downcase-dwim
         end-of-buffer
         forward-to-word
         god-mode-self-insert
@@ -35,6 +41,7 @@
         hydra-org-heading-move/org-metadown
         hydra-org-heading-move/org-metaup
         ido-switch-buffer
+        increment-number-at-point
         indent-for-tab-command
         keyboard-quit
         kill-region
@@ -50,13 +57,17 @@
         lispy-tick
         lispy-yank
         lsp-rename
+        lsp-ui-doc--handle-mouse-movement
         my-delete-whole-line
+        new-line-dwim
         org-beginning-of-line
         org-cycle
         org-delete-char
         org-end-of-line
+        org-fill-paragraph
         org-force-self-insert
         org-kill-line
+        org-latex-impatient-abort-preview
         org-meta-return
         org-metaright
         org-return
@@ -92,6 +103,7 @@
         special-lispy-repeat
         special-lispy-right
         special-lispy-stringify
+        special-lispy-teleport
         special-lispy-underscore
         switch-to-last-buffer
         upcase-char
@@ -112,14 +124,19 @@
         beginning-of-buffer
         centaur-tabs-forward
         describe-key
+        ejc-cancel-query
         god-mode-all
         helm-M-x
         hydra-git/nil
+        ignore
         jupyter-eval-buffer
+        lsp-signature-stop
         point-to-register
         ryo-modal-global-mode
         ryo-modal-mode-all
+        scroll-up
         special-lispy-ace-paren
+        special-lispy-eval-other-window
         special-lispy-narrow
         special-lispy-occur
         special-lispy-tab

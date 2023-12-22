@@ -50,3 +50,6 @@ workspace/
 /dirvish/
 /equake-persistent-display
 /#init.el#
+/tree-sitter/
+/.netcoredbg_hist
+/dap-ui-repl-python-history

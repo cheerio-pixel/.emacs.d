@@ -119,7 +119,7 @@ Indexing issues here"
 
 (define-minor-mode rainbow-numbers-mode
   "Highlight groupings within numbers to make long numbers easier to read."
-  nil "" nil
+  :keymap nil :lighter "" :group nil
   (font-lock-remove-keywords nil rainbow-numbers--font-lock-keywords)
   (when (boundp 'font-lock-flush)
     (font-lock-flush))

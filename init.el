@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+﻿;; -*- lexical-binding: t; -*-
 ;;* Early
 ;; https://github.com/bkaestner/.emacs.d/blob/37c75bfe3a199594ad89504d870e68f6f424764f/early-init.el
 (setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
@@ -24,12 +24,14 @@
       (goto-char (point-max))
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
+
 ;;* Straight config
 (setq straight-use-package-by-default t)
 (setq straight-host-usernames '((github . "cheerio-pixel")))
 ;;* vc-follows-symlinks
 (setq vc-follow-symlinks t)
 ;;* Use package installation
+(straight-use-package 'org)
 (straight-use-package 'use-package)
 (eval-when-compile (require 'use-package))
 ;;* Require
@@ -43,9 +45,17 @@
 
 (use-package general)
 
+;; Explicit patching of functions and variables.
 (use-package el-patch)
 
+;; Bring a little bit of clojure and more
 (use-package dash :config (global-dash-fontify-mode))
+
+;;* Alias
+(defalias 'yes-or-no-p 'y-or-n-p)
+(defalias 'gsetq 'general-setq)
+(defalias 'gsetq-local 'general-setq-local)
+(defalias 'gsetq-default 'general-setq-default)
 
 ;;* Configs
 (set-frame-parameter nil 'fullscreen 'fullboth) ; Fullscreen
@@ -64,18 +74,17 @@
 (setq create-lockfiles nil)
 (setq ring-bell-function 'ignore)
 (setq abbrev-suggest t)
-;; (setq lsp-use-plists t)
 
 ;;* Modes
 (global-hl-line-mode)
-(global-whitespace-mode)
+(setq-default show-trailing-whitespace t)
+;; Stopped being useful
+;; (global-whitespace-mode)
 (xterm-mouse-mode)
 (savehist-mode)
 (save-place-mode)
 (setq-default abbrev-mode t)
-;;* Alias
-(defalias 'yes-or-no-p 'y-or-n-p)
-(defalias 'gsetq 'general-setq)
+
 ;;* GC and minibuffer
 (defun my-minibuffer-setup-hook ()
   (setq gc-cons-threshold most-positive-fixnum))
@@ -88,16 +97,24 @@
 ;;* My variables
 ;; TODO: Set all of this in the defconst or defvar form
 (setq dropbox-dir
-      (pcase system-type
-        ('windows-nt "c:/Users/frail/Dropbox/")
-        ('gnu/linux "~/Dropbox (Maestral)/")))
+       (pcase system-type
+         ('windows-nt "c:/Users/frail/Dropbox/")
+         ('gnu/linux "~/Dropbox (Maestral)/")))
 (setq main-dropbox-dir (concat dropbox-dir "Creativè/"))
 (setq mymy-org-roam-dir (concat main-dropbox-dir "Notes/"))
+
 (defvar mymy-index-id "cd6174d3-3589-4286-8a1d-9f7254e22c33"
   "The org ID of my index note in `mymy-org-roam-dir'")
+
 (with-eval-after-load 'org-roam
   (defvar mymy-index-node (org-roam-node-from-id mymy-index-id)
     "The org-roam node of my index note"))
+
+(defvar mymy-organization-system-directory (concat main-dropbox-dir "info-files/")
+  "General purpose root directory of notes")
+;; Check
+(when (file-exists-p mymy-organization-system-directory)
+  (error "Cannot find '%s'. Directory doesn't exist " mymy-organization-system-directory))
 
 ;;* Variables
 
@@ -109,22 +126,46 @@
 ;;* Abbrevs
 (setq abbrev-file-name (concat dropbox-dir "emacs/abbrev_defs"))
 
-(let ((mymy-abbrevs
-       '(("bc" "because")
-         ("wo" "without")
-         ("ex" "For example,")
-         ("zk" "Zettelkasten")
-         ("col" "collection")
-         ("perm" "permanent")
-         ("lit" "literature")
-         ("sd" "software development")
-         ("diff" "different")
-         ("pv" "previous")
-         ("bf" "before")
-         ("hw" "however")
-         )))
-  (mapc (lambda (x) (define-global-abbrev (car x) (cadr x))) mymy-abbrevs))
+;; (let ((mymy-abbrevs
+;;        '(("bc" "because")
+;;          ("wo" "without")
+;;          ("ex" "For example,")
+;;          ("zk" "Zettelkasten")
+;;          ;; ("col" "collection")
+;;          ;; ("perm" "permanent")
+;;          ;; ("lit" "literature")
+;;          ;; ("sd" "software development")
+;;          ;; ("diff" "different")
+;;          ("pv" "previous")
+;;          ("bf" "before")
+;;          ("hw" "however")
+;;          )))
+;;   (mapc (lambda (x) (define-global-abbrev (car x) (cadr x))) mymy-abbrevs))
+
 ;;* Functions
+
+(defun increment-number-at-point (arg)
+  (interactive "p")
+  (let ((old-point (point)))
+    (unwind-protect
+        (progn
+          (skip-chars-backward "0-9")
+          (or (looking-at "[0-9]+")
+              (error "No number at point"))
+          (replace-match (number-to-string (+ (or arg 1) (string-to-number (match-string 0))))))
+      (goto-char old-point))))
+
+(defun decrement-number-at-point (arg)
+  (interactive "p")
+  (let ((old-point (point)))
+    (unwind-protect
+        (progn
+          (skip-chars-backward "0-9")
+          (or (looking-at "[0-9]+")
+              (error "No number at point"))
+          (replace-match (number-to-string (- (string-to-number (match-string 0)) (or arg 1)))))
+      (goto-char old-point))))
+
 
 ;; I use this too much
 (defun mymy-kill-new (s)
@@ -407,7 +448,9 @@ By default the minibuffer is excluded."
     ("z" (("u" upcase-char)
           ("U" upcase-region)
           ("v" upcase-initials-region)
-          ("n" downcase-dwim)))
+          ("n" downcase-dwim)
+          ("+" increment-number-at-point)
+          ("-" decrement-number-at-point)))
     ("Z" (("v" fill-region)
           ("s" my-save-word))))
   (ryo-modal-keys
@@ -568,26 +611,18 @@ By default the minibuffer is excluded."
  "C-;" 'iedit-mode
  "C-x C-y" 'pp-macroexpand-last-sexp)
 
-;;** general-override-map
-;; git: Override S-SPC with general.el
-(general-define-key
- :keymaps 'override
- "S-SPC" 'ryo-modal-global-mode
- "C-t" 'ryo-modal-global-mode)
-
-
 ;;** dired-mode-map
 (general-define-key
  :keymaps 'dired-mode-map
  "RET" 'dired-find-alternate-file
  "M-RET" 'dired-find-file)
 ;;** centered-cursor-keymap
-(general-define-key
- :keymaps 'centered-cursor-keymap
- "C-M--" 'centered-cursor-raise-position-manually
- "C-M-+" 'centered-cursor-lower-position-manually
- "C-M-=" 'centered-cursor-lower-position-manually
- "C-M-0" 'centered-cursor-reset-position-manually)
+;; (general-define-key
+;;  :keymaps 'centered-cursor-keymap
+;;  "C-M--" 'centered-cursor-raise-position-manually
+;;  "C-M-+" 'centered-cursor-lower-position-manually
+;;  "C-M-=" 'centered-cursor-lower-position-manually
+;;  "C-M-0" 'centered-cursor-reset-position-manually)
 ;;** key-translation-map
 (general-define-key
  :keymaps 'key-translation-map
@@ -602,6 +637,11 @@ By default the minibuffer is excluded."
  "M-(" 'sp-wrap-round
  "M-s" 'sp-splice-sexp
  "M-r" 'sp-splice-sexp-killing-around)
+
+(general-define-key
+   :keymaps 'override
+   "S-SPC" 'ryo-modal-global-mode
+   "C-t" 'ryo-modal-global-mode)
 ;;** lispy-mode-map
 (general-define-key
  :keymaps 'lispy-mode-map
@@ -611,20 +651,91 @@ By default the minibuffer is excluded."
  :keymaps 'python-mode-map
  "C-c C-d" nil)
 
+;;* Tree sitter grammar
+(setq treesit-language-source-alist
+      '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+        (cmake "https://github.com/uyha/tree-sitter-cmake")
+        (java "https://github.com/tree-sitter/tree-sitter-java")
+        (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+        (go "https://github.com/tree-sitter/tree-sitter-go")
+        (html "https://github.com/tree-sitter/tree-sitter-html")
+        (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+        (json "https://github.com/tree-sitter/tree-sitter-json")
+        (make "https://github.com/alemuller/tree-sitter-make")
+        (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+        (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
+        (python "https://github.com/tree-sitter/tree-sitter-python")
+        (toml "https://github.com/tree-sitter/tree-sitter-toml")
+        (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+        (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+        (css "https://github.com/tree-sitter/tree-sitter-css")
+        (vue . ("https://github.com/ikatyang/tree-sitter-vue"))
+        (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
 ;;* Set the font
 (custom-set-faces
  `(default ((t (:family "Fantasque Sans Mono"
                         :foundry "outline"
                         :slant normal
                         :weight normal
-                        :height 120
+                        :height 130
                         ;; :height ,(let ((h (display-pixel-width)))
                         ;;            (cond
                         ;;             ((>= 1280 h) 130)
                         ;;             ((< 1280 h) 110)))
                         :width normal)))))
 ;;* Emacs theme
+
+
+(use-package idea-darkula-theme
+  :init
+  (setq custom--inhibit-theme-enable nil)
+  ;; (setq custom--inhibit-theme-enable 'apply-only-user)
+  :config
+  (push (substitute-in-file-name "~/.emacs.d/idea-darkula-theme/") custom-theme-load-path)
+  (load-theme 'idea-darkula t)
+  (let ((class '((class color) (min-colors 89)))
+        (ol1 '(:height 1.3 :weight bold :overline "#5d5862" :foreground "#c7c3cb" :background "#322d37"))
+        (ol2 '(:height 1.0 :weight bold :overline "#efcab2" :foreground "#efcab2" :background "#3d2a2d"))
+        (ol3 '(:height 1.0 :weight bold :foreground "#ffaae3" :background "#332038"))
+        (ol4 '(:height 1.0 :weight bold :slant normal :foreground "#1a9cff"))
+        (ol5 '(:height 1.0 :weight bold :slant normal :foreground "#21da7a"))
+        (ol6 '(:height 1.0 :weight bold :slant italic :foreground "#ff883d"))
+        (ol7 '(:height 1.0 :weight bold :slant italic :foreground "#d451d9"))
+        (ol8 '(:height 1.0 :weight bold :slant italic :foreground "#077ffa"))
+        )
+    (custom-theme-set-faces
+     'idea-darkula
+     ;; Doesn't work for some reason
+     '(font-lock-type-face ((t (:foreground "#A8B5C3"))))
+     ;; End of dosen't work for some reason
+     `(org-level-1 ((,class ,ol1)))
+     `(org-level-2 ((,class ,ol2)))
+     `(org-level-3 ((,class ,ol3)))
+     `(org-level-4 ((,class ,ol4)))
+     `(org-level-5 ((,class ,ol5)))
+     `(org-level-6 ((,class ,ol6)))
+     `(org-level-7 ((,class ,ol7)))
+     `(org-level-8 ((,class ,ol8)))))
+
+  (enable-theme 'idea-darkula)
+
+  (defface font-lock-operator-face
+    '((t :foreground "#8fff9e")) "Basic face for operator."
+    :group 'basic-faces)
+
+  (defface font-lock-number-face
+    '((t :foreground "#6897BB")) "Basic face for number."
+    :group 'basic-faces)
+
+
+;;; Failed experiment
+  ;; (push (substitute-in-file-name "~/.emacs.d/elisp/") custom-theme-load-path)
+  ;; (load-theme 'custom-idea-darkula t)
+  )
+
 (use-package dracula-theme
+  :disabled
   :no-require
   :config
   (load-theme 'dracula t)
@@ -644,36 +755,39 @@ By default the minibuffer is excluded."
 ;;* Normal Packages
 ;;** Niceties
 (use-package hydra
-  :config
-  (ryo-modal-key
-   "q f" :hydra
-   '(hydra-fastmoving ()
-                      "Generic fast moving"
-                      ("n" scroll-up)
-                      ("u" scroll-down)
-                      ("U" ccm-scroll-down)
-                      ("N" ccm-scroll-up)
-                      ("]" forward-paragraph)
-                      ("[" backward-paragraph)
-                      ("q" nil "cancel" :color blue)))
-  (ryo-modal-key
-   "q i" :hydra
-   '(hydra-indent ()
-                  "Indent Mode"
-                  ("n" mymy/elpy-nav-move-line-or-region-down)
-                  ("u" mymy/elpy-nav-move-line-or-region-up)
-                  ("N" shift-left)
-                  ("U" shift-right)
-                  ("q" nil "cancel" :color blue)))
+  ;;; Not in use
+  ;; :config
+  ;; (ryo-modal-key
+  ;;  "q f" :hydra
+  ;;  '(hydra-fastmoving ()
+  ;;                     "Generic fast moving"
+  ;;                     ("n" scroll-up)
+  ;;                     ("u" scroll-down)
+  ;;                     ("U" ccm-scroll-down)
+  ;;                     ("N" ccm-scroll-up)
+  ;;                     ("]" forward-paragraph)
+  ;;                     ("[" backward-paragraph)
+  ;;                     ("q" nil "cancel" :color blue)))
+  ;; (ryo-modal-key
+  ;;  "q i" :hydra
+  ;;  '(hydra-indent ()
+  ;;                 "Indent Mode"
+  ;;                 ("n" mymy/elpy-nav-move-line-or-region-down)
+  ;;                 ("u" mymy/elpy-nav-move-line-or-region-up)
+  ;;                 ("N" shift-left)
+  ;;                 ("U" shift-right)
+  ;;                 ("q" nil "cancel" :color blue)))
   )
 
 (use-package electric-operator)
-(use-package highlight-indentation)
+(use-package highlight-indentation :config (highlight-indentation-mode 1))
 (use-package rainbow-delimiters :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package ag)
 ;; sp-pair is not suitiable when you have strict-mode activate
 (use-package wrap-region
+  ;; Shouldn't be using this
+  :disabled
   :straight (:type git :host github :repo "cheerio-pixel/wrap-region.el")
   :config
   ;; org mode
@@ -690,28 +804,32 @@ By default the minibuffer is excluded."
 
 (use-package aggressive-indent
   :hook
-  (emacs-lisp-mode . aggressive-indent-mode)
-  (clojure-mode . aggressive-indent-mode))
+  (emacs-lisp-mode . aggressive-indent-mode))
 
 (use-package goto-chg
   :config
   (ryo-modal-keys
-   ("g;" goto-last-change)
-   ("G:" goto-last-change-reverse)))
+    ("g;" goto-last-change)
+    ("G:" goto-last-change-reverse)))
 
 ;;** Web programming
 ;; Not using for now
 ;; (use-package web-mode)
 ;; (use-package impatient-mode)
 
-(use-package centered-cursor-mode
-  :straight (:type git :host github :repo "andre-r/centered-cursor-mode.el" :branch "dev")
-  :config
-  ;; (global-centered-cursor-mode)
-  (setq scroll-preserve-screen-position t
-        scroll-conservatively 0
-        maximum-scroll-margin 0.5
-        scroll-margin 99999))
+;; (use-package centered-cursor-mode
+;;   :straight (:type git :host github :repo "andre-r/centered-cursor-mode.el" :branch "dev")
+;;   :config
+;;   ;; (global-centered-cursor-mode)
+;;   (setq scroll-preserve-screen-position t
+;;         scroll-conservatively 0
+;;         maximum-scroll-margin 0.5
+;;         scroll-margin 99999)
+;;   (setq scroll-preserve-screen-position nil
+;;         scroll-conservatively 25
+;;         ;; maximum-scroll-margin 0.25
+;;         maximum-scroll-margin 0.25
+;;         scroll-margin 0))
 
 (use-package smartparens
   :init
@@ -723,7 +841,14 @@ By default the minibuffer is excluded."
   :hook ((after-init . mymy/smartparens-hook)
          (prog-mode . smartparens-strict-mode)))
 
+(when (version< emacs-version "29")
+  (use-package explain-pause-mode
+    :straight (explain-pause-mode :type git :host github :repo "lastquestion/explain-pause-mode")
+    :config
+    (explain-pause-mode)))
+
 (use-package golden-ratio
+  :disabled
   :config (golden-ratio-mode t)
   (add-to-list 'golden-ratio-extra-commands 'ace-window)
   (ryo-modal-key "gr" #'golden-ratio-mode))
@@ -748,83 +873,84 @@ By default the minibuffer is excluded."
   (spaceline-toggle-python-pyvenv-on)
   (spaceline-toggle-process-on)
   (spaceline-toggle-nyan-cat-on)
-  (gsetq powerline-default-separator 'wave)
+  (setq powerline-default-separator 'wave)
   (spaceline-compile))
 ;;** PDF
-(use-package pdf-tools
-  :defer 5
-  :ryo
-  (:mode 'pdf-view-mode)
-  ("n" pdf-view-next-line-or-next-page)
-  ("u" pdf-view-previous-line-or-previous-page)
-  ("N" pdf-view-next-page)
-  ("U" pdf-view-previous-page)
-  :bind (:map pdf-view-mode-map ("C-x l" . pdf-get-page))
-  :init
-  (defun pdf-get-page ()
-    (interactive)
-    (message (concat "Page: " (int-to-string (image-mode-window-get 'page)))))
-  ;; Don't make the daemon fail when a new version is avalible
-  (ignore-errors (pdf-tools-install))
-  :config
-  ;; It simply needs to exist to extend saveplace
-  (use-package saveplace-pdf-view)
-  :hook
-  (pdf-view-mode . pdf-isearch-minor-mode))
+;; (use-package pdf-tools
+;;   :defer 5
+;;   :ryo
+;;   (:mode 'pdf-view-mode)
+;;   ("n" pdf-view-next-line-or-next-page)
+;;   ("u" pdf-view-previous-line-or-previous-page)
+;;   ("N" pdf-view-next-page)
+;;   ("U" pdf-view-previous-page)
+;;   :bind (:map pdf-view-mode-map ("C-x l" . pdf-get-page))
+;;   :init
+;;   (defun pdf-get-page ()
+;;     (interactive)
+;;     (message (concat "Page: " (int-to-string (image-mode-window-get 'page)))))
+;;   ;; Don't make the daemon fail when a new version is avalible
+;;   (ignore-errors (pdf-tools-install))
+;;   :config
+;;   ;; It simply needs to exist to extend saveplace
+;;   (use-package saveplace-pdf-view)
+;;   :hook
+;;   (pdf-view-mode . pdf-isearch-minor-mode))
 
-(use-package org-noter
-  ;; Someday i will integrate this with org roam or not
-  :disabled
-  :config
-  (setq org-noter-notes-window-location 'other-frame)
-  (setq org-noter-always-create-frame nil)
-  (setq org-noter-notes-search-path '("~/Sync/Notes/"))
-  (setq org-noter-default-notes-file-names nil)
-  (ryo-modal-major-mode-keys
-   'pdf-view-mode
-   ("i" org-noter-insert-note)
-   ("I" org-noter-insert-precise-note)))
+;; (use-package org-noter
+;;   ;; Someday i will integrate this with org roam or not
+;;   :disabled
+;;   :config
+;;   (setq org-noter-notes-window-location 'other-frame)
+;;   (setq org-noter-always-create-frame nil)
+;;   (setq org-noter-notes-search-path '("~/Sync/Notes/"))
+;;   (setq org-noter-default-notes-file-names nil)
+;;   (ryo-modal-major-mode-keys
+;;     'pdf-view-mode
+;;     ("i" org-noter-insert-note)
+;;     ("I" org-noter-insert-precise-note)))
 ;;** Vterm
-(use-package vterm
-  ;; Git: Use vterm
-  ;; Comment: now that I use java, vterm is more comfortable than
-  ;; opening a terminal
-  ;; ;; I prefer to open a terminal before opening this
-  ;; ;; Good package though
-  ;; :disabled
-  ;; :bind
-  ;; ;; ("C-x l" . vterm)
-  :config
-  (defun mymy/vterm-hook ()
-    (centered-cursor-mode -1))
-  :hook
-  ((vterm-mode . mymy/vterm-hook)))
+;; (use-package vterm
+;;   ;; Git: Use vterm
+;;   ;; Comment: now that I use java, vterm is more comfortable than
+;;   ;; opening a terminal
+;;   ;; ;; I prefer to open a terminal before opening this
+;;   ;; ;; Good package though
+;;   ;; :disabled
+;;   ;; :bind
+;;   ;; ;; ("C-x l" . vterm)
+;;   :config
+;;   (defun mymy/vterm-hook ()
+;;     (centered-cursor-mode -1))
+;;   :hook
+;;   ((vterm-mode . mymy/vterm-hook)))
 
 ;;** calibredb
-(use-package calibredb
-  :defer 5
-  :config
-  (defun mymy-calibredb-update-list ()
-    (interactive)
-    (setq calibredb-search-entries (calibredb-candidates))
-    (setq calibredb-full-entries calibredb-search-entries))
-  (setq calibredb-root-dir "~/Sync/CalibreLibrary/")
-  (setq calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
-  (setq calibredb-library-alist '(("~/Sync/")))
-  )
+;; (use-package calibredb
+;;   :defer 5
+;;   :config
+;;   (defun mymy-calibredb-update-list ()
+;;     (interactive)
+;;     (setq calibredb-search-entries (calibredb-candidates))
+;;     (setq calibredb-full-entries calibredb-search-entries))
+;;   (setq calibredb-root-dir "~/Sync/CalibreLibrary/")
+;;   (setq calibredb-db-dir (expand-file-name "metadata.db" calibredb-root-dir))
+;;   (setq calibredb-library-alist '(("~/Sync/")))
+;;   )
 
 ;;** Spreedsheet
 ;; Will keep this two just in case
 (use-package rainbow-numbers-mode
+  :disabled
   :straight nil
   :load-path "~/.emacs.d/elisp/rainbow-numbers-mode.el")
-(use-package ses-mode
-  :no-require
-  :straight nil
-  :config
-  (setq ses-after-entry-functions '(next-line))
-  :hook
-  (ses-mode . rainbow-numbers-mode))
+;; (use-package ses-mode
+;;   :no-require
+;;   :straight nil
+;;   :config
+;;   (setq ses-after-entry-functions '(next-line))
+;;   :hook
+;;   (ses-mode . rainbow-numbers-mode))
 ;;** Lisp things
 (use-package lispy
   :defer t
@@ -845,21 +971,21 @@ By default the minibuffer is excluded."
       (ryo-modal-global-mode 1)
       (lispy-mode -1)))
   (ryo-modal-major-mode-keys
-   'clojure-mode
-   ("S-SPC" tmp-lispy-fix)
-   ("C-t" tmp-lispy-fix))
+    'clojure-mode
+    ("S-SPC" tmp-lispy-fix)
+    ("C-t" tmp-lispy-fix))
   (ryo-modal-major-mode-keys
-   'lisp-mode
-   ("S-SPC" tmp-lispy-fix)
-   ("C-t" tmp-lispy-fix))
+    'lisp-mode
+    ("S-SPC" tmp-lispy-fix)
+    ("C-t" tmp-lispy-fix))
   :hook
   (clojure-mode . lispy-mode)
   (emacs-lisp-mode . lispy-mode)
   (lisp-mode . lispy-mode))
 
 (use-package clj-refactor
-  :defer
-  :init
+  :straight clj-refactor pkg-info
+  :config
   (cljr-add-keybindings-with-prefix "C-c m")
   :hook
   (cider-mode . clj-refactor-mode))
@@ -878,20 +1004,24 @@ By default the minibuffer is excluded."
   :config
   (setq cider-test-show-report-on-success t)
   (ryo-modal-major-mode-keys
-   'clojure-mode
-   ("r" (("r" cider-run)
-         ("f" cider-pprint-eval-defun-at-point)
-         ("c" cider-find-and-clear-repl-output)
-         ("C" cider-find-and-clear-repl-buffer)
-         ("p" cider-eval-defun-to-comment)
-         ("P" cider-pprint-eval-defun-at-point-to-comment))))
+    'clojure-mode
+    ("r" (("r" cider-run)
+          ("f" cider-pprint-eval-defun-at-point)
+          ("c" cider-find-and-clear-repl-output)
+          ("C" cider-find-and-clear-repl-buffer)
+          ("p" cider-eval-defun-to-comment)
+          ("P" cider-pprint-eval-defun-at-point-to-comment))))
   (with-eval-after-load 'outline
     (ryo-modal-major-mode-keys
-     'clojure-mode
-     ("M-RET" outline-insert-heading)
-     ("M-N" outline-promote)
-     ("M-U" outline-demote)
-     ("M-e" outline-toggle-children)))
+      'clojure-mode
+      ("M-RET" outline-insert-heading)
+      ("M-N" outline-promote)
+      ("M-U" outline-demote)
+      ("M-e" outline-toggle-children)))
+  ;; Following three lines are for java interop documentation
+  (setq cider-enrich-classpath t)
+  (cider-add-to-alist 'cider-jack-in-dependencies "mx.cider/enrich-classpath" "1.9.0")
+  (cider-add-to-alist 'cider-jack-in-dependencies "mx.cider/tools.deps.enrich-classpath" "1.9.0")
   :hook
   (clojure-mode . cider-mode)
   (cider-repl-mode . aggressive-indent-mode)
@@ -901,31 +1031,291 @@ By default the minibuffer is excluded."
 
 (use-package clojure-mode
   :defer 5
-  :config (require 'flycheck-clj-kondo))
+  :config
+  (require 'flycheck-clj-kondo)
+  (defun mymy/clojure-mode-hook ()
+    (flycheck-mode)
+    ;; Set before enabling lsp
+    (setq-local lsp-enable-indentation nil)
+    (lsp)
+    (aggressive-indent-mode)
+    )
+  (add-hook 'clojure-mode-hook #'mymy/clojure-mode-hook)
+  )
+
+;; jsonrpc has to be put before eglot because it eglot will try to do
+;; something that will create dummy functions and for some reason that
+;; doesn't allow me to overwrite over them.
+;; (use-package jsonrpc)
+;; (use-package eglot
+;;   :config
+;;   (add-to-list 'eglot-server-programs
+;;                `(csharp-mode . ("omnisharp" "-lsp")))
+;;   )
+
+;;** SQL
+
+(use-package ejc-sql
+  :config
+  (setq clomacs-httpd-default-port 8090) ; Use a port other than 8080.
+  (setq ejc-result-table-impl 'orgtbl-mode)
+
+  (add-hook 'ejc-sql-minor-mode-hook
+            (lambda ()
+              (ejc-eldoc-setup)))
+
+  (setq ejc-connections
+         '(("Asig2"
+            (:classname . "com.mysql.jdbc.Driver")
+            (:classpath .
+                        ["/home/cheerio-pixel/.m2/repository/mysql/mysql-connector-java/5.1.44/mysql-connector-java-5.1.44.jar"])
+            (:password . "testtest")
+            (:user . "MySQL test")
+            (:port . "3306")
+            (:host . "localhost")
+            (:dbname . "Asig2")
+            (:dbtype . "mysql"))
+           ("mysql1"
+            (:classname . "com.mysql.jdbc.Driver")
+            (:classpath .
+                        ["/home/cheerio-pixel/.m2/repository/mysql/mysql-connector-java/5.1.44/mysql-connector-java-5.1.44.jar"])
+            (:password . "testtest")
+            (:user . "MySQL test")
+            (:port . "3306")
+            (:host . "localhost")
+            (:dbname . "intro2")
+            (:dbtype . "mysql"))
+           ("lab3"
+            (:classname . "com.mysql.jdbc.Driver")
+            (:classpath .
+                        ["/home/cheerio-pixel/.m2/repository/mysql/mysql-connector-java/5.1.44/mysql-connector-java-5.1.44.jar"])
+            (:password . "testtest")
+            (:user . "MySQL test")
+            (:port . "3306")
+            (:host . "localhost")
+            (:dbname . "lab3")
+            (:dbtype . "mysql"))
+           ("Group"
+            (:classname . "com.mysql.jdbc.Driver")
+            (:classpath .
+                        ["/home/cheerio-pixel/.m2/repository/mysql/mysql-connector-java/5.1.44/mysql-connector-java-5.1.44.jar"])
+            (:password . "testtest")
+            (:user . "MySQL test")
+            (:port . "3306")
+            (:host . "localhost")
+            (:dbname . "Tarea2Group")
+            (:dbtype . "mysql"))
+           ("Final"
+            (:classname . "com.mysql.jdbc.Driver")
+            (:classpath .
+                        ["/home/cheerio-pixel/.m2/repository/mysql/mysql-connector-java/5.1.44/mysql-connector-java-5.1.44.jar"])
+            (:password . "testtest")
+            (:user . "MySQL test")
+            (:port . "3306")
+            (:host . "localhost")
+            (:dbname . "ProyectoFinal")
+            (:dbtype . "mysql"))
+           ))
+
+  (with-eval-after-load 'company
+    (require 'ejc-company)
+    (push 'ejc-company-backend company-backends)
+    (add-hook 'ejc-sql-minor-mode-hook
+              (lambda ()
+                (company-mode t)))
+    (setq ejc-complete-on-dot t)
+    )
+  )
+
+(use-package tree-sitter
+  :disabled
+  :straight tree-sitter-langs
+  :config
+  (require 'tsc)
+  (tree-sitter-require 'python)
+  (tree-sitter-require 'c-sharp)
+  )
+
+;; (use-package dyalog-mode
+;;   :disabled
+;;   :config
+;;   (add-to-list 'auto-mode-alist '("\\.apl\\'" . dyalog-mode))
+;;   (add-to-list 'auto-mode-alist '("\\.dyalog$" . dyalog-mode)))
+
+;;** CSharp
+
+(use-package csharp-mode
+  :disabled
+  :if (version< emacs-version "29")
+  :config
+  (add-to-list 'auto-mode-alist '("\\.cs\\'" . csharp-mode))
+
+  ;; (setq c-default-style (delete '(csharp-mode . "csharp") c-default-style))
+  ;; (add-to-list 'c-default-style '(csharp-mode . "bsd"))
+
+  (with-eval-after-load 'lsp-mode
+    (add-hook 'csharp-mode-hook #'lsp)
+    )
+  ;; (with-eval-after-load 'aggressive-indent
+  ;;   (add-hook 'csharp-mode-hook #'aggressive-indent-mode)
+  ;;   )
+  (with-eval-after-load 'csharp-mode
+    (add-hook 'csharp-mode-hook #'lsp)
+    )
+  (with-eval-after-load 'dap-mode
+    ;; Enabling only some features
+    ;; (setq dap-auto-configure-features '(sessions locals controls tooltip))
+    (require 'dap-netcore)
+    ;; (dap-netcore--debugger-install)
+    (setq dap-netcore-download-url "https://github.com/Samsung/netcoredbg/releases/download/2.2.0-974/netcoredbg-linux-amd64.tar.gz")
+    (dap-register-debug-template
+     "NetCoreDbg::Launch (MyMy3)"
+     (list :type "coreclr"
+           :request "launch"
+           :mode "launch"
+           :name "NetCoreDbg::Launch"
+           :console "externalTerminal"
+           :dap-compilation "dotnet build"))
+    )
+  (with-eval-after-load 'yassnippet
+    (yas-define-snippets
+     'csharp-mode
+     '(;; "Key" "Template" "Name"
+       ("interface" "interface I${1:object} {
+    void ${2:sampleMethod}(var ${3:sampleParameter});
+    int ${4:sampleVariable} { get; set;}
+}" "interface")
+
+       ("d" "/// <summary>
+/// $1
+/// </summary>" "/// <summary> ... </summary>")
+       ("d" "/// <param name=\"$1\">$2</param>" "/// <param name=\"....\">...</param>")
+       ("d" "/// <returns>$1</returns>" "/// <returns> .. </returns>")
+       ("d" "/// <exception cref=\"$1\">$2</exception>" "/// <exception cref=\"...\">...</exception>")
+       ;; ("up" "(use-package ${1:package-name}$0)" "use-package")
+       ))
+    )
+  )
+
 ;;** lsp
+(use-package dap-mode
+  :disabled
+  :straight (:host github :repo "emacs-lsp/dap-mode" :files ("*.el"))
+  :config
+  (require 'dap-ui)
+
+  (setq dap-internal-terminal #'dap-internal-terminal-vterm)
+
+  (el-patch-defun dap-debug (debug-args)
+    "Run debug configuration DEBUG-ARGS.
+
+If DEBUG-ARGS is not specified the configuration is generated
+after selecting configuration template.
+
+:dap-compilation specifies a shell command to be run using
+`compilation-start' before starting the debug session. It could
+be used to compile the project, spin up docker, ...."
+    (interactive (list (-> (dap--completing-read "Select configuration template: "
+                                                 (-mapcat #'funcall dap-launch-configuration-providers)
+                                                 'cl-first nil t)
+                           cl-rest
+                           copy-tree)))
+    ;; NOTE: the launch configuration must be expanded *before* being passed to a
+    ;; debug provider. This is because some debug providers (e.g. dap-python) pass
+    ;; some fields of DEBUG-ARGS as shell arguments in :program-to-launch and try
+    ;; very hard to quote them. Because of this, `dap-start-debugging' cannot
+    ;; expand them properly. Any python configuration that uses variables in :args
+    ;; will fail.
+    (let* ((debug-args (dap-variables-expand-in-launch-configuration debug-args))
+           (taskConfigurations (dap-tasks-configuration-get-all))
+           (launch-args (or (-some-> (plist-get debug-args :type)
+                              (gethash dap--debug-providers)
+                              (funcall debug-args))
+                            (user-error "Have you loaded the `%s' specific dap package?"
+                                        (or (plist-get debug-args :type)
+                                            (user-error "%s does not specify :type" debug-args)))))
+           (cb (lambda ()
+                 (if (functionp launch-args)
+                     (funcall launch-args #'dap-start-debugging-noexpand)
+                   (dap-start-debugging-noexpand launch-args)))))
+      (-if-let ((&plist :dap-compilation) launch-args)
+          ;;                                      MAY I ASK WHY THIS HAPPENS TO ME?
+          (dap-debug-run-task (el-patch-wrap 1 0 (list `(:cwd ,(or (plist-get launch-args :dap-compilation-dir)
+                                                                   (lsp-workspace-root)
+                                                                   default-directory)
+                                                              :command ,dap-compilation
+                                                              :label ,(truncate-string-to-width dap-compilation 20)))) cb)
+        (-if-let ((&plist :preLaunchTask) launch-args)
+            (let* ((task (dap-tasks-get-configuration-by-label preLaunchTask))
+                   (tasks (dap-tasks-configuration-get-depends task)))
+              (if tasks
+                  (dap-debug-run-task tasks cb)
+                (user-error "No valid tasks found labelled \"%s\". Please check your tasks.json" preLaunchTask)))
+          (funcall cb)))))
+  )
+
 (use-package lsp-mode
-  :defer 5
+  ;; :defer 5
   :init
   (setq lsp-keymap-prefix "C-c l")
+  :hook ((c-mode . lsp)
+         (c++-mode . lsp))
   :config
   ;; For debugging
   ;; (setq lsp-log-io t)
-  (setq lsp-log-io nil)
+  ;; (setq lsp-log-io nil)
   ;; Please forgive my soul for being foolish
   ;; (setq lsp-keep-workspace-alive t)
+  ;; (lsp-register-custom-settings '(("omnisharp.enableImportCompletion" t)))
+  ;; (setq lsp-completion-provider :none)
+  (setq lsp-completion-provider :none)
+  ;; lsp-enable-snippet
+  ;; https://emacs-lsp.github.io/lsp-mode/tutorials/how-to-turn-off/
+
+  ;; And by default they have to put the most uncomfortable position.
+  (setq lsp-lens-place-position 'above-line)
+  (bind-key "M-RET" #'lsp-signature-activate 'lsp-mode-map)
+  (with-eval-after-load 'which-key
+    (lsp-enable-which-key-integration t))
+  (with-eval-after-load 'csharp-mode
+    (add-hook 'csharp-mode-hook #'lsp)
+    )
+  (with-eval-after-load 'vue-ts-mode
+    (setq lsp-vetur-format-default-formatter-css "none")
+    (setq lsp-vetur-format-default-formatter-html "none")
+    (setq lsp-vetur-format-default-formatter-js "none")
+    (setq lsp-vetur-validation-template nil)
+    )
+  (with-eval-after-load 'dap-mode
+    ;; Enabling only some features
+    ;; (setq dap-auto-configure-features '(sessions locals controls tooltip))
+    (require 'dap-netcore)
+    ;; (dap-netcore--debugger-install)
+    (setq dap-netcore-download-url "https://github.com/Samsung/netcoredbg/releases/download/2.2.0-974/netcoredbg-linux-amd64.tar.gz")
+    (dap-register-debug-template
+     "NetCoreDbg::Launch (MyMy3)"
+     (list :type "coreclr"
+           :request "launch"
+           :mode "launch"
+           :name "NetCoreDbg::Launch"
+           :console "externalTerminal"
+           :dap-compilation "dotnet build"))
+    )
   :hook
-  ((lsp-mode . lsp-enable-which-key-integration)))
+  (;; (lsp-mode . lsp-enable-which-key-integration)
+   (lsp-mode . lsp-signature-mode)))
 
 (use-package lsp-ui
   :config (setq lsp-ui-sideline-show-hover t
-                lsp-ui-sideline-delay 0.5
-                lsp-ui-doc-delay 5
-                lsp-ui-sideline-ignore-duplicates t
-                lsp-ui-doc-position 'bottom
-                lsp-ui-doc-alignment 'frame
-                lsp-ui-doc-header nil
-                lsp-ui-doc-include-signature t
-                lsp-ui-doc-use-childframe t)
+                 lsp-ui-sideline-delay 0.5
+                 lsp-ui-doc-delay 0.5
+                 lsp-ui-sideline-ignore-duplicates t
+                 lsp-ui-doc-position 'bottom
+                 lsp-ui-doc-alignment 'frame
+                 lsp-ui-doc-header nil
+                 lsp-ui-doc-include-signature t
+                 lsp-ui-doc-use-childframe t)
+  ;; lsp-doc-show
   :commands lsp-ui-mode)
 
 (use-package lsp-pyright
@@ -948,13 +1338,51 @@ By default the minibuffer is excluded."
 
 (use-package lsp-java
   :after lsp-mode
-  :config
-  (add-hook 'java-mode-hook #'lsp)
+  :init
+  (defun my/java-mode-hook ()
+    (setq-local lsp-enable-indentation nil)
+    (lsp)
+    )
+  (add-hook 'java-mode-hook #'my/java-mode-hook)
+  (setenv "JAVA_HOME" "/usr/lib/jvm/java-17-openjdk/")
+  (setq lsp-java-java-path
+        (if (getenv "JAVA_HOME")
+            (concat (getenv "JAVA_HOME") "bin/java")
+          "java"))
+
+  (setq lsp-java-configuration-runtimes
+        `[(:name "JavaSE-17"
+                 :path ,(getenv "JAVA_HOME")
+                 :default t)
+          (:name "JavaSE-11"
+                 :path "/usr/lib/jvm/java-11-openjdk")]
+        )
+  (setq lsp-java-imports-gradle-wrapper-checksums
+        [(:sha256: "a8451eeda314d0568b5340498b36edf147a8f0d692c5ff58082d477abe9146e4"
+                   :allowed: t)])
   )
+
+;; (use-package groovy-emacs-mode
+
+;; )
+
 ;;** Kotlin
-(use-package kotlin-mode
+;; (use-package kotlin-mode
+;;   :config
+;;   (with-eval-after-load 'lsp
+;;     (add-hook 'kotlin-mode-hook 'lsp))
+;;   )
+
+
+(use-package vue-ts-mode
+  :straight (:type git :host github :repo "8uff3r/vue-ts-mode")
   :config
-  (add-hook 'kotlin-mode-hook 'lsp))
+  (add-hook 'vue-ts-mode-hook #'lsp)
+  (use-package prettier-js
+    :config
+    (setq prettier-js-args '("--parser vue")))
+  ;; (mapc #'treesit-install-language-grammar '(vue css typescript))
+  )
 
 ;;** Python
 (use-package python
@@ -982,6 +1410,18 @@ By default the minibuffer is excluded."
                                'font-lock-operator-face keep)
                               ("\\<[\\+-]?[0-9]+\\(.[0-9]+\\)?\\>" 0
                                'font-lock-number-face keep))))
+  (with-eval-after-load 'dap-mode
+    (require 'dap-python)
+    (setq dap-python-debugger 'debugpy)
+
+    (add-hook 'dap-stopped-hook
+              (lambda (arg) (call-interactively #'dap-hydra)))
+    )
+  ;; Prefer the new treesit
+  ;; (with-eval-after-load 'tree-sitter
+  ;;   (add-hook 'python-mode-hook #'tree-sitter-mode)
+  ;;   (add-hook 'python-mode-hook #'tree-sitter-hl-mode)
+  ;;   )
   :hook
   ((inferior-python-mode . hide-mode-line-mode)
    (python-mode . (lambda ()
@@ -1005,6 +1445,7 @@ By default the minibuffer is excluded."
   :config (setq blacken-line-length 79))
 
 (use-package poetry
+  ;;; TODO: Need to solve the initial lag when opening a pyhton file.
   :config
   (setenv "WORKON_HOME" "~/.cache/pypoetry/virtualenvs/")
   display-buffer-alist
@@ -1031,25 +1472,30 @@ By default the minibuffer is excluded."
   (setq company-minimum-prefix-length 3)
   (setq company-selection-wrap-around t)
   (setq company-require-match nil)
-  (setq company-quick-access-keys '("n" "e" "i" "o" "u" "y" "m" "k" "h" "l"))
+  ;; (setq company-quick-access-keys '("n" "e" "i" "o" "u" "y" "m" "k" "h" "l"))
   ;; M-<n> where is a element of company-quick-access-keys
   (setq company-show-quick-access t)
   (setq company-tooltip-align-annotations t)
   (setq company-frontends
-        '(company-pseudo-tooltip-unless-just-one-frontend
-          company-preview-if-just-one-frontend
-          company-echo-metadata-frontend
-          company-pseudo-tooltip-frontend))
+         '(company-pseudo-tooltip-unless-just-one-frontend
+           ;; company-preview-if-just-one-frontend
+           company-echo-metadata-frontend
+           company-pseudo-tooltip-frontend))
   (general-define-key
    :keymaps 'company-active-map
    "TAB" 'company-select-next
    "<backtab>" 'company-select-previous
+   "RET" nil
    ;; "ESC" 'company-abort
    ;; "C-SPC" 'company-select-next-or-abort
    ;; "C-S-SPC" 'company-select-previous-or-abort
    )
-  (company-tng-mode)
-  (global-company-mode))
+  ;; Maybe this is the guy that is causing me problems with completions in java
+  ;; (company-tng-mode)
+  (global-company-mode)
+  )
+
+
 
 (use-package company-quickhelp
   :config
@@ -1062,13 +1508,13 @@ By default the minibuffer is excluded."
 (use-package flycheck
   :config
   (ryo-modal-keys
-   (:norepeat t)
-   ("!"
-    (("c" flycheck-buffer :name "Check buffer")
-     ("e" flycheck-explain-error-at-point :name "Explain error at point")
-     ("l" flycheck-list-errors :name "List errors")
-     ("x" flycheck-disable-checker :name "Disable checker")
-     ("o" flycheck-mode :name "Toggle mode"))))
+    (:norepeat t)
+    ("!"
+     (("c" flycheck-buffer :name "Check buffer")
+      ("e" flycheck-explain-error-at-point :name "Explain error at point")
+      ("l" flycheck-list-errors :name "List errors")
+      ("x" flycheck-disable-checker :name "Disable checker")
+      ("o" flycheck-mode :name "Toggle mode"))))
   (ryo-modal-key
    "q ; f" :hydra
    '(hydra-syntaxcheck ()
@@ -1092,8 +1538,8 @@ By default the minibuffer is excluded."
   ;; (vertico-posframe-mode -1)
   ;; (vertico-posframe-cleanup)
   ;; Kind of buggy for long lines
-  ;; (gsetq vertico-posframe-poshandler #'posframe-poshandler-frame-top-center)
-  (gsetq vertico-posframe-poshandler #'posframe-poshandler-frame-center)
+  ;; (setq vertico-posframe-poshandler #'posframe-poshandler-frame-top-center)
+  (setq vertico-posframe-poshandler #'posframe-poshandler-frame-center)
   ;; (setq vertico-posframe-parameters
   ;;       '((left-fringe . 8)
   ;;         (right-fringe . 8)))
@@ -1102,7 +1548,12 @@ By default the minibuffer is excluded."
   )
 
 (use-package consult
+  :straight
   :straight consult-projectile
+  :config
+  (with-eval-after-load 'lsp-mode
+    (use-package consult-lsp))
+  (setq consult-fontify-max-size 1024)
   :config
   ;; From https://www.reddit.com/r/emacs/comments/re31i6/comment/ho7ctf3/
   (defun up-directory (arg)
@@ -1147,7 +1598,6 @@ By default the minibuffer is excluded."
   ;; With this package I can embark-export consult-line candidates and
   ;; then edit with occur-edit-mode (e). Also, the export buffer
   ;; becomes a occur buffer.
-  (use-package embark-consult)
   (general-define-key
    "M-x" 'execute-extended-command
    "C-x b" 'consult-buffer
@@ -1185,8 +1635,8 @@ By default the minibuffer is excluded."
            ;; ("i" helm-M-x)
            ("i" execute-extended-command)
            ;; ("o" helm-apropos)
-           ("o" consult-apropos))))
-  )
+           ;; ("o" apropos)
+           ("o" describe-symbol)))))
 
 (use-package consult-org-roam
   ;; For some reason, he preview started to move the point.
@@ -1204,25 +1654,39 @@ By default the minibuffer is excluded."
   (ryo-modal-key "Seb" 'consult-bibtex)
   (setq consult-bibtex-default-action #'consult-bibtex-edit-notes)
   (define-key consult-bibtex-embark-map "RET" #'consult-bibtex)
-  (add-to-list 'embark-become-keymaps 'consult-bibtex-embark-map)
-  )
+  (with-eval-after-load 'embark
+    (add-to-list 'embark-become-keymaps 'consult-bibtex-embark-map)))
 
 (use-package marginalia
   :config
-  (marginalia-mode))
+  ;; Until I find the way.
+  ;;; I don't remember why I said the previous thing
+  (marginalia-mode)
+  )
 
 (use-package embark
+  ;; Unnecessary? Maybe, but this thing wasn't loading symlinking every .el file so I had to put it myself.
+  :straight (:files ("*.el"))
   :config
   (general-define-key
    "C-," 'embark-act
-   "M-," 'embark-dwim)
+   "M-," 'embark-dwim
+   "C-c i" 'embark-act
+   )
   (add-to-list 'display-buffer-alist
                '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                  nil
                  (window-parameters (mode-line-format . none))))
-  (gsetq embark-verbose-indicator-display-action '(display-buffer-at-bottom))
-  (gsetq embark-verbose-indicator-display-action '(display-buffer-reuse-window))
+  (setq embark-verbose-indicator-display-action '(display-buffer-in-direction
+                                                  (direction . top)))
+  ;; (setq embark-verbose-indicator-display-action '(display-buffer-reuse-window))
   )
+
+(use-package embark-consult
+  ;; :no-require t
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
 
 ;; Good old fuzzy search
 (use-package hotfuzz
@@ -1239,16 +1703,42 @@ By default the minibuffer is excluded."
 
 (use-package orderless
   :config
-  ;; Put orderless at last since orderless put me things almost at random.
-  ;; (add-to-list 'completion-styles 'orderless t)
-  (setq completion-styles '(basic partial-completion orderless))
-  ;; matching characters in order, but non-consecutively
-  ;; (add-to-list 'orderless-matching-styles 'orderless-flex t)
-  (gsetq orderless-matching-styles '(orderless-literal orderless-regexp orderless-prefixes))
+  ;; ;; Put orderless at last since orderless put me things almost at random.
+  ;; ;; (add-to-list 'completion-styles 'orderless t)
+  ;; ;; (setq completion-styles '(basic partial-completion orderless))
+  ;; (setq completion-styles '(orderless basic))
+  ;; ;; matching characters in order, but non-consecutively
+  ;; ;; (add-to-list 'orderless-matching-styles 'orderless-flex t)
+  ;; (setq orderless-matching-styles '(;; orderless-literal
+  ;;                                   orderless-regexp orderless-prefixes))
   ;; (setq orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex))
-  (gsetq completion-category-overrides '((file (styles basic partial-completion))))
+  ;; (setq completion-category-overrides '((file (styles basic partial-completion))))
   )
 
+(use-package fussy
+  :config
+  ;; (push 'fussy completion-styles)
+  (setq completion-styles '(fussy basic))
+  ;; (gsetq fussy-filter-fn #'fussy-filter-orderless)
+  (gsetq fussy-filter-fn #'fussy-filter-orderless-flex)
+
+  ;;; Set to nil for fussy-score-threshold-to-filter-alist to take flace
+  (gsetq fussy-score-threshold-to-filter 37)
+
+  (gsetq fussy-score-threshold-to-filter-alist
+         '((flx-score . -100)
+           (fussy-fuz-score . -100)
+           (fussy-fuz-bin-score . -100)
+           (fussy-fzf-native-score . 0)))
+
+  ;; (general-remove-advice #'flx-score #'mymy-flx-ad)
+
+  (setq
+   ;; For example, project-find-file uses 'project-files which uses
+   ;; substring completion by default. Set to nil to make sure it's using
+   ;; flx.
+   completion-category-defaults nil
+   completion-category-overrides nil))
 
 ;;** Helm
 (use-package helm
@@ -1444,14 +1934,18 @@ By default the minibuffer is excluded."
 
 ;;** Dired
 (use-package dired+)
+
 (use-package dired-subtree
   :bind (:map dired-mode-map
               ("i" . dired-subtree-toggle)))
+
 (use-package dired-collapse
   :hook
   ((dired-mode . dired-collapse-mode)))
+
 (use-package dirvish
-  :disabled
+  ;;; Why did I disable this?
+  ;; :disabled
   :init
   (dirvish-override-dired-mode)
   :config
@@ -1462,9 +1956,11 @@ By default the minibuffer is excluded."
   (:map dired-mode-map ("C-l" . dired-up-directory)))
 
 ;; TODO: Put this in org roam section
-(use-package git-auto-commit-mode)
+(use-package git-auto-commit-mode
+  :disabled
+  )
 ;;** Ledger mode
-(use-package ledger-mode :defer 5)
+(use-package ledger-mode :disabled :defer 5)
 ;;** Music
 (use-package emms
   ;; Overkill, but extremely nice
@@ -1474,24 +1970,24 @@ By default the minibuffer is excluded."
   (emms-all)
   (emms-default-players)
   (setq emms-source-file-default-directory "~/Music/"))
-(use-package empv
-  :straight (empv :type git :host github :repo "isamert/empv.el")
-  :config
-  (setq empv-base-directory (expand-file-name "~"))
-  (defhydra hydra-empv-volume
-    ()
-    ("-" empv-volume-down)
-    ("s" empv-volume-set)
-    ("+" empv-volume-up)
-    ("." nil :color blue))
-  :bind
-  ("C-c e n" . empv-playlist-next)
-  ("C-c e p" . empv-playlist-prev)
-  ("C-c e s" . empv-playlist-shuffle)
-  ("C-c e e" . empv-toggle)
-  ("C-c e l" . empv-playlist-loop-on)
-  ("C-c e f" . empv-play-file)
-  ("C-c e v" . hydra-empv-volume/body))
+;; (use-package empv
+;;   :straight (empv :type git :host github :repo "isamert/empv.el")
+;;   :config
+;;   (setq empv-base-directory (expand-file-name "~"))
+;;   (defhydra hydra-empv-volume
+;;     ()
+;;     ("-" empv-volume-down)
+;;     ("s" empv-volume-set)
+;;     ("+" empv-volume-up)
+;;     ("." nil :color blue))
+;;   :bind
+;;   ("C-c e n" . empv-playlist-next)
+;;   ("C-c e p" . empv-playlist-prev)
+;;   ("C-c e s" . empv-playlist-shuffle)
+;;   ("C-c e e" . empv-toggle)
+;;   ("C-c e l" . empv-playlist-loop-on)
+;;   ("C-c e f" . empv-play-file)
+;;   ("C-c e v" . hydra-empv-volume/body))
 
 ;;** Org mode
 (use-package org
@@ -1501,6 +1997,15 @@ By default the minibuffer is excluded."
   (:mode 'org-agenda-mode)
   ("okc" org-agenda-exit)
   :init
+
+  ;; Use timmestamps instead of UUID
+  (gsetq org-id-method 'ts)
+
+  ;; Default: "%Y%m%dT%H%M%S.%6N"
+  (gsetq org-id-ts-format "%Y%m%dT%H%M%S.%6N")
+
+  (setq org-fontify-whole-heading-line t)
+
   (setq org-clock-string-limit 25)
 
   (el-patch-defcustom org-mark-ring-length 4
@@ -1521,7 +2026,7 @@ Changing this requires a restart of Emacs to work correctly."
     :type 'integer)
 
   ;; I mean, this is useful once you start going
-  (gsetq org-mark-ring-length 100)
+  (setq org-mark-ring-length 100)
 
   (setq spaceline-org-clock-format-function 'dwim/org-clock-get-string)
   (require 'org-habit)
@@ -1544,7 +2049,8 @@ Changing this requires a restart of Emacs to work correctly."
      (python . t)
      (ruby . t)
      (screen . nil)
-     (sql . nil)
+     (sql . t)
+     ;; (mysql . t)
      (sqlite . t)
      (clojure . t)
      (java . t)))
@@ -1797,7 +2303,14 @@ Changing this requires a restart of Emacs to work correctly."
         ;; -xelatex use xelatex for processing files to pdf and turn dvi/ps modes off
         ;; -f: Force -pdf output pdf -bibtex
         ;; (list "latexmk -bibtex -f -pdf %f")
-        (list "latexmk -f -pdf -%latex -interaction=nonstopmode -output-directory=%o %f"))
+        (list "latexmk -f -pdf -shell-escape -%latex -interaction=nonstopmode -output-directory=%o %f")
+        ;; (list "latexmk -f -pdf -shell-escape -xelatex -interaction=nonstopmode -output-directory=%o %f")
+        )
+  ;; Syntax hightlighting on source code blocs
+  ;; https://emacs.stackexchange.com/questions/20839/exporting-code-blocks-to-pdf-via-latex/20841#20841
+  (setq org-latex-listings 'minted)
+  (add-to-list 'org-latex-packages-alist '("" "minted"))
+
   ;; ▶, ▼, ↴, ⬎, ⤷, and ⋱
   (setq org-ellipsis "▶")
   (setq org-log-done t)
@@ -1819,26 +2332,24 @@ Changing this requires a restart of Emacs to work correctly."
           ("_" underline)
           ("=" (underline org-code))
           ("~" org-code verbatim)
-          ("+"
-           (:strike-through t))))
-  (setq org-startup-folded t)
-  (setq org-default-notes-file (concat main-dropbox-dir "agenda.org"))
+          ("+" (:strike-through t))))
+  ;;; Had this because I was really sensitive to info overload
+  ;; (setq org-startup-folded t)
+  (setq org-startup-folded "showeverything")
   (setq org-todo-keyword-faces
-        '(("CANCELLED" . (:foreground "red" :weight bold))
-          ("ABANDONED" . (:foreground "red" :weight bold))
-          ("WAITING" . (:foreground "yellow" :weight bold))
-          ("CLASS" . (:foreground "purple" :weight bold))
-          ;; From NEXT to HOLD to mean that another NEXT, more
-          ;; important, it's taking lead.
-          ("HOLD" . (:foreground "yellow" :weight bold))
-          ("NEXT" . (:foreground "blue" :weight bold))
-          ("HABIT" . (:foreground "yellow" :weight italic))
-          ;; As in alloted time
-          ("BOOK" . (:foreground "white" :weight bold))
+        '(("NEXT" . (:foreground "blue" :weight bold))
+          ("TODO" . (:foreground "#F09432" :weight bold))
+          ("CANCELLED" . (:foreground "red" :weight bold))
+          ;; PROJect, as in something without a clear goal
+          ;; ("PROJ" . (:foreground "white" :weight bold))
           ))
+
   (setq org-todo-keywords
-        '((sequence "TODO(t)" "NEXT(n)" "WAITING(w)" "HOLD(o)" "|" "DONE(s)")
-          (type "HABIT(h)" "|" "CANCELLED(c)" "ABANDONED(a)")))
+        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(s)" "CANCELLED(c)")
+          ;; (type "PROJ(p)")
+          ))
+
+  (setq org-default-notes-file (f-join mymy-organization-system-directory "agenda.org"))
   ;; (org-capture-templates
   ;;  ;; https://orgmode.org/manual/Template-expansion.html#Template-expansion
   ;;  ;; https://orgmode.org/manual/Template-elements.html#Template-elements
@@ -1877,12 +2388,13 @@ Changing this requires a restart of Emacs to work correctly."
   (org-mode . org-fragtog-mode))
 
 (use-package org-latex-impatient
+  :disabled
   :defer t
   :hook (org-mode . org-latex-impatient-mode)
   :init
   (setq org-latex-impatient-tex2svg-bin
-        ;; location of tex2svg executable
-        "~/node_modules/mathjax-node-cli/bin/tex2svg")
+         ;; location of tex2svg executable
+         "~/node_modules/mathjax-node-cli/bin/tex2svg")
   ;; (setq org-latex-impatient-posframe-position-handler #'posframe-poshandler-frame-top-right-corner)
   (setq org-latex-impatient-posframe-position-handler #'org-latex-impatient-poshandler)
   :bind
@@ -1921,12 +2433,12 @@ Changing this requires a restart of Emacs to work correctly."
                               it))))))
   :config
   (ryo-modal-major-mode-keys
-   'org-agenda-mode
-   ("n" org-agenda-next-line)
-   ("u" org-agenda-previous-line)
-   ("oks" org-agenda-write)
-   ("rl" org-toggle-link-display)
-   ("ro" org-agenda-open-link))
+    'org-agenda-mode
+    ("n" org-agenda-next-line)
+    ("u" org-agenda-previous-line)
+    ("oks" org-agenda-write)
+    ("rl" org-toggle-link-display)
+    ("ro" org-agenda-open-link))
   (setq mymy-org-agenda-tags-width 0)
   (setq org-agenda-custom-commands
         '(("n" "Agenda and all TODOs"
@@ -1966,6 +2478,8 @@ Changing this requires a restart of Emacs to work correctly."
 (use-package posframe)
 
 (use-package which-key-posframe
+  ;; Sometimes fires, sometimes doesn't and that is a problem
+  :disabled
   :config
   (which-key-posframe-mode))
 (use-package company-posframe
@@ -1973,20 +2487,20 @@ Changing this requires a restart of Emacs to work correctly."
   :config
   (company-posframe-mode))
 
-(use-package org-journal
-  ;; Dailies is a better alternative
-  :disabled
-  ;; Why do i live, just to suffer?
-  :init
-  ;; Change default prefix key; needs to be set before loading org-journal
-  (setq org-journal-prefix-key "C-c j")
-  :config
-  (setq org-journal-dir (concat main-dropbox-dir "journal/")
-        org-journal-date-format "%A, %d %B %Y"))
+;; (use-package org-journal
+;;   ;; Dailies is a better alternative
+;;   :disabled
+;;   ;; Why do i live, just to suffer?
+;;   :init
+;;   ;; Change default prefix key; needs to be set before loading org-journal
+;;   (setq org-journal-prefix-key "C-c j")
+;;   :config
+;;   (setq org-journal-dir (concat main-dropbox-dir "journal/")
+;;         org-journal-date-format "%A, %d %B %Y"))
 (use-package org-superstar
   :config
   (org-superstar-configure-like-org-bullets)
-  (gsetq org-superstar-special-todo-items t)
+  (setq org-superstar-special-todo-items t)
   (setq org-superstar-prettify-item-bullets nil)
   (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄)))
 
@@ -1998,14 +2512,16 @@ Changing this requires a restart of Emacs to work correctly."
     (bind-key "M-." 'elisp-slime-nav-find-elisp-thing-at-point))
   :hook
   (emacs-lisp-mode . elisp-slime-nav-mode))
+
 (use-package csv-mode
+  :hook (csv-mode . csv-align-mode)
   :config
   (ryo-modal-major-mode-keys
-   'csv-mode
-   ("st" csv-align-fields))
-  )
+    'csv-mode
+    ("st" csv-align-fields)))
+
 (use-package org-roam-ui
-  ;; :disabled
+  :disabled
   :straight (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
   :straight websocket simple-httpd
   :after org-roam
@@ -2017,6 +2533,7 @@ Changing this requires a restart of Emacs to work correctly."
         org-roam-ui-open-on-start t))
 
 (use-package git-timemachine
+  :disabled
   :straight t
   :ryo
   ("Gt" git-timemachine-toggle)
@@ -2099,12 +2616,12 @@ string."
       (lambda (headline)
         (org-element-property :ROAM_REFS headline))))
 
-  (gsetq ebib-notes-get-ids-function #'mymy-ebib-notes-extract-org-ids)
+  (setq ebib-notes-get-ids-function #'mymy-ebib-notes-extract-org-ids)
   :config
   (setq ebib-preload-bib-files `(,(concat dropbox-dir "My Library/MyLibrary.bib")))
   (setq ebib-bibtex-dialect 'biblatex)
   (setq ebib-file-associations '(("pdf" . "sioyek")
-                                 ("ps" . "zathura")))
+                                  ("ps" . "zathura")))
   (setq ebib-default-directory (concat dropbox-dir "My Library/"))
   (setq ebib-popup-entry-window t)
   ;; (setq ebib-layout 'index-only)
@@ -2174,6 +2691,7 @@ string."
 ;; with only a little work i can steal some code or make some glue
 ;; with how i want some things to work
 (use-package delve
+  :after org-roam
   ;; For some reason it just break, maybe i will report this
   ;; Found out that the reason is because show/hide outline
   ;; functionality is buggy with lister
@@ -2282,19 +2800,6 @@ collection."
                               "\\1"
                               cand))
 
-  (defun mymy-delve-parse-link (link)
-    "Return the name, type and path of org link as plist. The string
-    just needs to have a link and the link used is the first one"
-    (if (save-match-data
-          ;; Check that it's a org link and set the first occurence as
-          ;; the link
-          (and (string-match org-bracket-link-regexp link)
-               (setq link (match-string 0 link))))
-        (let* ((get (lambda (n) (replace-regexp-in-string org-bracket-link-regexp n link)))
-               (name (funcall get "\\2"))
-               (link-props (split-string (funcall get "\\1") ":")))
-          `(:type ,(car link-props) :path ,(cadr link-props) :name ,name))))
-
   (defun mymy-delve-link-to-zettel (s)
     "Convert org id link to a delve--zettel object"
     (thread-last (plist-get (mymy-delve-parse-link s) :path)
@@ -2344,14 +2849,14 @@ Optional argument ARGS is ignored."
     :parent 'yank-into-org
     :separator "\n"
     :printers `((delve--pile    . ,(lambda (p o)
-                                     (concat
-                                      (string-join (--map (delve-export--item-string it o)
-                                                          (delve--pile-zettels p))
-                                                   ", ")
-                                      ",")))
-                (delve--heading . ,(lambda (h _) (concat "- " (delve--heading-text h))))
-                (delve--zettel  . ,#'mymy-delve-export--zettel-to-link)
-                ))
+				     (concat
+				      (string-join (--map (delve-export--item-string it o)
+							  (delve--pile-zettels p))
+						   ", ")
+				      ",")))
+		(delve--heading . ,(lambda (h _) (concat "- " (delve--heading-text h))))
+		(delve--zettel  . ,#'mymy-delve-export--zettel-to-link)
+		))
 
   (setq delve-export--yank-handlers (list 'mymy-yank-into-org))
   (el-patch-defvar delve-export--yank-handlers
@@ -2517,6 +3022,7 @@ Optional argument ARGS is ignored."
 
 ;;** Org roam
 (use-package org-roam
+  :after el-patch
   :init
   (defvar org-roam-v2-ack t)
   (defun phc-prognify-and-append (form new-form)
@@ -2533,7 +3039,8 @@ Optional argument ARGS is ignored."
                 (when (boundp 'native-comp-async-env-modifier-form)
                   native-comp-async-env-modifier-form)
                 `(defvar org-roam-v2-ack ,org-roam-v2-ack)))
-  (el-patch-defconst org-roam-db--table-schemata
+
+  (defconst org-roam-db--table-schemata
     '((files
        [(file :unique :primary-key)
         title
@@ -2588,6 +3095,59 @@ Optional argument ARGS is ignored."
         (:foreign-key [source] :references nodes [id] :on-delete :cascade)))))
   :config
   (setq org-agenda-files (list (concat mymy-org-roam-dir "Projects/20210715113548-projects.org")))
+  (el-patch-defconst org-roam-db--table-schemata
+    '((files
+       [(file :unique :primary-key)
+        title
+        (hash :not-null)
+        (atime :not-null)
+        (mtime :not-null)])
+
+      (nodes
+       ([(id :not-null :primary-key)
+         (file :not-null)
+         (level :not-null)
+         (pos :not-null)
+         todo
+         priority
+         (scheduled text)
+         (deadline text)
+         title
+         properties
+         olp
+         (el-patch-add backlinkcount)
+         ]
+        (:foreign-key [file] :references files [file] :on-delete :cascade)))
+      (aliases
+       ([(node-id :not-null)
+         alias]
+        (:foreign-key [node-id] :references nodes [id] :on-delete :cascade)))
+
+      (citations
+       ([(node-id :not-null)
+         (cite-key :not-null)
+         (pos :not-null)
+         properties]
+        (:foreign-key [node-id] :references nodes [id] :on-delete :cascade)))
+
+      (refs
+       ([(node-id :not-null)
+         (ref :not-null)
+         (type :not-null)]
+        (:foreign-key [node-id] :references nodes [id] :on-delete :cascade)))
+
+      (tags
+       ([(node-id :not-null)
+         tag]
+        (:foreign-key [node-id] :references nodes [id] :on-delete :cascade)))
+
+      (links
+       ([(pos :not-null)
+         (source :not-null)
+         (dest :not-null)
+         (type :not-null)
+         (properties :not-null)]
+        (:foreign-key [source] :references nodes [id] :on-delete :cascade)))))
   (require 'org-roam-patch)
   (org-roam-db-autosync-enable)
   ;; https://systemcrafters.net/build-a-second-brain-in-emacs/5-org-roam-hacks/
@@ -2641,32 +3201,11 @@ Optional argument ARGS is ignored."
 
   ;; Not using second dailies, consider removing the feature
   ;; Second dailies
-  (setq org-roam-dailies-second-directory "dailies/")
-  (defun mymy-org-roam-dailies-update-second-capture-templates (&rest args)
-    (setq org-roam-dailies-second-capture-templates
-          `(("d" "date" entry
-             "* %<%H:%M> %?"
-             :target (file+head+olp "%<%Y-%m-%d>.org"
-                                    "#+title: %<%Y-%m-%d>\n#+STARTUP: nofold\n"
-                                    (,(format-time-string "%A, %d %B %Y")))
-             :unnarrowed t))))
-  (mymy-org-roam-dailies-update-second-capture-templates)
-  ;; Update after open capture
-  (add-hook 'org-capture-mode-hook #'mymy-org-roam-dailies-update-second-capture-templates)
-
-  (defun mymy-org-roam-dailies--secondary-capture (time &optional goto)
-    (let ((org-roam-dailies-directory
-           org-roam-dailies-second-directory)
-          (org-roam-dailies-capture-templates
-           org-roam-dailies-second-capture-templates))
-      (org-roam-dailies--capture time goto)))
-  (defun mymy-org-roam-dailies-secondary-capture-today (&optional goto)
+  (defun mymy-org-roam-dailies-today (&optional goto)
     (interactive "P")
-    (mymy-org-roam-dailies--secondary-capture (current-time) goto))
+    (org-roam-dailies--capture (current-time) goto "d"))
 
-  (defun mymy-org-roam-dailies-secondary-goto-today ()
-    (interactive)
-    (mymy-org-roam-dailies-secondary-capture-today t))
+  ;; Update after open capture
   ;; (require 'org-roam-protocol)
 
   ;; If a note is a heading, in what file is it?
@@ -2690,9 +3229,9 @@ Optional argument ARGS is ignored."
     (interactive)
     (caar (org-roam-db-query
            [:select (funcall count source)
-            :from links
-            :where (= dest $s1)
-            :and (= type "id")]
+	    :from links
+	    :where (= dest $s1)
+	    :and (= type "id")]
            (or id (org-id-get)))))
   ;; (org-roam-node-backlink-count (org-roam-populate (org-roam-node-create :id (org-id-get))))
 
@@ -2929,9 +3468,6 @@ Like `org-id-open', but additionally uses the Org-roam database."
                                 (point))))
                 (string-trim (buffer-substring-no-properties beg end)))))))))
 
-  ;; Could be anywhere
-  (setq org-tags-column 0)
-
   (defvar mymy-org-roam-preview-current-link nil
     "Link we are previewing.")
 
@@ -3106,8 +3642,7 @@ _._: Quit _q_: Quit
                (message (number-to-string (mymy-org-roam-get-backlinks))))
          :name "Say number of backlinks")))
       ("k"
-       (("f" org-roam-dailies-goto-today)
-        ("F" mymy-org-roam-dailies-secondary-goto-today)))
+       (("f" org-roam-dailies-goto-today)))
       ("n"
        (("n" org-roam-node-find)
         ("i" org-roam-node-insert)
@@ -3163,7 +3698,7 @@ _._: Quit _q_: Quit
     "Sn" "org-roam node"
     "St" "org-roam tags"
     )
-  (gsetq org-roam-db-node-include-function (lambda () (not (member "ARCHIVE" (org-get-tags)))))
+  (setq org-roam-db-node-include-function (lambda () (not (member "ARCHIVE" (org-get-tags)))))
   :hook
   (after-init . winner-mode)
   ;; (org-mode . org-hide-properties)
@@ -3271,7 +3806,15 @@ Author: %^{author}
      ;; Standard Operating Procedures
      ("o" "SOP" entry "* %?\n\n"
       :target (file+olp ,(concat org-roam-directory "2022-08-03-06-17-18-standard_operating_procedures.org")
-                        ("Standard operating procedures"))))
+                        ("Standard operating procedures")))
+     ("d" "date" entry
+      "* %<%H:%M> %?"
+      :target (file+head+olp ,(concat org-roam-directory "dailies/" "%<%Y-%m-%d>.org")
+                             "#+title: %<%Y-%m-%d>\n#+STARTUP: nofold\n"
+                             ("%<%A, %d %B %Y>")
+                             )
+      :unnarrowed t)
+     )
    )
   :bind
   (("C-c n l" . org-roam-buffer-toggle)
@@ -3281,9 +3824,13 @@ Author: %^{author}
    ;; ("C-c n c" . org-roam-capture)
    ("C-c n c" . org-roam-dailies-capture-today)
    ;; Dailies
-   ("C-c C-j" . mymy-org-roam-dailies-secondary-capture-today)
+   ("C-c C-j C-j" . mymy-org-roam-dailies-today)
+   ("C-c C-j j" . mymy-org-roam-dailies-today)
    :map org-mode-map
-   ("C-c C-j" . mymy-org-roam-dailies-secondary-capture-today)))
+   ("C-c C-j" . nil)
+   ("C-c C-j C-j" . mymy-org-roam-dailies-today)
+   ("C-c C-j j" . mymy-org-roam-dailies-today)))
+
 (use-package org-transclusion)
 
 (use-package org-roam-bibtex
@@ -3294,12 +3841,17 @@ Author: %^{author}
   (setq orb-preformat-keywords '("title" "citekey" "entry-type" "date" "author"))
   )
 
+
 (use-package asoc
   :straight (asoc :type git :host github :repo "troyp/asoc.el"))
+(use-package doct
+  ;; Description: doct is a function that provides an alternative,
+  ;; declarative syntax for describing Org capture templates.
+  )
+
 (use-package org-capture-ref
   :defer 5
   :after org-roam
-  :straight doct
   ;; :straight (asoc.el :type git :host github :repo "troyp/asoc.el")
   :straight (org-capture-ref :type git :host github :repo "yantar92/org-capture-ref")
   :config
@@ -3377,7 +3929,7 @@ If a keyword from the template is missing, it will remain empty."
                                                                 (t (lambda () "")))))
           (bibtex-generate-autokey)))))
 
-  (gsetq org-capture-ref-generate-key-functions '(mymy-org-capture-ref-generate-key))
+  (setq org-capture-ref-generate-key-functions '(mymy-org-capture-ref-generate-key))
 
   (defmacro mymy-org-capture-ref-set-bibtex-fields (&rest arg-list)
     "Set org-caputer-ref fields like setq"
@@ -3430,30 +3982,30 @@ If a keyword from the template is missing, it will remain empty."
 
   (add-to-list 'org-capture-ref-get-bibtex-functions #'org-capture-ref-get-bibtex-zettelkasten-de t)
 
-  (gsetq org-capture-ref-capture-target (expand-file-name (concat mymy-org-roam-dir "2022-09-07-08-31-08-references.org"))
-         org-capture-ref-capture-keys '("b" "B")
-         org-capture-ref-capture-template `( :group "Browser link"
-                                             :type entry
-                                             :file ,org-capture-ref-capture-target
-                                             :fetch-bibtex (lambda () (org-capture-ref-process-capture)) ; this must run first
-                                             :extra "- [ ] Check bibtex entry for missing fields and incorrect metadata"
-                                             :bibtex-string (lambda () (org-capture-ref-format-bibtex))
-                                             :org-entry (lambda () (funcall org-capture-ref-headline-format-function))
-                                             :template
-                                             ("%{fetch-bibtex}* TODO %?%{space}%{org-entry}"
-                                              ;; "%{extra}"
-                                              "%{bibtex-string}"
-                                              )
-                                             :headline "References"
-                                             :children (("Interactive link"
-                                                         :keys ,(car org-capture-ref-capture-keys)
-                                                         :clock-in t
-                                                         :space " "
-                                                         :clock-resume t)
-                                                        ("Silent link"
-                                                         :keys ,(cadr org-capture-ref-capture-keys)
-                                                         :space ""
-                                                         :immediate-finish t))))
+  (setq org-capture-ref-capture-target (expand-file-name (concat mymy-org-roam-dir "2022-09-07-08-31-08-references.org"))
+        org-capture-ref-capture-keys '("b" "B")
+        org-capture-ref-capture-template `( :group "Browser link"
+                                            :type entry
+                                            :file ,org-capture-ref-capture-target
+                                            :fetch-bibtex (lambda () (org-capture-ref-process-capture)) ; this must run first
+                                            :extra "- [ ] Check bibtex entry for missing fields and incorrect metadata"
+                                            :bibtex-string (lambda () (org-capture-ref-format-bibtex))
+                                            :org-entry (lambda () (funcall org-capture-ref-headline-format-function))
+                                            :template
+                                            ("%{fetch-bibtex}* TODO %?%{space}%{org-entry}"
+                                             ;; "%{extra}"
+                                             "%{bibtex-string}"
+                                             )
+                                            :headline "References"
+                                            :children (("Interactive link"
+                                                        :keys ,(car org-capture-ref-capture-keys)
+                                                        :clock-in t
+                                                        :space " "
+                                                        :clock-resume t)
+                                                       ("Silent link"
+                                                        :keys ,(cadr org-capture-ref-capture-keys)
+                                                        :space ""
+                                                        :immediate-finish t))))
   (let ((templates (doct org-capture-ref-capture-template)))
     (dolist (template templates)
       (asoc-put! org-capture-templates
@@ -3468,8 +4020,8 @@ If a keyword from the template is missing, it will remain empty."
   (ryo-modal-key "Sm" 'org-pomodoro)
   (setq alert-user-configuration '((((:category . "org-pomodoro")) libnotify nil)))
   (setq org-pomodoro-length 30
-        org-pomodoro-short-break-length 6
-        org-pomodoro-long-break-length 24)
+         org-pomodoro-short-break-length 6
+         org-pomodoro-long-break-length 24)
   ;; (setq org-pomodoro-length 57
   ;;       org-pomodoro-short-break-length 11
   ;;       org-pomodoro-long-break-length 46)
@@ -3520,17 +4072,17 @@ If a keyword from the template is missing, it will remain empty."
   :disabled
   :config
   (setq anki-editor--ox-anki-html-backend
-        (if anki-editor-use-math-jax
-            (org-export-create-backend
-             :parent 'html
-             :transcoders '((latex-fragment . anki-editor--ox-latex-for-mathjax)
-                            (latex-environment . anki-editor--ox-latex-for-mathjax)
-                            (paragraph . strip-<p>-html)))
-          (org-export-create-backend
-           :parent 'html
-           :transcoders '((latex-fragment . anki-editor--ox-latex)
-                          (latex-environment . anki-editor--ox-latex)
-                          (paragraph . strip-<p>-html))))))
+         (if anki-editor-use-math-jax
+             (org-export-create-backend
+              :parent 'html
+              :transcoders '((latex-fragment . anki-editor--ox-latex-for-mathjax)
+                             (latex-environment . anki-editor--ox-latex-for-mathjax)
+                             (paragraph . strip-<p>-html)))
+           (org-export-create-backend
+            :parent 'html
+            :transcoders '((latex-fragment . anki-editor--ox-latex)
+                           (latex-environment . anki-editor--ox-latex)
+                           (paragraph . strip-<p>-html))))))
 
 (use-package org-drill :disabled)
 (use-package quickrun)
@@ -3557,6 +4109,13 @@ If a keyword from the template is missing, it will remain empty."
                            :family "Liberation Serif"
                            :height 1.0)))
    (nov-mode . (lambda () (whitespace-mode -1)))))
+
+(use-package treemacs
+  :config
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window))
+  )
 (use-package projectile
   ;; TODO: Come here later
   :init
@@ -3575,17 +4134,17 @@ If a keyword from the template is missing, it will remain empty."
   (after-init . frames-only-mode)
   :init
   (setq frames-only-mode-kill-frame-when-buffer-killed-buffer-list
-        ;; Default
-        '("*RefTeX Select*" "*Help*" "*Popup Help*" "*Completions*"
-          ;; Cider group
-          "*cider-doc*" "*cider-error*" "*cider-result*" "*cider-apropos*"
-          ;; Vterm
-          "*vterm*"
-          ;; Poetry
-          "*poetry*"))
-  (gsetq frames-only-mode-use-window-functions
+         ;; Default
+         '("*RefTeX Select*" "*Help*" "*Popup Help*" "*Completions*"
+           ;; Cider group
+           "*cider-doc*" "*cider-error*" "*cider-result*" "*cider-apropos*"
+           ;; Vterm
+           "*vterm*"
+           ;; Poetry
+           "*poetry*"))
+  (setq frames-only-mode-use-window-functions
          '( calendar report-emacs-bug checkdoc-show-diagnostics checkdoc org-compile-file
-            embark-act))
+            embark-act dap-debug-run-task))
   :config
   ;; This is a temporary solution
   (unless (equal "DESKTOP-GTTJN7V" (system-name))
@@ -3594,109 +4153,109 @@ If a keyword from the template is missing, it will remain empty."
   :config
   (with-eval-after-load 'gnus
     (setq gnus-buffer-configuration '((group
-                                       (frame 1.0
-                                              (group 1.0 point)))
-                                      (summary
-                                       (frame 1.0
-                                              (summary 1.0 point)))
-                                      (article
-                                       (cond
-                                        (gnus-use-trees
-                                         '(frame 1.0
-                                                 (summary 0.25 point)
-                                                 (tree 0.25)
-                                                 (article 1.0)))
-                                        (t
-                                         '(frame 1.0
-                                                 (summary 0.25 point)
-                                                 (article 1.0)))))
-                                      (server
-                                       (frame 1.0
-                                              (server 1.0 point)))
-                                      (browse
-                                       (frame 1.0
-                                              (browse 1.0 point)))
-                                      (message
-                                       (frame 1.0
-                                              (message 1.0 point)))
-                                      (pick
-                                       (frame 1.0
-                                              (article 1.0 point)))
-                                      (info
-                                       (frame 1.0
-                                              (info 1.0 point)))
-                                      (summary-faq
-                                       (frame 1.0
-                                              (summary 0.25)
-                                              (faq 1.0 point)))
-                                      (only-article
-                                       (frame 1.0
-                                              (article 1.0 point)))
-                                      (edit-article
-                                       (frame 1.0
-                                              (article 1.0 point)))
-                                      (edit-form
-                                       (frame 1.0
-                                              (group 0.5)
-                                              (edit-form 1.0 point)))
-                                      (edit-score
-                                       (frame 1.0
-                                              (summary 0.25)
-                                              (edit-score 1.0 point)))
-                                      (edit-server
-                                       (frame 1.0
-                                              (server 0.5)
-                                              (edit-form 1.0 point)))
-                                      (post
-                                       (frame 1.0
-                                              (post 1.0 point)))
-                                      (reply
-                                       (frame 1.0
-                                              (article 0.5)
-                                              (message 1.0 point)))
-                                      (forward
-                                       (frame 1.0
-                                              (message 1.0 point)))
-                                      (reply-yank
-                                       (frame 1.0
-                                              (message 1.0 point)))
-                                      (mail-bounce
-                                       (frame 1.0
-                                              (article 0.5)
-                                              (message 1.0 point)))
-                                      (pipe
-                                       (frame 1.0
-                                              (summary 0.25 point)
-                                              ("*Shell Command Output*" 1.0)))
-                                      (bug
-                                       (frame 1.0
-                                              ("*Gnus Bug*" 1.0 point)))
-                                      (score-trace
-                                       (frame 1.0
-                                              (summary 0.5 point)
-                                              ("*Score Trace*" 1.0)))
-                                      (score-words
-                                       (frame 1.0
-                                              (summary 0.5 point)
-                                              ("*Score Words*" 1.0)))
-                                      (split-trace
-                                       (frame 1.0
-                                              (summary 0.5 point)
-                                              ("*Split Trace*" 1.0)))
-                                      (category
-                                       (frame 1.0
-                                              (category 1.0)))
-                                      (compose-bounce
-                                       (frame 1.0
-                                              (article 0.5)
-                                              (message 1.0 point)))
-                                      (display-term
-                                       (frame 1.0
-                                              ("*display*" 1.0)))
-                                      (mml-preview
-                                       (frame 1.0
-                                              (message 0.5)
-                                              (mml-preview 1.0 point)))))))
+                                        (frame 1.0
+                                               (group 1.0 point)))
+                                       (summary
+                                        (frame 1.0
+                                               (summary 1.0 point)))
+                                       (article
+                                        (cond
+                                         (gnus-use-trees
+                                          '(frame 1.0
+                                                  (summary 0.25 point)
+                                                  (tree 0.25)
+                                                  (article 1.0)))
+                                         (t
+                                          '(frame 1.0
+                                                  (summary 0.25 point)
+                                                  (article 1.0)))))
+                                       (server
+                                        (frame 1.0
+                                               (server 1.0 point)))
+                                       (browse
+                                        (frame 1.0
+                                               (browse 1.0 point)))
+                                       (message
+                                        (frame 1.0
+                                               (message 1.0 point)))
+                                       (pick
+                                        (frame 1.0
+                                               (article 1.0 point)))
+                                       (info
+                                        (frame 1.0
+                                               (info 1.0 point)))
+                                       (summary-faq
+                                        (frame 1.0
+                                               (summary 0.25)
+                                               (faq 1.0 point)))
+                                       (only-article
+                                        (frame 1.0
+                                               (article 1.0 point)))
+                                       (edit-article
+                                        (frame 1.0
+                                               (article 1.0 point)))
+                                       (edit-form
+                                        (frame 1.0
+                                               (group 0.5)
+                                               (edit-form 1.0 point)))
+                                       (edit-score
+                                        (frame 1.0
+                                               (summary 0.25)
+                                               (edit-score 1.0 point)))
+                                       (edit-server
+                                        (frame 1.0
+                                               (server 0.5)
+                                               (edit-form 1.0 point)))
+                                       (post
+                                        (frame 1.0
+                                               (post 1.0 point)))
+                                       (reply
+                                        (frame 1.0
+                                               (article 0.5)
+                                               (message 1.0 point)))
+                                       (forward
+                                        (frame 1.0
+                                               (message 1.0 point)))
+                                       (reply-yank
+                                        (frame 1.0
+                                               (message 1.0 point)))
+                                       (mail-bounce
+                                        (frame 1.0
+                                               (article 0.5)
+                                               (message 1.0 point)))
+                                       (pipe
+                                        (frame 1.0
+                                               (summary 0.25 point)
+                                               ("*Shell Command Output*" 1.0)))
+                                       (bug
+                                        (frame 1.0
+                                               ("*Gnus Bug*" 1.0 point)))
+                                       (score-trace
+                                        (frame 1.0
+                                               (summary 0.5 point)
+                                               ("*Score Trace*" 1.0)))
+                                       (score-words
+                                        (frame 1.0
+                                               (summary 0.5 point)
+                                               ("*Score Words*" 1.0)))
+                                       (split-trace
+                                        (frame 1.0
+                                               (summary 0.5 point)
+                                               ("*Split Trace*" 1.0)))
+                                       (category
+                                        (frame 1.0
+                                               (category 1.0)))
+                                       (compose-bounce
+                                        (frame 1.0
+                                               (article 0.5)
+                                               (message 1.0 point)))
+                                       (display-term
+                                        (frame 1.0
+                                               ("*display*" 1.0)))
+                                       (mml-preview
+                                        (frame 1.0
+                                               (message 0.5)
+                                               (mml-preview 1.0 point)))))))
 
 ;; One moment I just thought "Dynamic tiling." And emacs can do this,
 ;; so maybe this will replace frames-only-mode
@@ -3711,12 +4270,15 @@ If a keyword from the template is missing, it will remain empty."
   )
 
 (use-package avy
+  :init
+  (require 'linum)
   :config
   (defun avy-goto-word-crt-line ()
     "Jump to a word start on the current line only."
     (interactive)
     (avy-with avy-goto-word-0
       (avy-goto-word-0 nil (line-beginning-position) (line-end-position))))
+
   :config
   (ryo-modal-keys ;;; Avy
     ("I" avy-goto-word-1)
@@ -3743,6 +4305,7 @@ If a keyword from the template is missing, it will remain empty."
   (setq aw-keys '(?n ?e ?i ?o ?k ?m ?u ?y))
   (ace-window-display-mode)
   (ryo-modal-key "owf" #'ace-window))
+
 (use-package windmove
   :config
   (windmove-default-keybindings)
@@ -3750,11 +4313,13 @@ If a keyword from the template is missing, it will remain empty."
 
 (use-package yasnippet-snippets
   :defer 5)
+
 (use-package yasnippet
-  :bind (("C-l" . yas-expand))
+  :bind (("TAB" . yas-expand))
   :config
   (add-to-list 'company-backends 'company-yasnippet t)
   ;; (add-to-list 'warning-suppress-types '(yasnippet backquote-change))
+
   (defun mymy-yasnippet-hook ()
     (yas-define-snippets
      'prog-mode
@@ -3800,8 +4365,8 @@ If a keyword from the template is missing, it will remain empty."
        (">>sum" "\\sum_{${1:a}}^{${2:b}}" "Summation"))))
 
   (ryo-modal-keys
-   ("gy" yas-visit-snippet-file)
-   ("Gy" yas-insert-snippet))
+    ("gy" yas-visit-snippet-file)
+    ("Gy" yas-insert-snippet))
   :bind ((;; C-c y is reserved for yasnippets and, possibly, its
           ;; snippets shortcuts
           "C-c y y" . company-yasnippet))
@@ -3813,6 +4378,7 @@ If a keyword from the template is missing, it will remain empty."
   (text-mode . yas-minor-mode)
   ;; I'm really getting sure this things run
   (yas-minor-mode . mymy-yasnippet-hook))
+
 (use-package slime-company
   :after (slime company)
   :config (setq slime-company-completion 'fuzzy
@@ -3820,7 +4386,7 @@ If a keyword from the template is missing, it will remain empty."
 (use-package slime
   :init
   (setq slime-lisp-implementations
-        '((sbcl . "/usr/bin/sbcl")))
+         '((sbcl . "/usr/bin/sbcl")))
   (setq inferior-lisp-program "/usr/bin/sbcl")
   (slime-setup '(slime-company
                  slime-fancy
@@ -3859,7 +4425,7 @@ If a keyword from the template is missing, it will remain empty."
   (setq dashboard-center-content t)
   ;; Projects, Areas of activity, Reading list
   (setq dashboard-items '((bookmarks . 5)
-                          (projects . 5)))
+                           (projects . 5)))
   :bind (:map dashboard-mode-map
               ("TAB" . dashboard-next-section)
               ("<backtab>" . dashboard-previous-section))
@@ -3868,6 +4434,7 @@ If a keyword from the template is missing, it will remain empty."
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
   ;; (setq initial-buffer-choice (concat org-roam-directory "Projects/20210715113548-projects.org"))
   (bookmark-location (car bookmark-alist))
+  ;; TODO: Make own section of fast access files.
   (el-patch-defun dashboard-insert-bookmarks (list-size)
     "Add the list of LIST-SIZE items of bookmarks."
     (require 'bookmark)
@@ -3904,7 +4471,10 @@ If a keyword from the template is missing, it will remain empty."
         ("n" . undo-tree-visualize-redo)
         ("u" . undo-tree-visualize-undo)
         ("U" . undo-tree-visualize-switch-branch-right)))
+
 (use-package selected ;; Special keybindings when a region is active
+  ;; Not in current use
+  :disabled
   :straight t
   ;; selected-<major-mode>-map for major mode specific keybindings
   ;; (setq selected-org-mode-map (make-sparse-keymap)) example org mode
@@ -3915,14 +4485,19 @@ If a keyword from the template is missing, it will remain empty."
               ("q" . selected-off)
               ("" . count-words-region)))
 (use-package ace-mc
+  ;; Not in current use
+  :disabled
   :config
   (ryo-modal-keys
-   ("i" (("a" ace-mc-add-multiple-cursors)
-         ("t" ace-mc-add-single-cursor)))))
+    ("i" (("a" ace-mc-add-multiple-cursors)
+          ("t" ace-mc-add-single-cursor)))))
+
 (use-package direx
+  ;; Not in current use
+  :disabled
   :config
-  (ryo-modal-key "Okm" #'direx:jump-to-directory)
-  )
+  (ryo-modal-key "Okm" #'direx:jump-to-directory))
+
 (use-package nyan-mode ;; Nyan, simple nyan
   :diminish nyan-mode
   :init
@@ -3930,8 +4505,9 @@ If a keyword from the template is missing, it will remain empty."
         nyan-wavy-trail t)
   :hook
   (after-init . nyan-mode))
+
 (use-package centaur-tabs
-  :demand
+  :disabled
   :config
   (defun toggle-centaur-grouping ()
     (interactive)
@@ -3942,24 +4518,25 @@ If a keyword from the template is missing, it will remain empty."
   (centaur-tabs-mode t)
   (centaur-tabs-change-fonts "Fantasque Sans Mono" 160)
   (setq centaur-tabs-style "bar"
-        centaur-tabs-set-bar 'over
-        centaur-tabs-set-icons t
-        centaur-tabs-set-close-button nil
-        centaur-tabs-cycle-scope 'tabs
-        centaur-tabs-show-new-tab-button nil
-        centaur-tabs-label-fixed-length 6)
+         centaur-tabs-set-bar 'over
+         centaur-tabs-set-icons t
+         centaur-tabs-set-close-button nil
+         centaur-tabs-cycle-scope 'tabs
+         centaur-tabs-show-new-tab-button nil
+         centaur-tabs-label-fixed-length 6)
   (setq uniquify-separator "/"
-        uniquify-buffer-name-style 'forward)
+         uniquify-buffer-name-style 'forward)
   (centaur-tabs-group-by-projectile-project)
   (centaur-tabs-get-groups)
   (ryo-modal-keys
-   (">>" centaur-tabs-move-current-tab-to-right)
-   ("<<" centaur-tabs-move-current-tab-to-left))
+    (">>" centaur-tabs-move-current-tab-to-right)
+    ("<<" centaur-tabs-move-current-tab-to-left))
   :bind
   ("C-S-<iso-lefttab>" . centaur-tabs-backward)
   ("C-<tab>" . centaur-tabs-forward)
   ("C-z" . centaur-tabs-backward-group)
   ("C-S-z" . centaur-tabs-forward-group))
+
 (use-package which-key ;; Useful to tell what is the next command that i can do
   :init
   (setq which-key-enable-extended-define-key t)
@@ -3987,31 +4564,52 @@ If a keyword from the template is missing, it will remain empty."
     "sy" "Eval code section"
     "s@" "HideShow"
     "rd" "Debugging"
-    "rr" "Refractoring"
-    )
-  )
+    "rr" "Refractoring"))
+
 (use-package expand-region
   :init
   (ryo-modal-key "\'" #'er/expand-region)
   :config
+  (defhydra hydra-expand-region (:hint nil :color pink)
+    "
+_c_: Comment _d_: defun _w_: word _m_: method call _s_: symbol _a_: symbol with prefix
+_qi_: Inside quotes _qo_: Outside quotes _pi_: Inside pairs _po_: Outside pairs _n_: Next accessor
+_C-._ Deactivate mark _._: Quit.
+"
+    ("c" er/mark-comment)
+    ("d" er/mark-defun)
+    ("w" er/mark-word)
+    ("m" er/mark-method-call)
+    ("s" er/mark-symbol)
+    ("a" er/mark-symbol-with-prefix)
+    ("qi" er/mark-inside-quotes)
+    ("qo" er/mark-outside-quotes)
+    ("pi" er/mark-inside-pairs)
+    ("po" er/mark-outside-pairs)
+    ("n" er/mark-next-accessor) ;; skips over one period and mark next symbol
+    ("C-." deactivate-mark :color blue)
+    ("." nil :color blue)
+    )
+  (global-set-key (kbd "C-'") #'hydra-expand-region/body)
   (ryo-modal-keys
-   ("\'" er/expand-region)
-   ("On" (("c" er/mark-comment)
-          ("d" er/mark-defun)
-          ("w" er/mark-word)
-          ("m" er/mark-method-call)
-          ("s" er/mark-symbol)
-          ("a" er/mark-symbol-with-prefix)
-          ("q" (("i" er/mark-inside-quotes)
-                ("o" er/mark-outside-quotes)))
-          ("p" (("i" er/mark-inside-pairs)
-                ("o" er/mark-outside-pairs)))
-          ("n" er/mark-next-accessor) ;; skips over one period and mark next symbol
-          )))
+    ("\'" er/expand-region)
+    ("On" (("c" er/mark-comment)
+           ("d" er/mark-defun)
+           ("w" er/mark-word)
+           ("m" er/mark-method-call)
+           ("s" er/mark-symbol)
+           ("a" er/mark-symbol-with-prefix)
+           ("q" (("i" er/mark-inside-quotes)
+                 ("o" er/mark-outside-quotes)))
+           ("p" (("i" er/mark-inside-pairs)
+                 ("o" er/mark-outside-pairs)))
+           ("n" er/mark-next-accessor) ;; skips over one period and mark next symbol
+           )))
   :bind
   ("C-'" . er/expand-region))
 
 (use-package yequake
+  :disabled
   :after org-roam
   :config
   ;; Will change this to an advice later
@@ -4027,16 +4625,37 @@ If a keyword from the template is missing, it will remain empty."
       (user-error "No Yequake frame named: %s" name)))
   :config
   (setq yequake-frames
-        '(("org-roam-dailies-capture-today"
-           (buffer-fns . (yequake-org-roam-dailies-capture-today))
-           (width . 0.75)
-           (height . 0.5)
-           (alpha . 0.8)
-           (frame-parameters . ((undecorated . t)
-                                (sticky . t)
-                                (skip-taskbar . t)
-                                ;; (window-system . x)
-                                ))))))
+         '(("org-roam-dailies-capture-today"
+            (buffer-fns . (yequake-org-roam-dailies-capture-today))
+            (width . 0.75)
+            (height . 0.5)
+            (alpha . 0.8)
+            (frame-parameters . ((undecorated . t)
+                                 (sticky . t)
+                                 (skip-taskbar . t)
+                                 ;; (window-system . x)
+                                 ))))))
+
+(use-package terminal-here
+  :config
+  (global-set-key (kbd "C-<f5>") #'terminal-here-launch)
+  (global-set-key (kbd "C-<f6>") #'terminal-here-project-launch)
+  (setq terminal-here-linux-terminal-command '("kitty" "--single-instance"))
+  (setq terminal-here-command-flag "--")
+  (when (executable-find "poetry")
+    (global-set-key (kbd "C-<f3>") (lambda () (interactive) (terminal-here-launch (list (executable-find "poetry") "shell")))))
+
+  (defun mymy-set-xmonad-project-dir-here ()
+    (interactive)
+    (and (y-or-n-p "Want to change the xmonad directory?")
+         (when (not (= 0 (shell-command (format (expand-file-name "~/Scripts/xmonadctl -a XMONAD_CHANGE_DIR %S") default-directory))))
+           (error "Error setting the xmonad dir")))
+    )
+  (global-set-key (kbd "C-<f4>") #'mymy-set-xmonad-project-dir-here)
+  )
+
+;; let dir = default-directory
+;; modifyProject (\p -> p { projectDirectory = dir })
 
 (use-package dired
   :straight nil
@@ -4093,42 +4712,19 @@ T - tag prefix
     ("Z" dired-do-compress)
     ("q" nil)
     ("." nil :color blue)))
-(use-package straight
-  :straight nil
-  :bind (("C-c s t" . hydra-straight-helper/body))
-  :ryo
-  ("hs" hydra-straight-helper/body)
-  (defhydra hydra-straight-helper (:hint nil)
-    "
-_c_heck all       |_f_etch all     |_m_erge all      |_n_ormalize all   |p_u_sh all
-_C_heck package   |_F_etch package |_M_erge package  |_N_ormlize package|p_U_sh package
-----------------^^+--------------^^+---------------^^+----------------^^+------------||_q_uit||
-_r_ebuild all     |_p_ull all      |_v_ersions freeze|_w_atcher start   |_g_et recipe
-_R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_ build"
-    ("c" straight-check-all)
-    ("C" straight-check-package)
-    ("r" straight-rebuild-all)
-    ("R" straight-rebuild-package)
-    ("f" straight-fetch-all)
-    ("F" straight-fetch-package)
-    ("p" straight-pull-all)
-    ("P" straight-pull-package)
-    ("m" straight-merge-all)
-    ("M" straight-merge-package)
-    ("n" straight-normalize-all)
-    ("N" straight-normalize-package)
-    ("u" straight-push-all)
-    ("U" straight-push-package)
-    ("v" straight-freeze-versions)
-    ("V" straight-thaw-versions)
-    ("w" straight-watcher-start)
-    ("W" straight-watcher-quit)
-    ("g" straight-get-recipe)
-    ("e" straight-prune-build)
-    ("q" nil)))
 
 (use-package emacs
   :config
+  (defun my-unfill-paragraph (&optional region)
+    "Make multi-line paragraph into a single line of text.
+
+REGION unfills the region.  See URL
+`https://www.emacswiki.org/emacs/UnfillParagraph'"
+    (interactive (progn (barf-if-buffer-read-only) '(t)))
+    (let ((fill-column (point-max))
+          ;; This would override `fill-column' if it's an integer.
+          (emacs-lisp-docstring-fill-column t))
+      (fill-paragraph nil region)))
   )
 
 (prefer-coding-system 'utf-8)
@@ -4139,11 +4735,6 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (setenv "PATH" (let ((current (getenv "PATH"))
                      (new (concat (getenv "HOME") "/.local/bin")))
                  (if current (concat new ":" current) new)))
-
-(let ((java-env (getenv "JAVA_HOME")))
-  (if java-env
-      (setq lsp-java-java-path (concat (getenv "JAVA_HOME") "bin/java"))
-    (setq lsp-java-java-path "java")))
 
 (setq default-fill-column 74)
 ;; To remind me that this thing is posible
@@ -4162,17 +4753,19 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 
 (setq highlight-nonselected-windows t)
 (setq use-dialog-box nil) ; Text-based options are better
-(setq bidi-display-reordering nil)
+;;; Seems this is not supported anymore, whatever it did
+;; (setq bidi-display-reordering nil)
+(setq bidi-inhibit-bpa t)
+(setq-default bidi-paragraph-direction 'left-to-right)
+
 ;; Why this varible even exists?
 (setq delete-pair-blink-delay 0)
-(setq font-lock-verbose nil)
+(setq font-lock-verbse nil)
 (setq byte-compile-verbose nil)
-(setq default-tab-width 4)
-;; (setq tab-width 4)
-(setq-default tab-width 4)
-;; Default one
-(setq tab-width 8)
+;; Default one; Why? Because everyone uses it, making more sense when
+;; reading another person's code
 (setq-default tab-width 8)
+(setq default-tab-width 8)
 (setq inhibit-compacting-font-caches t)
 (setq use-package-always-demand (daemonp))
 (setq mouse-yank-at-point t)
@@ -4189,13 +4782,13 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (setq-default garbage-collection-messages t)
 (setq-default indent-tabs-mode nil)
 (setq scroll-error-top-bottom t)
-(setq-default
- prettify-symbols-alist
- '(("#+BEGIN_SRC" . "Λ")
-   ("#+END_SRC" . "Λ")
-   ("#+begin_src" . "Λ")
-   ("#+end_src" . "Λ")
-   ("lambda" . "λ")))
+;; (setq-default
+;;  prettify-symbols-alist
+;;  '(("#+BEGIN_SRC" . "Λ")
+;;    ("#+END_SRC" . "Λ")
+;;    ("#+begin_src" . "Λ")
+;;    ("#+end_src" . "Λ")
+;;    ("lambda" . "λ")))
 (setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
 (setq delete-old-versions -1)
 (setq version-control t)
@@ -4224,15 +4817,15 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 ;; Note that the default is x100), but this seems too high.
 (setq undo-outer-limit 1006632960)
 
-(setq exec-path (append exec-path '("~/.local/bin")))
+;; (setq exec-path (append exec-path '("~/.local/bin")))
+(add-to-list 'exec-path "~/.local/bin")
 (setq jit-lock-defer-time 0)
 (setq fast-but-imprecise-scrolling t)
 (setq auto-window-vscroll nil)
 (setq savehist-additional-variables '(register-alist))
-(setq
- split-height-threshold 4
- split-width-threshold 40
- split-window-preferred-function 'split-window-really-sensibly)
+(setq split-height-threshold 4
+      split-width-threshold 40
+      split-window-preferred-function 'split-window-really-sensibly)
 
 ;; use xclip to copy/paste in emacs-nox
 (unless window-system
@@ -4244,15 +4837,18 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
          (point-min) (point-max)
          "xclip" nil 0 nil "-i" "-selection" "clipboard")))
     (defun xclip-paste-function ()
-      (let ((xclip-output
-             (shell-command-to-string "xclip -o -selection clipboard")))
-        (unless (string= (car kill-ring) xclip-output)
+      (let* ((xclip-output
+              (shell-command-to-string "xclip -o -selection clipboard"))
+             (xclip-output (if (string= xclip-output "Error: target STRING not available\n")
+                               "" xclip-output))
+             )
+        (unless (and (string= (car kill-ring) xclip-output) (string= xclip-output "Error: target STRING not available"))
           xclip-output)))
     (setq interprogram-cut-function 'xclip-cut-function)
     (setq interprogram-paste-function 'xclip-paste-function)))
 
 ;;                   Don't know where to put it, but it's still config
-(with-eval-after-load "linum"
+(with-eval-after-load 'linum
   ;; set `linum-delay' so that linum uses `linum-schedule' to update linums.
   (setq linum-delay t)
   ;; create a new var to keep track of the current update timer.
@@ -4265,23 +4861,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
     (setq my-linum-current-timer
           (run-with-idle-timer 1 nil #'linum-update-current))))
 
-(setq custom--inhibit-theme-enable nil)
 
-(defface font-lock-operator-face
-  '((t :foreground "#8fff9e")) "Basic face for operator."
-  :group 'basic-faces)
-(defface font-lock-number-face
-  '((t :foreground "#f56356")) "Basic face for number."
-  :group 'basic-faces)
-
-
-
-;; (add-hook 'window-configuration-change-hook
-;;           (lambda ()
-;;             (set-window-margins (car (get-buffer-window-list (current-buffer) nil t)) 1 1)))
-
-(add-hook 'csv-mode-hook
-          'csv-align-mode)
 
 (add-hook 'after-init-hook
           (lambda ()
@@ -4290,37 +4870,13 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (add-hook 'prog-mode
           (lambda ()
             (auto-fill-mode t)))
+
 (add-hook 'TeX-after-compilation-finished-functions
           #'TeX-revert-document-buffer)
 
-(add-hook 'c-mode-hook 'lsp)
-(add-hook 'c++-mode-hook 'lsp)
-
 ;; MyMy mode
 
-(defun increment-number-at-point ()
-  (interactive)
-  (let ((old-point (point)))
-    (unwind-protect
-        (progn
-          (skip-chars-backward "0-9")
-          (or (looking-at "[0-9]+")
-              (error "No number at point"))
-          (replace-match (number-to-string (1+ (string-to-number (match-string 0))))))
-      (goto-char old-point))))
-(defun decrement-number-at-point ()
-  (interactive)
-  (let ((old-point (point)))
-    (unwind-protect
-        (progn
-          (skip-chars-backward "0-9")
-          (or (looking-at "[0-9]+")
-              (error "No number at point"))
-          (replace-match (number-to-string (1- (string-to-number (match-string 0))))))
-      (goto-char old-point))))
-(ryo-modal-keys
- ("z+" increment-number-at-point)
- ("z-" decrement-number-at-point))
+
 ;; git: Remove mymy-mode
 ;; Comment: General alredy provides a way of doing this
 ;; (define-minor-mode mymy-mode
@@ -4339,49 +4895,9 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 ;;         (mymy-mode t))))
 ;; (add-hook 'after-init-hook 'mymy-global-mode)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ;; Load all functions
 (require 'functions)
 (ryo-modal-global-mode t)
 
 ;; Init.el ends here
-
 
