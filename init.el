@@ -1310,14 +1310,14 @@ be used to compile the project, spin up docker, ...."
 
 (use-package lsp-ui
   :config (setq lsp-ui-sideline-show-hover t
-                 lsp-ui-sideline-delay 0.5
-                 lsp-ui-doc-delay 0.5
-                 lsp-ui-sideline-ignore-duplicates t
-                 lsp-ui-doc-position 'bottom
-                 lsp-ui-doc-alignment 'frame
-                 lsp-ui-doc-header nil
-                 lsp-ui-doc-include-signature t
-                 lsp-ui-doc-use-childframe t)
+                lsp-ui-sideline-delay 0.5
+                lsp-ui-doc-delay 0.5
+                lsp-ui-sideline-ignore-duplicates t
+                lsp-ui-doc-position 'bottom
+                lsp-ui-doc-alignment 'frame
+                lsp-ui-doc-header nil
+                lsp-ui-doc-include-signature t
+                lsp-ui-doc-use-childframe t)
   ;; lsp-doc-show
   :commands lsp-ui-mode)
 
