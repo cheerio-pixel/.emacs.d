@@ -1324,8 +1324,8 @@ be used to compile the project, spin up docker, ...."
 (use-package lsp-pyright
   :after lsp-mode
   :config
-  (add-hook 'python-mode-hook #'lsp)
-  (add-hook 'python-mode-hook (lambda () (require 'lsp-pyright))))
+  (add-hook 'python-mode-hook (lambda () (require 'lsp-pyright)))
+  (add-hook 'python-mode-hook #'lsp))
 
 (use-package lsp-haskell
   ;; :defer 5
