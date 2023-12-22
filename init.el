@@ -1463,6 +1463,83 @@ be used to compile the project, spin up docker, ...."
   (python-mode . poetry-tracking-mode))
 ;;** Haskell
 (use-package haskell-mode)
+
+;;** Corfu
+
+(use-package corfu
+  ;; Optional customizations
+  :config
+  (gsetq corfu-cycle t) ;; Enable cycling for `corfu-next/previous'
+  ;; (gsetq corfu-auto t)  ;; Enable auto completion
+  (gsetq corfu-separator ?\s) ;; Orderless field separator
+  ;; (gsetq corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
+  ;; (gsetq corfu-quit-no-match nil)      ;; Never quit, even if there is no match
+  (gsetq corfu-preview-current nil) ;; Disable current candidate preview
+  ;; (gsetq corfu-preselect 'prompt)      ;; Preselect the prompt
+  ;; (gsetq corfu-on-exact-match nil)     ;; Configure handling of exact matches
+  (gsetq corfu-scroll-margin 5) ;; Use scroll margin
+
+  ;; Enable Corfu only for certain modes.
+  ;; :hook ((prog-mode . corfu-mode)
+  ;;        (shell-mode . corfu-mode)
+  ;;        (eshell-mode . corfu-mode))
+
+  ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
+  ;; be used globally (M-/).  See also the customization variable
+  ;; `global-corfu-modes' to exclude certain modes.
+
+  ;; Set the first delay and consecutive delay for help on current
+  ;; element
+  (gsetq corfu-echo-delay (cons 1.5 0.8))
+
+  (comment
+   ;; https://github.com/minad/corfu?tab=readme-ov-file#debugging-corfu
+   ;; "When you observe an error in the corfu--post-command post
+   ;; command hook"
+
+   (setq debug-on-error t)
+
+   (defun force-debug (func &rest args)
+     (condition-case e
+         (apply func args)
+       ((debug error) (signal (car e) (cdr e)))))
+
+   (advice-add #'corfu--post-command :around #'force-debug)
+   )
+
+  :init
+  (general-define-key
+   "C-M-e" 'completion-at-point
+   "M-/" 'dabbrev-completion
+   "C-M-/" ' dabbrev-expand
+   )
+
+  (general-define-key
+   :keymap 'corfu-map
+   ;; Default: M-h
+   "M-h" 'corfu-info-documentation
+   ;; Default: M-g
+   "M-g" 'corfu-info-location
+   ;; Default: completion-at-point, TAB
+   [completion-at-point] 'corfu-complete
+   "TAB" 'corfu-complete)
+
+  (global-corfu-mode)
+  (corfu-echo-mode)
+   ;;; Like company quickhelp, except that opens the frame
+  ;; (corfu-popupinfo-mode -1)
+  )
+
+(use-package cape
+  :after corfu
+  :config
+  (general-define-key
+   :keymap 'org-mode-map
+   "C-M-k" 'cape-file))
+
+(use-package nerd-icons-corfu
+  :config (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+
 ;;** Company
 (use-package company
   :disabled
