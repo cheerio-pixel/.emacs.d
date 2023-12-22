@@ -607,8 +607,6 @@ By default the minibuffer is excluded."
  "C-<" 'mc/mark-previous-like-this
  "C-c m c" 'mc/edit-lines
  "C-a" 'smarter-move-beginning-of-line
- "C-M-n" 'company-capf
- "C-M-e" 'company-complete
  "M-<return>" 'new-line-dwim
  "M-e" 'hippie-expand
  "M-n" 'dabbrev-expand
@@ -639,7 +637,6 @@ By default the minibuffer is excluded."
 ;;** smartparens-mode-map
 (general-define-key
  :keymaps 'smartparens-mode-map
- "C-M-e" 'company-complete
  "M-(" 'sp-wrap-round
  "M-s" 'sp-splice-sexp
  "M-r" 'sp-splice-sexp-killing-around)
@@ -1468,6 +1465,7 @@ be used to compile the project, spin up docker, ...."
 (use-package haskell-mode)
 ;;** Company
 (use-package company
+  :disabled
   :config
   ;; Prefer to use it manually
   (setq company-idle-delay nil)
@@ -1483,32 +1481,46 @@ be used to compile the project, spin up docker, ...."
   (setq company-show-quick-access t)
   (setq company-tooltip-align-annotations t)
   (setq company-frontends
-         '(company-pseudo-tooltip-unless-just-one-frontend
-           ;; company-preview-if-just-one-frontend
-           company-echo-metadata-frontend
-           company-pseudo-tooltip-frontend))
+        '(company-pseudo-tooltip-unless-just-one-frontend
+          company-preview-if-just-one-frontend
+          company-echo-metadata-frontend
+          company-pseudo-tooltip-frontend))
   (general-define-key
-   :keymaps 'company-active-map
-   "TAB" 'company-select-next
-   "<backtab>" 'company-select-previous
-   "RET" nil
-   ;; "ESC" 'company-abort
-   ;; "C-SPC" 'company-select-next-or-abort
-   ;; "C-S-SPC" 'company-select-previous-or-abort
-   )
-  ;; Maybe this is the guy that is causing me problems with completions in java
-  ;; (company-tng-mode)
-  (global-company-mode)
-  )
+   "C-M-n" 'company-capf
+   "C-M-e" 'company-complete)
 
+  (with-eval-after-load 'smartparens-mode
+    (general-define-key
+     :keymaps 'smartparens-mode-map
+     "C-M-e" 'company-complete))
+
+  (global-company-mode))
+
+(use-package company-posframe
+  :disabled
+  :config
+  (company-posframe-mode))
 
 
 (use-package company-quickhelp
+  :disabled
+  ;; This has a problem with frames-only-mode, I think, since it tries
+  ;; to open a new window, it opens a frame, which in turn loses focus
+  ;; of the current frame
+  :after frames-only-mode
+  :if (not frames-only-mode)
   :config
   (general-define-key
    :keymaps 'company-active-map
    "C-c h" 'company-quickhelp-manual-begin)
-  (company-quickhelp-mode))
+  (unless frames-only-mode
+    (company-quickhelp-mode))
+  )
+
+(use-package slime-company
+  :after (slime company)
+  :config (setq slime-company-completion 'fuzzy
+                slime-company-after-completion 'slime-company-just-one-space))
 
 ;;** flycheck
 (use-package flycheck
@@ -2372,8 +2384,9 @@ Changing this requires a restart of Emacs to work correctly."
   (setq org-log-into-drawer t)
   :bind
   (("C-c o c" . org-capture)
-   :map org-mode-map
-   (("C-M-k" . company-files)))
+   ;; :map org-mode-map
+   ;; (("C-M-k" . company-files))
+   )
   :hook
   (org-mode . org-superstar-mode)
   (org-mode . prettify-symbols-mode)
@@ -2488,10 +2501,6 @@ Changing this requires a restart of Emacs to work correctly."
   :disabled
   :config
   (which-key-posframe-mode))
-(use-package company-posframe
-  :disabled
-  :config
-  (company-posframe-mode))
 
 ;; (use-package org-journal
 ;;   ;; Dailies is a better alternative
@@ -4393,9 +4402,9 @@ If a keyword from the template is missing, it will remain empty."
   (ryo-modal-keys
     ("gy" yas-visit-snippet-file)
     ("Gy" yas-insert-snippet))
-  :bind ((;; C-c y is reserved for yasnippets and, possibly, its
-          ;; snippets shortcuts
-          "C-c y y" . company-yasnippet))
+  ;; :bind ((;; C-c y is reserved for yasnippets and, possibly, its
+  ;;         ;; snippets shortcuts
+  ;;         "C-c y y" . company-yasnippet))
   :hook
   ;; Doesn't work for some reason
   ;; (after-init . yas-global-mode)
@@ -4405,14 +4414,10 @@ If a keyword from the template is missing, it will remain empty."
   ;; I'm really getting sure this things run
   (yas-minor-mode . mymy-yasnippet-hook))
 
-(use-package slime-company
-  :after (slime company)
-  :config (setq slime-company-completion 'fuzzy
-                slime-company-after-completion 'slime-company-just-one-space))
 (use-package slime
   :init
   (setq slime-lisp-implementations
-         '((sbcl . "/usr/bin/sbcl")))
+        '((sbcl . "/usr/bin/sbcl")))
   (setq inferior-lisp-program "/usr/bin/sbcl")
   (slime-setup '(slime-company
                  slime-fancy
