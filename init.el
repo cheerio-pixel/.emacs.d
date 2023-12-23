@@ -58,7 +58,7 @@
 (defalias 'gsetq-default 'general-setq-default)
 
 ;;* Configs
-(set-frame-parameter nil 'fullscreen 'fullboth) ; Fullscreen
+;; (set-frame-parameter nil 'fullscreen 'fullboth) ; Fullscreen
 (setq redisplay-dont-pause t)
 (setq frame-resize-pixelwise t)
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
