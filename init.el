@@ -380,6 +380,18 @@
   :config
   (setq ryo-modal-cursor-color nil)
   (setq ryo-modal-cursor-type 'hollow)
+
+  (defun mymy-ryo-modal-update-default-after-theme-change-ad (&rest _)
+    "If the theme is changed after loading ryo modal, then the default
+cursor face is going to be configured as the previous theme cursor
+face. This advice is to hook on the function `enable-theme'"
+    (setq ryo-modal-default-cursor-color (face-attribute 'cursor :background)))
+
+  (advice-add #'enable-theme :after #'mymy-ryo-modal-update-default-after-theme-change-ad)
+
+  ;; Raise Ryo Modal map priority
+  ;; Cannot do that, since ryo modal relies on making other modes to make its magic
+  ;; (add-to-ordered-list 'emulation-mode-map-alists `((ryo-modal-mode . ,ryo-modal-mode-map)))
   :config
   (require 'ryo-modal-patch)
 
