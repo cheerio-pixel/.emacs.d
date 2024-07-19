@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: clojure src
-# key: cl
-# --
-#+begin_src clojure
-  ${}
-#+end_src

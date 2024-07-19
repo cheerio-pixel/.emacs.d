@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: for ... in ... : ...
-# key: for
-# binding: C-c y f
-# group : control structure
-# --
-for ${var} in ${collection}:
-    $0
