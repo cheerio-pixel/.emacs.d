@@ -12,9 +12,12 @@
         backward-to-word
         c-electric-colon
         c-electric-semi&comma
+        c-electric-slash
         c-indent-line-or-region
         company-complete
+        completion-at-point
         consult-yank-from-kill-ring
+        decrement-number-at-point
         delete-current-line
         delete-horizontal-space
         delete-pair
@@ -22,7 +25,11 @@
         describe-symbol
         downcase-dwim
         end-of-buffer
+        end-of-visual-line
+        eval-last-sexp
+        expreg-expand
         forward-to-word
+        frames-only-mode-abort-recursive-edit
         god-mode-self-insert
         handle-switch-frame
         haskell-indentation-common-electric-command
@@ -41,7 +48,9 @@
         hydra-org-heading-move/org-metadown
         hydra-org-heading-move/org-metaup
         ido-switch-buffer
+        ignore-preserving-kill-region
         increment-number-at-point
+        indent-according-to-mode
         indent-for-tab-command
         keyboard-quit
         kill-region
@@ -58,7 +67,12 @@
         lispy-yank
         lsp-rename
         lsp-ui-doc--handle-mouse-movement
+        markdown-outdent-or-delete
+        mouse-appearance-menu
         my-delete-whole-line
+        mymy-act-at-point
+        mymy-downcase-char
+        mymy-lispy-different
         new-line-dwim
         org-beginning-of-line
         org-cycle
@@ -78,21 +92,26 @@
         rectangle-backward-char
         rectangle-forward-char
         rectangle-mark-mode
+        ryo-modal-repeat
         ryo:085ed6482dfe2416f758b8ed90262cd0:insert\ text
         ryo:6c0b5bec3522d2e495ff80ad83791864:insert-quotes
+        ryo:837a9bf7a89d42cd4fb9d6b17299460c:lispy-different
         ryo:d77df2a102a270b1c4ab1b70c78e1fd0:insert\ text
         ryo:d80a40411c8db939213101425d5bc549:Comment
+        save-some-buffers
         slime-autodoc-space
         slime-space
         smarter-move-beginning-of-line
         sp-backward-delete-char
         sp-delete-char
         sp-delete-region
+        sp-kill-hybrid-sexp
         sp-kill-region
         sp-wrap-round
         special-lispy-ace-subword
         special-lispy-ace-symbol
         special-lispy-barf
+        special-lispy-clone
         special-lispy-different
         special-lispy-mark-list
         special-lispy-move-down
@@ -105,10 +124,15 @@
         special-lispy-stringify
         special-lispy-teleport
         special-lispy-underscore
+        special-lispy-view
+        string-rectangle
         switch-to-last-buffer
+        tempel-insert
         upcase-char
+        upcase-region
         wdired--self-insert
         wdired-finish-edit
+        wgrep-finish-edit
         yas-expand
         ))
 
@@ -127,14 +151,17 @@
         ejc-cancel-query
         god-mode-all
         helm-M-x
+        hydra-avy/body
         hydra-git/nil
         ignore
         jupyter-eval-buffer
         lsp-signature-stop
+        org-cycle-agenda-files
         point-to-register
         ryo-modal-global-mode
         ryo-modal-mode-all
         scroll-up
+        sp-remove-active-pair-overlay
         special-lispy-ace-paren
         special-lispy-eval-other-window
         special-lispy-narrow

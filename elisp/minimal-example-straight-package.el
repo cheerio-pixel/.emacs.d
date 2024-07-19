@@ -18,3 +18,60 @@
 (eval-when-compile (require 'use-package))
 ;; ---------------------------------------------------------------------------------------------
 
+
+(use-package ejc-sql
+  :config
+  (setq ejc-connections
+        '(("Asig2"
+           (:classname . "com.mysql.jdbc.Driver")
+           (:classpath .
+                       ["/home/cheerio-pixel/.m2/repository/mysql/mysql-connector-java/5.1.44/mysql-connector-java-5.1.44.jar"])
+           (:password . "testtest")
+           (:user . "MySQL test")
+           (:port . "3306")
+           (:host . "localhost")
+           (:dbname . "Asig2")
+           (:dbtype . "mysql"))
+          ("mysql1"
+           (:classname . "com.mysql.jdbc.Driver")
+           (:classpath .
+                       ["/home/cheerio-pixel/.m2/repository/mysql/mysql-connector-java/5.1.44/mysql-connector-java-5.1.44.jar"])
+           (:password . "testtest")
+           (:user . "MySQL test")
+           (:port . "3306")
+           (:host . "localhost")
+           (:dbname . "intro2")
+           (:dbtype . "mysql"))
+          ("lab3"
+           (:classname . "com.mysql.jdbc.Driver")
+           (:classpath .
+                       ["/home/cheerio-pixel/.m2/repository/mysql/mysql-connector-java/5.1.44/mysql-connector-java-5.1.44.jar"])
+           (:password . "testtest")
+           (:user . "MySQL test")
+           (:port . "3306")
+           (:host . "localhost")
+           (:dbname . "lab3")
+           (:dbtype . "mysql"))
+          ("Group"
+           (:classname . "com.mysql.jdbc.Driver")
+           (:classpath .
+                       ["/home/cheerio-pixel/.m2/repository/mysql/mysql-connector-java/5.1.44/mysql-connector-java-5.1.44.jar"])
+           (:password . "testtest")
+           (:user . "MySQL test")
+           (:port . "3306")
+           (:host . "localhost")
+           (:dbname . "Tarea2Group")
+           (:dbtype . "mysql"))
+          ("Final"
+           (:classname . "com.mysql.jdbc.Driver")
+           (:classpath .
+                       ["/home/cheerio-pixel/.m2/repository/mysql/mysql-connector-java/5.1.44/mysql-connector-java-5.1.44.jar"])
+           (:password . "testtest")
+           (:user . "MySQL test")
+           (:port . "3306")
+           (:host . "localhost")
+           (:dbname . "ProyectoFinal")
+           (:dbtype . "mysql"))
+          ))
+  )
+

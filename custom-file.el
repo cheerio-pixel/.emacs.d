@@ -5,12 +5,123 @@
  ;; If there is more than one, they won't work right.
  '(custom-safe-themes
    '("573182354a59c672f89b8a7ea98ef020a54ff3fc93cf67bbfae4aa5bd41fdd5d" "549ccbd11c125a4e671a1e8d3609063a91228e918ffb269e57bd2cd2c0a6f1c6" "9584533e7ca091a59f88e7f2acc2f8ce9124753d7b82aad6d4526ccf77787975" default))
+ '(git-gutter:added-sign "++")
+ '(git-gutter:deleted-sign "--")
+ '(git-gutter:modified-sign "**")
+ '(git-gutter:update-interval 0.7)
+ '(magit-todos-insert-after '(bottom) nil nil "Changed by setter of obsolete option `magit-todos-insert-at'")
  '(org-agenda-files
    '("~/Dropbox (Maestral)/Creativè/Notes/ITLA.org" "/home/cheerio-pixel/Dropbox (Maestral)/Creativè/Notes/Projects/20210715113548-projects.org"))
  '(org-modules
    '(ol-bbdb ol-bibtex ol-docview ol-doi ol-eww ol-gnus ol-info ol-irc ol-mhe ol-rmail ol-w3m org-checklist))
  '(safe-local-variable-values
-   '((time-stamp-active . t)
+   '((treesit-load-name-override-list
+      (razor "razor"))
+     (treesit-load-name-override-list
+      ((razor "razor")))
+     (treesit-extra-load-path "~/.cache/tree-sitter/lib/")
+     (treesit-extra-load-path list "~/.cache/tree-sitter/lib/")
+     (checkdoc-minor-mode . t)
+     (lsp-language-id-configuration
+      '((web-mode . "angularls")))
+     (lsp-language-id-configuration
+      '((angular-mode . "angularls")))
+     (cov-lcov-file-name . "./test/ProyectoFinal.Domain.Tests/coverage.info")
+     (cov-lcov-file-name . "test/ProyectoFinal.Domain.Tests/coverage.info")
+     (whitespace-style quote
+                       (face trailing empty tabs))
+     (whitespace-action)
+     (elisp-lint-indent-specs
+      (git-gutter:awhen . 1))
+     (org-tag-alist
+      (:startgroup)
+      ("@phone")
+      ("@pc")
+      (:endgroup)
+      ("ARCHIVE")
+      ("resources")
+      ("projects")
+      ("watch")
+      ("math")
+      ("extras")
+      ("additions")
+      ("references")
+      ("readings"))
+     (org-tag-persistent-alist
+      (:startgroup)
+      ("@phone")
+      ("@pc")
+      (:endgroup)
+      ("ARCHIVE")
+      ("resources")
+      ("projects")
+      ("watch")
+      ("math")
+      ("extras")
+      ("additions")
+      ("references")
+      ("readings"))
+     (org-tag-persistent-alist
+      (:startgroup)
+      ("@phone")
+      ("@pc")
+      (:endgroup)
+      ("ARCHIVE")
+      ("resources")
+      ("projects")
+      ("watch")
+      ("math")
+      ("extras")
+      ("additions"))
+     (org-tag-persistent-alist
+      (:startgroup)
+      ("@phone")
+      ("@pc")
+      (:endgroup)
+      ("ARCHIVE")
+      ("resources")
+      ("projects")
+      ("watch")
+      ("math")
+      ("extras"))
+     (org-tag-persistent-alist
+      (:startgroup)
+      ("@phone")
+      ("@pc")
+      (:endgroup)
+      ("ARCHIVE")
+      ("resource")
+      ("project")
+      ("watch")
+      ("math")
+      ("extra"))
+     (org-tag-alist
+      (:startgroup)
+      ("@phone")
+      ("@pc")
+      (:endgroup)
+      ("ARCHIVE")
+      ("resource")
+      ("project")
+      ("watch")
+      ("math")
+      ("extra"))
+     (auto-revert-mode . t)
+     (org-tag-alist
+      (:startgroup)
+      ("@cellphone")
+      ("@pc")
+      (:endgroup)
+      ("ARCHIVE")
+      ("resource")
+      ("project")
+      ("watch"))
+     (org-tag-alist quote
+                    (("ARCHIVE")
+                     ("resource")
+                     ("project")
+                     ("watch")))
+     (time-stamp-active . t)
      (eval with-eval-after-load 'olivetti
            (olivetti-mode))
      (elisp-lint-indent-specs
@@ -82,10 +193,14 @@
       (org-roam-with-file . 2))
      (elisp-lint-ignored-validators "byte-compile" "package-lint")))
  '(screenshot-max-width 300)
+ '(screenshot-min-width 80)
+ '(screenshot-user-full-name-as-image-author-p nil)
  '(warning-suppress-types '((use-package) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 130 :width normal)))))
+ '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 130 :width normal))))
+ '(fringe ((t (:foreground "#E5E5E5"))))
+ '(olivetti-fringe ((t (:foreground "#353535" :background "#353535")))))

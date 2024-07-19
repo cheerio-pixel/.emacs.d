@@ -53,3 +53,29 @@ workspace/
 /tree-sitter/
 /.netcoredbg_hist
 /dap-ui-repl-python-history
+/%backup%~
+*~$
+
+
+# Undo-tree files
+*.~undo-tree~
+
+# Backup files
+*.bak
+
+# Emacs specific files
+TAGS
+.bookmarked-files.eld
+dap-ui-repl-coreclr-history
+*.el~
+log.json
+
+# Specific directories
+elisp/.signature.p7s
+elisp/emacs-application-framework/
+elisp/lsp-razor.el~
+elisp/microsoft.aspnetcore.razor.omnisharpplugin.5.0.0-preview.1.20121.3/
+forge-database.sqlite
+
+bookmarked-files.eld
+/lsp-cache

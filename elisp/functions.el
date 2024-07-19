@@ -64,14 +64,14 @@
   (interactive)
   (helm :sources
         (helm-build-in-file-source "Strings"
-            "~/Dropbox (Maestral)/Creativè/Common-numbers.txt"
-          :action
-          '(("Insert vertically" .
-             (lambda (_candidate)
-               (insert (mapconcat #'identity (helm-marked-candidates) "\n"))))
-            ("Insert horizontally" .
-             (lambda (_candidate)
-               (insert (mapconcat #'identity (helm-marked-candidates) " "))))))))
+                                   "~/Dropbox (Maestral)/Creativè/Common-numbers.txt"
+                                   :action
+                                   '(("Insert vertically" .
+                                      (lambda (_candidate)
+                                        (insert (mapconcat #'identity (helm-marked-candidates) "\n"))))
+                                     ("Insert horizontally" .
+                                      (lambda (_candidate)
+                                        (insert (mapconcat #'identity (helm-marked-candidates) " "))))))))
 
 
 (defun new-line-dwim ()
@@ -80,11 +80,16 @@
                              (and (looking-back ">") (looking-at "<"))
                              (and (looking-back "(") (looking-at ")"))
                              (and (looking-back "\\[") (looking-at "\\]")))))
-    (newline)
-    (when break-open-pair
-      (save-excursion
-        (newline-and-indent)))
-    (indent-for-tab-command)))
+    (cond
+     ((save-excursion (comment-beginning))
+      (call-interactively #'default-indent-new-line)
+      )
+     (t
+      (newline)
+      (when break-open-pair
+        (save-excursion
+          (newline-and-indent)))
+      (indent-for-tab-command)))))
 
 (defun mymy/elpy-nav-backward-block ()
   "Move to the previous line indented like point.
