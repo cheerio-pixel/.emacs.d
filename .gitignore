@@ -1,0 +1,9 @@
+.early-init.el.~undo-tree~
+.init.el.~undo-tree~
+.tramp.~undo-tree~
+auto-save-list/
+backups/
+eln-cache/
+elpaca/
+history
+projectile-bookmarks.eld
