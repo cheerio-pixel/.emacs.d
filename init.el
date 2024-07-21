@@ -93,28 +93,26 @@
 
 ;;* Configs
 ;; (set-frame-parameter nil 'fullscreen 'fullboth) ; Fullscreen
+;;* Modes
+(global-hl-line-mode)
+(setq-default show-trailing-whitespace t)
+(setq ring-bell-function #'ignore)
 (setq redisplay-dont-pause t)
 (setq frame-resize-pixelwise t)
+;; Increase the amount of bytes that emacs can read from an extenarl process
 (setq read-process-output-max (* 1024 1024)) ;; 1mb
-(tool-bar-mode -1)   ; This is much easier
-(menu-bar-mode -1)   ; than needing to change
-(scroll-bar-mode -1) ; this on every OS
-(setq byte-compile-warnings '(not obsolete));; Cl warnings
-(setq custom-file (concat user-emacs-directory "custom-file.el"))
-(load custom-file)
+(tool-bar-mode -1)                           ; This is much easier
+(menu-bar-mode -1)                           ; than needing to change
+(scroll-bar-mode -1)                         ; this on every OS
+(setq byte-compile-warnings '(not obsolete)) ;; Cl warnings
 (setq save-abbrevs 'silently)
 (setq-default abbrev-mode t)
 (setq native-comp-async-report-warnings-errors 'silent)
 (setq create-lockfiles nil)
-(setq ring-bell-function 'ignore)
 (setq abbrev-suggest t)
-;; I finally caught on. This is annoying when it's tries to.
+;; I finally caught on. This is annoying when it tries to.
 (setq require-final-newline nil)
 (setq mode-require-final-newline nil)
-
-;;* Modes
-(global-hl-line-mode)
-(setq-default show-trailing-whitespace t)
 ;; Stopped being useful
 ;; (global-whitespace-mode)
 (xterm-mouse-mode)
@@ -662,6 +660,61 @@ Version: 2019-11-04 2023-04-05 2023-06-26"
 
 ;;* Ryo modal
 
+;; (use-package evil
+;;   :config
+;;   (evil-mode)
+;;   (gsetq evil-undo-system 'undo-redo)
+;;   (general-def 'normal emacs-lisp-mode-map
+;;     "K" 'elisp-slime-nav-describe-elisp-thing-at-point)
+
+;;   (general-override-mode 1)
+
+;;   ;; (general-create-definer lift-def
+;;   ;;   :states '(normal motion visual)
+;;   ;;   :keymaps 'override
+;;   ;;   :prefix "SPC"
+;;   ;;   )
+
+;;   (general-define-key
+;;    :states '(normal motion visual)
+;;    :keymaps 'override
+;;    :prefix "SPC"
+
+;;    "s" 'save-buffer
+;;    "b" 'switch-to-last-buffer
+;;    "fb" 'consult-buffer
+;;    "ff" 'find-file
+;;    "fx" 'reopen-killed-file
+;;    "fX" 'reopen-killed-file-fancy
+;;    "fl" #'consult-line
+;;    "fg" #'consult-ripgrep
+;;    )
+;;   ;; SPC = Lift
+;;   ;; f = prefix find
+;;   ;; fb = Find buffer
+;;   ;; ff = Find file
+;;   ;; fx = Open last closed file
+;;   ;; fX = Open history of closed files
+;;   ;; fl = Consult line
+;;   ;; fg = Consult ripgrep
+;;   ;; fr = Find references of thing at point
+;;   ;; r = prefix replace
+;;   ;; rs = replace-string
+;;   ;; rr = replace-regex
+;;   )
+
+;; (use-package evil-colllection
+;;   :straight (:type git :host github :repo "emacs-evil/evil-collection")
+;;   :config
+;;   (evil-collection-init '(dired consult))
+;;   )
+
+;; (use-package lispyville
+;;   :init
+;;   (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode)
+;;   :config
+;;   (lispyville-set-key-theme '(operators c-w additional)))
+
 (use-package ryo-modal
   ;; DONE: Make ryo-modal-key create a function when passed a lambda
   ;; The name of the function will be from the keyword :lambda-name
@@ -971,16 +1024,12 @@ By default the minibuffer is excluded.")
 
 ;;* Set the font
 (custom-set-faces
- `(default ((t (:family "Fantasque Sans Mono"
-                        :foundry "outline"
-                        :slant normal
-                        :weight normal
-                        :height 130
-                        ;; :height ,(let ((h (display-pixel-width)))
-                        ;;            (cond
-                        ;;             ((>= 1280 h) 130)
-                        ;;             ((< 1280 h) 110)))
-                        :width normal)))))
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 130 :width normal))))
+ '(olivetti-fringe ((t (:foreground "#353535" :background "#353535")))))
 
 ;; This assumes you've installed the package via MELPA.
 (use-package ligature
@@ -3373,6 +3422,7 @@ stores this metadata and filename is returned so lsp-mode can display this file.
 
   (require 'dap-netcore)
   (require 'dap-php)
+  (require 'dap-mouse)
   (add-hook 'dap-stopped-hook
             (lambda (arg) (call-interactively #'dap-hydra)))
 
@@ -7309,3 +7359,26 @@ _N_   _U_   _o_k        _y_ank       /,`.-'`'   .‗  \-;;,‗
 
 ;; Init.el ends here
 
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(haskell-process-type 'cabal-repl)
+ '(safe-local-variable-values
+   '((org-tag-alist
+      (:startgroup)
+      ("@phone")
+      ("@pc")
+      (:endgroup)
+      ("ARCHIVE")
+      ("resources")
+      ("projects")
+      ("watch")
+      ("math")
+      ("extras")
+      ("additions")
+      ("references")
+      ("readings"))
+     (haskell-compiler-type quote stack)
+     (haskell-process-type quote stack))))
