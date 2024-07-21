@@ -7,3 +7,17 @@ eln-cache/
 elpaca/
 history
 projectile-bookmarks.eld
+*~undo-tree~
+.cache/
+.dap-breakpoints
+.lsp-session-v1
+bookmarked-files.eld
+bookmarks
+org-roam.db
+places
+projects
+recentf
+straight/
+tramp
+transient/
+tree-sitter/
