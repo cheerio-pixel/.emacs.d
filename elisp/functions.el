@@ -1,4 +1,4 @@
-(require 'avy)
+;; (require 'avy)
 ;; (require 'elpy)
 (require 'subr-x)
 (require 'cl-lib)
@@ -263,38 +263,38 @@ indentation levels."
             '(:with company-yasnippet))))
 
 
-(defun avy-delete-region (arg)
-  "Select two lines and delete the region between them.
+;; (defun avy-delete-region (arg)
+;;   "Select two lines and delete the region between them.
 
-  The window scope is determined by `avy-all-windows' or
-  `avy-all-windows-alt' when ARG is non-nil."
-  (interactive "P")
-  (let ((initial-window (selected-window)))
-    (avy-with avy-delete-region
-      (let* ((beg (save-selected-window
-                    (list (avy--line arg) (selected-window))))
-             (end (list (avy--line arg) (selected-window))))
-        (cond
-         ((not (numberp (car beg)))
-          (user-error "Fail to select the beginning of region"))
-         ((not (numberp (car end)))
-          (user-error "Fail to select the end of region"))
-         ;; Restrict operation to same window. It's better if it can be
-         ;; different windows but same buffer; however, then the cloned
-         ;; buffers with different narrowed regions might cause problem.
-         ((not (equal (cdr beg) (cdr end)))
-          (user-error "Selected points are not in the same window"))
-         ((< (car beg) (car end))
-          (save-excursion
-            (delete-region
-             (car beg)
-             (progn (goto-char (car end)) (forward-visible-line 1) (point)))))
-         (t
-          (save-excursion
-            (delete-region
-             (progn (goto-char (car beg)) (forward-visible-line 1) (point))
-             (car end)))))))
-    (select-window initial-window)))
+;;   The window scope is determined by `avy-all-windows' or
+;;   `avy-all-windows-alt' when ARG is non-nil."
+;;   (interactive "P")
+;;   (let ((initial-window (selected-window)))
+;;     (avy-with avy-delete-region
+;;       (let* ((beg (save-selected-window
+;;                     (list (avy--line arg) (selected-window))))
+;;              (end (list (avy--line arg) (selected-window))))
+;;         (cond
+;;          ((not (numberp (car beg)))
+;;           (user-error "Fail to select the beginning of region"))
+;;          ((not (numberp (car end)))
+;;           (user-error "Fail to select the end of region"))
+;;          ;; Restrict operation to same window. It's better if it can be
+;;          ;; different windows but same buffer; however, then the cloned
+;;          ;; buffers with different narrowed regions might cause problem.
+;;          ((not (equal (cdr beg) (cdr end)))
+;;           (user-error "Selected points are not in the same window"))
+;;          ((< (car beg) (car end))
+;;           (save-excursion
+;;             (delete-region
+;;              (car beg)
+;;              (progn (goto-char (car end)) (forward-visible-line 1) (point)))))
+;;          (t
+;;           (save-excursion
+;;             (delete-region
+;;              (progn (goto-char (car beg)) (forward-visible-line 1) (point))
+;;              (car end)))))))
+;;     (select-window initial-window)))
 (defun dwim/org-clock-get-string ()
   (let ((clock-string (org-clock-get-clock-string))
         (help-text "Org mode clock is running.\nmouse-1 shows a \
@@ -306,30 +306,30 @@ indentation levels."
          'help-echo (concat help-text ": " org-clock-heading))
       (propertize clock-string 'help-echo help-text)))
   )
-(defun avy-delete-whole-line (arg)
-  "Select line and delete the whole selected line.
+;; (defun avy-delete-whole-line (arg)
+;;   "Select line and delete the whole selected line.
 
-  With a numerical prefix ARG, delete ARG line(s) starting from the
-  selected line.  If ARG is negative, delete backward.
+;;   With a numerical prefix ARG, delete ARG line(s) starting from the
+;;   selected line.  If ARG is negative, delete backward.
 
-  If ARG is zero, delete the selected line but exclude the trailing
-  newline.
+;;   If ARG is zero, delete the selected line but exclude the trailing
+;;   newline.
 
-  \\[universal-argument] 3 \\[avy-kil-whole-line] delete three lines
-  starting from the selected line.  \\[universal-argument] -3
+;;   \\[universal-argument] 3 \\[avy-kil-whole-line] delete three lines
+;;   starting from the selected line.  \\[universal-argument] -3
 
-  \\[avy-delete-whole-line] delete three lines backward including the
-  selected line."
-  (interactive "P")
-  (let ((initial-window (selected-window)))
-    (avy-with avy-delete-whole-line
-      (let* ((start (avy--line)))
-        (if (not (numberp start))
-            (user-error "Fail to select the line to delete")
-          (save-excursion (goto-char start)
-                          (my-delete-whole-line arg)
-                          ))))
-    (select-window initial-window)))
+;;   \\[avy-delete-whole-line] delete three lines backward including the
+;;   selected line."
+;;   (interactive "P")
+;;   (let ((initial-window (selected-window)))
+;;     (avy-with avy-delete-whole-line
+;;       (let* ((start (avy--line)))
+;;         (if (not (numberp start))
+;;             (user-error "Fail to select the line to delete")
+;;           (save-excursion (goto-char start)
+;;                           (my-delete-whole-line arg)
+;;                           ))))
+;;     (select-window initial-window)))
 
 
 ;;(advice-add 'toggle-input-method :after 'ryo-modal-global-mode)
@@ -337,95 +337,95 @@ indentation levels."
 
 ;;;;;                   AVY
 
-(defun avy-goto-parens ()
-  (interactive)
-  (let ((avy-command this-command))   ; for look up in avy-orders-alist
-    (avy-jump "(+")))
+;; (defun avy-goto-parens ()
+;;   (interactive)
+;;   (let ((avy-command this-command))   ; for look up in avy-orders-alist
+;;     (avy-jump "(+")))
 
-(defun avy-org-same-level (&optional all)
-  "Go to any org heading of the same level as the current one.
+;; (defun avy-org-same-level (&optional all)
+;;   "Go to any org heading of the same level as the current one.
 
-  By default, choices are limited to headings under common
-  subheading, but if called with a prefix argument, will be
-  buffer-global."
-  (interactive "P")
-  (let ((org-level (org-current-level)))
-    (avy--generic-jump
-     (format "^%s "
-             (regexp-quote
-              (make-string org-level ?*)))
-     nil
-     'pre
-     (unless (or all (= org-level 1))
-       (save-excursion
-         (outline-up-heading 1)
-         (point)))
-     (unless (or all (= org-level 1))
-       (save-excursion
-         (outline-up-heading 1)
-         (org-end-of-subtree))))))
+;;   By default, choices are limited to headings under common
+;;   subheading, but if called with a prefix argument, will be
+;;   buffer-global."
+;;   (interactive "P")
+;;   (let ((org-level (org-current-level)))
+;;     (avy--generic-jump
+;;      (format "^%s "
+;;              (regexp-quote
+;;               (make-string org-level ?*)))
+;;      nil
+;;      'pre
+;;      (unless (or all (= org-level 1))
+;;        (save-excursion
+;;          (outline-up-heading 1)
+;;          (point)))
+;;      (unless (or all (= org-level 1))
+;;        (save-excursion
+;;          (outline-up-heading 1)
+;;          (org-end-of-subtree))))))
 
-(defun avy-org-parent-level (&optional all)
-  "Go to any org heading one level above the current one.
+;; (defun avy-org-parent-level (&optional all)
+;;   "Go to any org heading one level above the current one.
 
 
-  By default, choices are limited to headings under common
-  subheading, but if called with a prefix argument, will be
-  buffer-global."
-  (interactive "P")
-  (let ((org-level (org-current-level)))
-    (if (= org-level 1)
-        (message "Already at top level.")
-      (avy--generic-jump
-       (format "^%s "
-               (regexp-quote
-                (make-string (- org-level 1) ?*)))
-       nil
-       'pre
-       (unless (or all (= org-level 2))
-         (save-excursion
-           (outline-up-heading 2)
-           (point)))
-       (unless (or all (= org-level 2))
-         (save-excursion
-           (outline-up-heading 2)
-           (org-end-of-subtree)))))))
+;;   By default, choices are limited to headings under common
+;;   subheading, but if called with a prefix argument, will be
+;;   buffer-global."
+;;   (interactive "P")
+;;   (let ((org-level (org-current-level)))
+;;     (if (= org-level 1)
+;;         (message "Already at top level.")
+;;       (avy--generic-jump
+;;        (format "^%s "
+;;                (regexp-quote
+;;                 (make-string (- org-level 1) ?*)))
+;;        nil
+;;        'pre
+;;        (unless (or all (= org-level 2))
+;;          (save-excursion
+;;            (outline-up-heading 2)
+;;            (point)))
+;;        (unless (or all (= org-level 2))
+;;          (save-excursion
+;;            (outline-up-heading 2)
+;;            (org-end-of-subtree)))))))
 
-(defun avy-org-child-level (&optional all)
-  "Go to any org heading one level below the current one.
+;; (defun avy-org-child-level (&optional all)
+;;   "Go to any org heading one level below the current one.
 
-  By default, choices are limited to headings under common
-  subheading, but if called with a prefix argument, will be
-  buffer-global."
-  (interactive "P")
-  (if (save-excursion (org-goto-first-child))
-      (let ((org-level (org-current-level)))
-        (avy--generic-jump
-         (format "^%s "
-                 (regexp-quote
-                  (make-string (+ org-level 1) ?*)))
-         nil
-         'pre
-         (unless all
-           (save-excursion
-             (ignore-errors
-               (outline-up-heading 0))
-             (point)))
-         (unless all
-           (save-excursion
-             (ignore-errors
-               (outline-up-heading 0))
-             (org-end-of-subtree)))))
-    (message "Heading has no children.")))
+;;   By default, choices are limited to headings under common
+;;   subheading, but if called with a prefix argument, will be
+;;   buffer-global."
+;;   (interactive "P")
+;;   (if (save-excursion (org-goto-first-child))
+;;       (let ((org-level (org-current-level)))
+;;         (avy--generic-jump
+;;          (format "^%s "
+;;                  (regexp-quote
+;;                   (make-string (+ org-level 1) ?*)))
+;;          nil
+;;          'pre
+;;          (unless all
+;;            (save-excursion
+;;              (ignore-errors
+;;                (outline-up-heading 0))
+;;              (point)))
+;;          (unless all
+;;            (save-excursion
+;;              (ignore-errors
+;;                (outline-up-heading 0))
+;;              (org-end-of-subtree)))))
+;;     (message "Heading has no children.")))
 
-(defun avy-org-goto-level (&optional num)
-  "Prompt for an org level to go to, defaulting to the current one."
-  (interactive (list
-                (read-number "Select heading level: " (org-current-level))))
-  (avy--generic-jump
-   (format "^%s " (regexp-quote (make-string num ?*)))
-   nil
-   'pre))
+;; (defun avy-org-goto-level (&optional num)
+;;   "Prompt for an org level to go to, defaulting to the current one."
+;;   (interactive (list
+;;                 (read-number "Select heading level: " (org-current-level))))
+;;   (avy--generic-jump
+;;    (format "^%s " (regexp-quote (make-string num ?*)))
+;;    nil
+;;    'pre))
 
 (defun my-buffer-predicate (buffer)
   (if (string-match "helm" (buffer-name buffer))

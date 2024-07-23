@@ -8,6 +8,7 @@
 ;; https://github.com/bkaestner/.emacs.d/blob/37c75bfe3a199594ad89504d870e68f6f424764f/early-init.el
 (setq gc-cons-threshold most-positive-fixnum ; 2^61 bytes
       gc-cons-percentage 0.6)
+
 (defun my-cleanup-gc ()
   "Clean up gc."
   (setq gc-cons-threshold 16777216)
@@ -20,31 +21,72 @@
               (setq gc-cons-threshold 16777216
                     gc-cons-percentage 0.1))))
 
-(setq straight-check-for-modifications '(check-on-save find-when-checking))
-
+;; (setq straight-check-for-modifications '(check-on-save find-when-checking))
+(defvar elpaca-installer-version 0.7)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil :depth 1
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                 ,@(when-let ((depth (plist-get order :depth)))
+                                                     (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                 ,(plist-get order :repo) ,repo))))
+                 ((zerop (call-process "git" nil buffer t "checkout"
+                                       (or (plist-get order :ref) "--"))))
+                 (emacs (concat invocation-directory invocation-name))
+                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                 ((require 'elpaca))
+                 ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
 ;;* Straight bootstrap
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-      (bootstrap-version 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+;; (defvar bootstrap-version)
+;; (let ((bootstrap-file
+;;        (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+;;       (bootstrap-version 5))
+;;   (unless (file-exists-p bootstrap-file)
+;;     (with-current-buffer
+;;         (url-retrieve-synchronously
+;;          "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+;;          'silent 'inhibit-cookies)
+;;       (goto-char (point-max))
+;;       (eval-print-last-sexp)))
+;;   (load bootstrap-file nil 'nomessage))
 
-;;* Straight config
-(setq straight-use-package-by-default t)
-(setq straight-host-usernames '((github . "cheerio-pixel")))
+;; ;;* Straight config
+;; (setq straight-use-package-by-default t)
+;; (setq straight-host-usernames '((github . "cheerio-pixel")))
 ;;* vc-follows-symlinks
 (setq vc-follow-symlinks t)
+;; Install use-package support
+(elpaca elpaca-use-package
+        ;; Enable use-package :ensure support for Elpaca.
+        (elpaca-use-package-mode))
 ;;* Use package installation
-(straight-use-package '(org :type built-in))
-(straight-use-package 'use-package)
-(eval-when-compile (require 'use-package))
+;; (straight-use-package '(org :type built-in))
+;; (straight-use-package 'use-package)
+;; (eval-when-compile (require 'use-package))
 
 ;;* Use package configuration
 
@@ -66,11 +108,13 @@
 ;; This packages need to be loaded before all the others
 
 (use-package general
+  :ensure t
   :config
   (general-override-mode)
   )
 
 (use-package exec-path-from-shell
+  :ensure t
   :config
   (add-to-list 'exec-path-from-shell-variables "ANDROID_HOME")
   (add-to-list 'exec-path-from-shell-variables "ANDROID_SDK_ROOT")
@@ -80,10 +124,41 @@
 
 
 ;; Explicit patching of functions and variables.
-(use-package el-patch)
+(use-package el-patch
+  :ensure (:wait t))
 
 ;; Bring a little bit of clojure and more
-(use-package dash :config (global-dash-fontify-mode))
+(use-package dash :ensure t :config (global-dash-fontify-mode))
+
+(use-package s :ensure t)
+
+(use-package hydra
+  :after ryo-modal
+  :ensure t
+  ;;; Not in use
+  :config
+  ;; (ryo-modal-key
+  ;;  "q f" :hydra
+  ;;  '(hydra-fastmoving ()
+  ;;                     "Generic fast moving"
+  ;;                     ("n" scroll-up)
+  ;;                     ("u" scroll-down)
+  ;;                     ("U" ccm-scroll-down)
+  ;;                     ("N" ccm-scroll-up)
+  ;;                     ("]" forward-paragraph)
+  ;;                     ("[" backward-paragraph)
+  ;;                     ("q" nil "cancel" :color blue)))
+  (ryo-modal-key
+   "q i" :hydra
+   '(hydra-indent ()
+                  "Indent Mode"
+                  ("n" mymy/elpy-nav-move-line-or-region-down)
+                  ("u" mymy/elpy-nav-move-line-or-region-up)
+                  ("N" shift-left)
+                  ("U" shift-right)
+                  ("q" nil "cancel" :color blue)
+                  ("." nil "cancel" :color blue)))
+  )
 
 ;;* Alias
 (defalias 'yes-or-no-p 'y-or-n-p)
@@ -317,6 +392,24 @@ current window."
                           (member extension '("csproj" "fsproj"))))
                       files))))))))
 
+(defun mymy-find-nearest-solution-file (&opitonal _dir)
+  (let ((start-from (or (buffer-file-name)
+                        (when (eq major-mode
+                                  'dired-mode)
+                          default-directory))))
+    (when start-from
+      (locate-dominating-file
+       start-from
+       (lambda (directory)
+         (when (file-directory-p directory)
+           ;; Strangely enough, in Windows directory-files ignores a path
+           ;; that is a file, but under Linux it fails. Adding a guard...
+           (let ((files (directory-files directory t)))
+             (cl-some (lambda (filename)
+                        (let ((extension (file-name-extension filename)))
+                          (member extension '("sln"))))
+                      files))))))))
+
 (defvar mymy-process-to-json-script (concat
                                      user-emacs-directory
                                      "ps-aux-to-json.sh"
@@ -394,12 +487,12 @@ Version: 2019-11-04 2023-04-05 2023-06-26"
         ((eq system-type 'berkeley-unix)
          (mapc (lambda (xfpath) (let ((process-connection-type nil)) (start-process "" nil "xdg-open" xfpath))) xfileList)))))))
 
-(defun mymy-hook-to-read-only-in-straigth-package ()
-  "Open files under straight as read-only"
-  (when (string-match-p (straight--dir) (buffer-file-name))
-    (read-only-mode 1)))
+;; (defun mymy-hook-to-read-only-in-straigth-package ()
+;;   "Open files under straight as read-only"
+;;   (when (string-match-p (straight--dir) (buffer-file-name))
+;;     (read-only-mode 1)))
 
-(add-hook 'find-file-hook #'mymy-hook-to-read-only-in-straigth-package)
+;; (add-hook 'find-file-hook #'mymy-hook-to-read-only-in-straigth-package)
 
 ;; (defun append-date-to-file (file)
 ;;   "docstring"
@@ -704,7 +797,7 @@ Version: 2019-11-04 2023-04-05 2023-06-26"
 ;;   )
 
 ;; (use-package evil-colllection
-;;   :straight (:type git :host github :repo "emacs-evil/evil-collection")
+;;   :ensure (:type git :host github :repo "emacs-evil/evil-collection")
 ;;   :config
 ;;   (evil-collection-init '(dired consult))
 ;;   )
@@ -716,6 +809,8 @@ Version: 2019-11-04 2023-04-05 2023-06-26"
 ;;   (lispyville-set-key-theme '(operators c-w additional)))
 
 (use-package ryo-modal
+  :ensure t
+  :demand t
   ;; DONE: Make ryo-modal-key create a function when passed a lambda
   ;; The name of the function will be from the keyword :lambda-name
   ;; So ryo-modal-key will check if TARGET is a lambda and then theck
@@ -871,14 +966,90 @@ By default the minibuffer is excluded.")
   (ryo-modal-keys
     (:norepeat t)
     ("v" set-mark-command)
-    ("V" (;; ("v" rectangle-mark-mode) ;; Changed to an hydra
-          ("c" exchange-point-and-mark))))
+    )
   ;; emacs-lisp
   (ryo-modal-major-mode-keys
     'emacs-lisp-mode
     ("s" (("s" eval-buffer)
           ("r" eval-region)
           ("f" eval-defun)))))
+
+(use-package yasnippet
+  :after ryo-modal
+  :ensure t
+  ;; :bind (("TAB" . yas-expand))
+  :config
+  ;; (add-to-list 'company-backends 'company-yasnippet t)
+  ;; (add-to-list 'warning-suppress-types '(yasnippet backquote-change))
+
+  (defun mymy-yasnippet-hook ()
+    (yas-define-snippets
+     'prog-mode
+     '(;; "Key" "Template" "Name"
+                                        ; git1: To give context the moment I do a commit
+                                        ; git2: Make "g" snippet use comment depending on the mode
+       ("g" "`(org-trim comment-start)` git: " "Git reminder")))
+    (yas-define-snippets
+     'emacs-lisp-mode
+     '(;; "Key" "Template" "Name"
+       ("up" "(use-package ${1:package-name}$0)" "use-package")
+       (":c" ":config" "Use package :config")
+       (":i" ":init" "Use package :init")
+       (":b" ":bind (($1))" "Use package :bind")
+       (":bd" "(\"${1:keys}\" . ${2:function})" "Use package :bind binding")
+       (":s" ":ensure " "Use package :straigth")
+       (":ss" ":ensure (:host github :type git :repo \"${1:repo}\" :files (${2:files}))" ":ensure repo")
+       (":h" ":hook" "Use package :hook")))
+    (yas-define-snippets
+     'python-mode
+     '(;; "Key" "Template" "Name"
+       ("pr" "print(${1:`(when (region-active-p) (yas-selected-text))`})$0" "print")))
+    (yas-define-snippets
+     'org-mode
+     '(;; "Key" "Template" "Name"
+       ("clj" "#+begin_src clojure\n\n#+end_src\n" "Clojure source block")
+       ("<co" "#+STARTUP: content" "Content")
+       ("<n" "#+STARTUP: nofold" "No fold")
+
+       ;; Git: More easy to type
+       (">el" "\\begin{${1:env}}\n\\end{${1:$(yas-field-value 1)}}" "Enviroment")
+       (">a" "align" "Aling env")
+       (">a*" "align*" "Align* env")
+       (">e" "equation" "Equation env")
+       (">e*" "equation*" "Equation* env")
+
+       (">>frac" "\\frac{${1:a}}{${2:b}}" "Fraction")
+       (">>div" "{${1:a} \\div ${2:b}}" "Division")
+       (">>cdot" "{${1:a} \\cdot ${2:b}}" "Multiplication")
+       (">>=" "{${1:a} = ${2:b}}" "Equality")
+       (">>nck" "{${1:n} \\choose ${2:k}}" "Choose function")
+       (">>int" "\\int_{${1:a}}^{${2:b}} ${3:f(x)} \\,dx" "Integrals")
+       (">>sum" "\\sum_{${1:a}}^{${2:b}}" "Summation"))))
+
+  (add-hook 'prog-mode-hook #'yas-minor-mode)
+
+  ;; (add-hook 'prog-mode-hook #'yas-minor-mode)
+  ;; (add-hook 'text-mode-hook #'yas-minor-mode)
+  ;; (add-hook 'yas-minor-mode-hook #'mymy-yasnippet-hook)
+  (ryo-modal-keys
+    ("gy" yas-visit-snippet-file)
+    ("Gy" yas-insert-snippet))
+  ;; :bind ((;; C-c y is reserved for yasnippets and, possibly, its
+  ;;         ;; snippets shortcuts
+  ;;         "C-c y y" . company-yasnippet))
+  ;; :hook
+  ;; ;; Doesn't work for some reason
+  ;; ;; (after-init . yas-global-mode)
+  ;; ;; (yas-global-mode-hook . mymy-yasnippet-hook)
+  ;; (prog-mode . yas-minor-mode)
+  ;; (text-mode . yas-minor-mode)
+  ;; ;; I'm really getting sure this things run
+  ;; (yas-minor-mode . mymy-yasnippet-hook)
+  )
+
+;; * All previous packages are somehow used later on and do not depend on
+;; each other at the package dependency level.
+(elpaca-wait)
 
 
 ;;* Keys
@@ -892,8 +1063,8 @@ By default the minibuffer is excluded.")
   "C-t"
   "C-v"
   "M-v"
-  "C-b"
-  "C-f"
+  ;; "C-b"
+  ;; "C-f"
   "M-u"
   "C-M-p"
   "C-M-f"
@@ -917,10 +1088,10 @@ By default the minibuffer is excluded.")
  "S-C-<right>" 'enlarge-window-horizontally
  "S-C-<down>" 'shrink-window
  "S-C-<up>" 'enlarge-window
- "C-r" 'backward-char
- "C-s" 'forward-char
- "M-r" 'backward-word
- "M-s" 'forward-to-word
+ ;; "C-r" 'backward-char
+ ;; "C-s" 'forward-char
+ ;; "M-r" 'backward-word
+ ;; "M-s" 'forward-to-word
  "C-M-s" 'forward-sexp
  "C-M-r" 'backward-sexp
  "C-M-u" 'backward-list
@@ -958,10 +1129,11 @@ By default the minibuffer is excluded.")
 ;;  "C-M-=" 'centered-cursor-lower-position-manually
 ;;  "C-M-0" 'centered-cursor-reset-position-manually)
 ;;** key-translation-map
-(general-define-key
- :keymaps 'key-translation-map
- "C-p" "C-u"
- "C-u" "C-p")
+;; I grew up
+;; (general-define-key
+;;  :keymaps 'key-translation-map
+;;  "C-p" "C-u"
+;;  "C-u" "C-p")
 ;; (define-key key-translation-map (kbd "C-p") (kbd "C-u"))
 ;; (define-key key-translation-map (kbd "C-u") (kbd "C-p"))
 ;;** smartparens-mode-map
@@ -1016,6 +1188,7 @@ By default the minibuffer is excluded.")
 
 (when (version< "29" emacs-version)
   (use-package treesit-auto
+    :ensure t
     :custom
     (treesit-auto-install 'prompt)
     :config
@@ -1033,6 +1206,7 @@ By default the minibuffer is excluded.")
 
 ;; This assumes you've installed the package via MELPA.
 (use-package ligature
+  :ensure t
   :config
   ;; Enable the "www" ligature in every possible major mode
   (ligature-set-ligatures 't '("www"))
@@ -1062,6 +1236,7 @@ By default the minibuffer is excluded.")
 
 
 (use-package idea-darkula-theme
+  :ensure t
   :init
   (setq custom--inhibit-theme-enable nil)
   ;; (setq custom--inhibit-theme-enable 'apply-only-user)
@@ -1152,7 +1327,7 @@ By default the minibuffer is excluded.")
 
   (use-package olivetti
     ;; :disabled
-    :straight t
+    :ensure t
     :hook ((olivetti-mode . mymy-configure-olivetti)
            (text-mode . olivetti-mode))
     :init
@@ -1166,12 +1341,16 @@ By default the minibuffer is excluded.")
   )
 
 (use-package persid
-  :straight (:type git :host github :repo "rougier/persid"))
+  :ensure (:type git :host github :repo "rougier/persid"))
 
 ;;** Vertico
+(use-package vertico-posframe
+  :disabled t
+  :after (vertico)
+  :ensure t)
 
 (use-package vertico
-  :straight vertico-posframe
+  :ensure t
   :init
   (vertico-mode)
   :config
@@ -1188,122 +1367,121 @@ By default the minibuffer is excluded.")
   (with-eval-after-load 'hotfuzz
     (hotfuzz-vertico-mode))
   (defun vertico--filter-completions (&rest args)
-      "Compute all completions for ARGS with lazy highlighting."
-        (dlet ((completion-lazy-hilit t) (completion-lazy-hilit-fn nil))
-	          (if (eval-when-compile (>= emacs-major-version 30))
-			             (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn)
-				           (cl-letf* ((orig-pcm (symbol-function #'completion-pcm--hilit-commonality))
-						                       (orig-flex (symbol-function #'completion-flex-all-completions))
-								                        ((symbol-function #'completion-flex-all-completions)
-											                   (lambda (&rest args)
-													                         ;; Unfortunately for flex we have to undo the lazy highlighting, since flex uses
-																                     ;; the completion-score for sorting, which is applied during highlighting.
-																		                         (cl-letf (((symbol-function #'completion-pcm--hilit-commonality) orig-pcm))
-																						                        (apply orig-flex args))))
-											                 ((symbol-function #'completion-pcm--hilit-commonality)
-													                    (lambda (pattern cands)
-															                          (setq completion-lazy-hilit-fn
-																			                          (lambda (x)
-																						                                ;; `completion-pcm--hilit-commonality' sometimes throws an internal error
-																										                            ;; for example when entering "/sudo:://u".
-																													                                (condition-case nil
-																																			                                (car (completion-pcm--hilit-commonality pattern (list x)))
-																																							                              (t x))))
-																		                      cands))
-													                  ((symbol-function #'completion-hilit-commonality)
-															                     (lambda (cands prefix &optional base)
-																	                           (setq completion-lazy-hilit-fn
-																					                           (lambda (x) (car (completion-hilit-commonality (list x) prefix base))))
-																				                       (and cands (nconc cands base)))))
-						             (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn)))))
+    "Compute all completions for ARGS with lazy highlighting."
+    (dlet ((completion-lazy-hilit t) (completion-lazy-hilit-fn nil))
+      (if (eval-when-compile (>= emacs-major-version 30))
+	  (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn)
+	(cl-letf* ((orig-pcm (symbol-function #'completion-pcm--hilit-commonality))
+		   (orig-flex (symbol-function #'completion-flex-all-completions))
+		   ((symbol-function #'completion-flex-all-completions)
+		    (lambda (&rest args)
+		      ;; Unfortunately for flex we have to undo the lazy highlighting, since flex uses
+		      ;; the completion-score for sorting, which is applied during highlighting.
+		      (cl-letf (((symbol-function #'completion-pcm--hilit-commonality) orig-pcm))
+			(apply orig-flex args))))
+		   ((symbol-function #'completion-pcm--hilit-commonality)
+		    (lambda (pattern cands)
+		      (setq completion-lazy-hilit-fn
+			    (lambda (x)
+			      ;; `completion-pcm--hilit-commonality' sometimes throws an internal error
+			      ;; for example when entering "/sudo:://u".
+			      (condition-case nil
+				  (car (completion-pcm--hilit-commonality pattern (list x)))
+				(t x))))
+		      cands))
+		   ((symbol-function #'completion-hilit-commonality)
+		    (lambda (cands prefix &optional base)
+		      (setq completion-lazy-hilit-fn
+			    (lambda (x) (car (completion-hilit-commonality (list x) prefix base))))
+		      (and cands (nconc cands base)))))
+	  (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn)))))
 
   )
 
-(section "Bookmarked files"
-  (defvar mymy-bookmarked-files '()
-    "Files saved for later search."
-    )
+(with-eval-after-load 'ryo-modal
+  (section "Bookmarked files"
+    (defvar mymy-bookmarked-files '()
+      "Files saved for later search."
+      )
 
-  (defvar mymy-bookmarked-files-save-file
-    (expand-file-name (concat user-emacs-directory
-                              "bookmarked-files.eld")))
+    (defvar mymy-bookmarked-files-save-file
+      (expand-file-name (concat user-emacs-directory
+                                "bookmarked-files.eld")))
 
-  (defun mymy-bookmarked-files-init ()
-    (if (file-exists-p mymy-bookmarked-files-save-file)
-        (->> mymy-bookmarked-files-save-file
-             (mymy-bookmarked-files-load)
-             (mymy-bookmarked-files-clean)
-             (mymy-bookmarked-files-save mymy-bookmarked-files-save-file)
-             (setq mymy-bookmarked-files)
-             )
-      (mymy-bookmarked-files-save
-       mymy-bookmarked-files-save-file
-       mymy-bookmarked-files)))
+    (defun mymy-bookmarked-files-init ()
+      (if (file-exists-p mymy-bookmarked-files-save-file)
+          (->> mymy-bookmarked-files-save-file
+               (mymy-bookmarked-files-load)
+               (mymy-bookmarked-files-clean)
+               (mymy-bookmarked-files-save mymy-bookmarked-files-save-file)
+               (setq mymy-bookmarked-files)
+               )
+        (mymy-bookmarked-files-save
+         mymy-bookmarked-files-save-file
+         mymy-bookmarked-files)))
 
-  (add-hook 'after-init-hook #'mymy-bookmarked-files-init)
+    (add-hook 'after-init-hook #'mymy-bookmarked-files-init)
 
-  (defun mymy-bookmarked-files-clean (files)
-    "Function that cleans the files in bookmarked files"
-    (-filter (-compose #'file-exists-p #'expand-file-name) files))
+    (defun mymy-bookmarked-files-clean (files)
+      "Function that cleans the files in bookmarked files"
+      (-filter (-compose #'file-exists-p #'expand-file-name) files))
 
-  (defun mymy-bookmarked-files-save (save-file files)
-    (cl-assert (not (file-directory-p save-file)))
-    (with-temp-file save-file
-      (erase-buffer)
-      (insert (format "%S" mymy-bookmarked-files)))
-    mymy-bookmarked-files)
+    (defun mymy-bookmarked-files-save (save-file files)
+      (cl-assert (not (file-directory-p save-file)))
+      (with-temp-file save-file
+        (erase-buffer)
+        (insert (format "%S" mymy-bookmarked-files)))
+      mymy-bookmarked-files)
 
-  (defun mymy-bookmarked-files-load (save-file)
-    (cl-assert (and (file-exists-p save-file)
-                    (not (file-directory-p save-file))))
-    (with-temp-buffer
-      (insert-file-contents save-file)
-      (-> (buffer-substring-no-properties (point-min)
-                                          (point-max))
-          (read-from-string)
-          (car))))
+    (defun mymy-bookmarked-files-load (save-file)
+      (cl-assert (and (file-exists-p save-file)
+                      (not (file-directory-p save-file))))
+      (with-temp-buffer
+        (insert-file-contents save-file)
+        (-> (buffer-substring-no-properties (point-min)
+                                            (point-max))
+            (read-from-string)
+            (car))))
 
-  (defun mymy-bookmarked-files-add (file)
-    (interactive (list (car (find-file-read-args "Find file: "
-                                                 (confirm-nonexistent-file-or-buffer)))))
-    (add-to-list 'mymy-bookmarked-files file)
-    (mymy-bookmarked-files-save mymy-bookmarked-files-save-file
-                                mymy-bookmarked-files))
+    (defun mymy-bookmarked-files-add (file)
+      (interactive (list (car (find-file-read-args "Find file: "
+                                                   (confirm-nonexistent-file-or-buffer)))))
+      (add-to-list 'mymy-bookmarked-files file)
+      (mymy-bookmarked-files-save mymy-bookmarked-files-save-file
+                                  mymy-bookmarked-files))
 
-  (defun mymy-bookmarked-files-delete (file)
-    (interactive (list (completing-read "Files: "
-                                        mymy-bookmarked-files
-                                        nil
-                                        t)))
-    (when file
-      (setq mymy-bookmarked-files (remove file mymy-bookmarked-files))
-      (mymy-bookmarked-files-save
-       mymy-bookmarked-files-save-file
-       mymy-bookmarked-files)))
+    (defun mymy-bookmarked-files-delete (file)
+      (interactive (list (completing-read "Files: "
+                                          mymy-bookmarked-files
+                                          nil
+                                          t)))
+      (when file
+        (setq mymy-bookmarked-files (remove file mymy-bookmarked-files))
+        (mymy-bookmarked-files-save
+         mymy-bookmarked-files-save-file
+         mymy-bookmarked-files)))
 
-  (ryo-modal-key "otf" #'mymy-bookmarked-files-add)
+    (ryo-modal-key "otf" #'mymy-bookmarked-files-add)
 
-  (ryo-modal-key "otr" #'mymy-bookmarked-files-delete)
+    (ryo-modal-key "otr" #'mymy-bookmarked-files-delete)
 
-  (with-eval-after-load 'consult
-    (defvar consult--source-file-bookmarks
-      `( :name     "File Bookmarks"
-         :category file
-         :narrow   ?i
-         :face     consult-file
-         :history  file-name-history
-         :state    ,#'consult--file-state
-         :new      ,#'consult--file-action
-         :items    ,(lambda ()
-                      mymy-bookmarked-files)))
+    (with-eval-after-load 'consult
+      (defvar consult--source-file-bookmarks
+        `( :name     "File Bookmarks"
+           :category file
+           :narrow   ?i
+           :face     consult-file
+           :history  file-name-history
+           :state    ,#'consult--file-state
+           :new      ,#'consult--file-action
+           :items    ,(lambda ()
+                        mymy-bookmarked-files)))
 
-    (add-to-list 'consult-buffer-sources 'consult--source-file-bookmarks 'append)
-    )
-  )
+      (add-to-list 'consult-buffer-sources 'consult--source-file-bookmarks 'append)
+      )))
 
 (use-package consult
-  :straight
-  :straight consult-projectile
+  :ensure t
   :config
   (setq consult-fontify-max-size 1024)
   :config
@@ -1375,8 +1553,7 @@ By default the minibuffer is excluded.")
    "M-x" 'execute-extended-command
    "C-x b" 'consult-buffer
    "C-x C-f" 'find-file
-   "C-c h s" 'consult-line
-   "C-c t h" 'consult-projectile)
+   "C-c h s" 'consult-line)
 
   ;; Much better than openning a window
   (setq xref-show-xrefs-function #'consult-xref
@@ -1425,7 +1602,7 @@ By default the minibuffer is excluded.")
 ;; Even though this package is only one commit and is from 2021/8/24,
 ;; I'm going to keep it since it's really simple.
 (use-package consult-bibtex
-  :straight (:type git :host github :repo "mohkale/consult-bibtex")
+  :ensure (:type git :host github :repo "mohkale/consult-bibtex")
   :config
   (require 'consult-bibtex-embark)
   (ryo-modal-key "Seb" 'consult-bibtex)
@@ -1435,6 +1612,7 @@ By default the minibuffer is excluded.")
     (add-to-list 'embark-become-keymaps 'consult-bibtex-embark-map)))
 
 (use-package marginalia
+  :ensure t
   :config
   ;; Until I find the way.
   ;;; I don't remember why I said the previous thing
@@ -1442,8 +1620,9 @@ By default the minibuffer is excluded.")
   )
 
 (use-package embark
+  :ensure t
   ;; Unnecessary? Maybe, but this thing wasn't loading symlinking every .el file so I had to put it myself.
-  :straight (:files ("*.el"))
+  ;; :ensure (:files ("*.el"))
   :config
   (general-define-key
    "C-," 'embark-act
@@ -1478,6 +1657,8 @@ By default the minibuffer is excluded.")
   )
 
 (use-package embark-consult
+  :after (embark consult)
+  :ensure t
   ;; :no-require t
   :hook
   (embark-collect-mode . consult-preview-at-point-mode)
@@ -1498,6 +1679,7 @@ By default the minibuffer is excluded.")
   )
 
 (use-package orderless
+  :ensure t
   :config
   ;; ;; Put orderless at last since orderless put me things almost at random.
   ;; ;; (add-to-list 'completion-styles 'orderless t)
@@ -1507,8 +1689,9 @@ By default the minibuffer is excluded.")
   ;; ;; (add-to-list 'orderless-matching-styles 'orderless-flex t)
   ;; (setq orderless-matching-styles '(;; orderless-literal
   ;;                                   orderless-regexp orderless-prefixes))
-  (setq orderless-matching-styles '(orderless-literal orderless-regexp ;; orderless-flex
-                                                      ))
+  (setq orderless-matching-styles '( orderless-literal orderless-regexp ;; orderless-flex
+                                     
+                                     ))
   (setq completion-category-overrides '((file (styles basic partial-completion substring))))
   )
 
@@ -1554,8 +1737,8 @@ By default the minibuffer is excluded.")
 ;;** Helm
 (use-package helm
   :disabled
-  :straight t
-  :straight helm-swoop helm-projectile
+  :ensure t
+  :ensure helm-swoop helm-projectile
   :diminish helm-mode
   :init
   (setq helm-split-window-default-side 'rigth)
@@ -1720,6 +1903,7 @@ By default the minibuffer is excluded.")
 
 ;;** ispell
 (use-package ispell
+  :ensure nil
   ;; https://200ok.ch/posts/2020-08-22_setting_up_spell_checking_with_multiple_dictionaries.html
   :config
   (setq ispell-program-name "hunspell")
@@ -1739,35 +1923,15 @@ By default the minibuffer is excluded.")
     (write-region "" nil ispell-personal-dictionary nil 0)))
 
 ;;** Niceties
-(use-package hydra
-  ;;; Not in use
-  :config
-  ;; (ryo-modal-key
-  ;;  "q f" :hydra
-  ;;  '(hydra-fastmoving ()
-  ;;                     "Generic fast moving"
-  ;;                     ("n" scroll-up)
-  ;;                     ("u" scroll-down)
-  ;;                     ("U" ccm-scroll-down)
-  ;;                     ("N" ccm-scroll-up)
-  ;;                     ("]" forward-paragraph)
-  ;;                     ("[" backward-paragraph)
-  ;;                     ("q" nil "cancel" :color blue)))
-  (ryo-modal-key
-   "q i" :hydra
-   '(hydra-indent ()
-                  "Indent Mode"
-                  ("n" mymy/elpy-nav-move-line-or-region-down)
-                  ("u" mymy/elpy-nav-move-line-or-region-up)
-                  ("N" shift-left)
-                  ("U" shift-right)
-                  ("q" nil "cancel" :color blue)
-                  ("." nil "cancel" :color blue)))
-  )
 
-(use-package electric-operator)
-(use-package highlight-indentation :config (highlight-indentation-mode 1))
-(use-package rainbow-delimiters :hook (prog-mode . rainbow-delimiters-mode))
+(use-package electric-operator
+  :ensure t)
+(use-package highlight-indentation
+  :ensure t
+  :config (highlight-indentation-mode 1))
+(use-package rainbow-delimiters
+  :ensure t
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package git-gutter
   :disabled
@@ -1801,7 +1965,7 @@ By default the minibuffer is excluded.")
 
 (use-package git-gutter-fringe
   :disabled
-  :after git-gutter
+  :after (git-gutter)
   :demand fringe-helper
   :config
   (setq fringes-outside-margins t)
@@ -1811,6 +1975,7 @@ By default the minibuffer is excluded.")
   )
 
 (use-package diff-hl
+  :ensure t
   :config
   (add-hook 'magit-pre-refresh-hook 'diff-hl-magit-pre-refresh)
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
@@ -1848,12 +2013,16 @@ By default the minibuffer is excluded.")
    )
   )
 
-(use-package ag)
+(use-package wgrep
+  :ensure t)
+
+(use-package ag
+  :ensure t)
 ;; sp-pair is not suitiable when you have strict-mode activate
 (use-package wrap-region
   ;; Shouldn't be using this
   :disabled
-  :straight (:type git :host github :repo "cheerio-pixel/wrap-region.el")
+  :ensure (:type git :host github :repo "cheerio-pixel/wrap-region.el")
   :config
   ;; org mode
   (wrap-region-add-wrapper "*" "*" nil 'org-mode)
@@ -1868,7 +2037,10 @@ By default the minibuffer is excluded.")
   :hook (after-init . wrap-region-global-mode))
 
 (use-package aggressive-indent
+  :ensure t
   :config
+  (add-hook 'lisp-data-mode-hook
+            #'aggressive-indent-mode)
   (defconst mymy-c-keywords (list "if" "for" "foreach" "while"))
   (add-to-list
    'aggressive-indent-dont-indent-if
@@ -1892,6 +2064,7 @@ By default the minibuffer is excluded.")
   (emacs-lisp-mode . aggressive-indent-mode))
 
 (use-package goto-chg
+  :ensure t
   :config
   (ryo-modal-keys
     ("g;" goto-last-change)
@@ -1911,9 +2084,11 @@ By default the minibuffer is excluded.")
     )
   )
 
-(use-package emmet-mode)
+(use-package emmet-mode
+  :ensure t)
 
 (use-package web-mode
+  :ensure t
   :init
   ;; Neat trick
   (define-derived-mode vue-web-mode web-mode "Vue")
@@ -1938,8 +2113,8 @@ By default the minibuffer is excluded.")
   )
 
 (use-package lsp-razor
-  :after lsp-mode web-mode
-  :straight nil
+  :after (lsp-mode web-mode)
+  :ensure nil
   :load-path "lsp-razor.el"
   :init
   (add-to-list 'lsp-language-id-configuration '(razor-web-mode . "aspnetcorerazor"))
@@ -1967,12 +2142,13 @@ By default the minibuffer is excluded.")
   ;; Error during redisplay: (jit-lock-function 1) signaled (wrong-type-argument treesit-node-p nil)
   ;; For some reason this stops if it doesn't have the <source> tag
   :disabled
-  :straight (:type git :host github :repo "8uff3r/vue-ts-mode")
+  :ensure (:type git :host github :repo "8uff3r/vue-ts-mode")
   :hook ((vue-mode-ts . eglot-ensure))
   :init
   (add-hook 'vue-mode-ts-hook #'mymy-vue-hook))
 
 (use-package prettier-js
+  :ensure t
   ;; Check prettier's comamnd-line help options to see how to configure
   ;; (setq-local prettier-js-args '("--parser vue --tab-width 4"))
   :preface
@@ -1982,7 +2158,7 @@ By default the minibuffer is excluded.")
 ;; (use-package impatient-mode)
 
 ;; (use-package centered-cursor-mode
-;;   :straight (:type git :host github :repo "andre-r/centered-cursor-mode.el" :branch "dev")
+;;   :ensure (:type git :host github :repo "andre-r/centered-cursor-mode.el" :branch "dev")
 ;;   :config
 ;;   ;; (global-centered-cursor-mode)
 ;;   (setq scroll-preserve-screen-position t
@@ -1996,6 +2172,7 @@ By default the minibuffer is excluded.")
 ;;         scroll-margin 0))
 
 (use-package smartparens
+  :ensure t
   :init
   (defun mymy/smartparens-hook ()
     (smartparens-global-mode)
@@ -2009,7 +2186,7 @@ By default the minibuffer is excluded.")
 
 (when (version< emacs-version "29")
   (use-package explain-pause-mode
-    :straight (explain-pause-mode :type git :host github :repo "lastquestion/explain-pause-mode")
+    :ensure (explain-pause-mode :type git :host github :repo "lastquestion/explain-pause-mode")
     :config
     (explain-pause-mode)))
 
@@ -2139,15 +2316,17 @@ slant, utf-8."
 ;; Will keep this two just in case
 (use-package rainbow-numbers-mode
   :disabled
-  :straight nil
+  :ensure nil
   :load-path (concat user-emacs-directory "elisp/rainbow-numbers-mode.el"))
 
 (use-package alert
+  :ensure t
   :init
   (setq alert-default-style 'libnotify)
   )
 
 (use-package hl-todo
+  :ensure t
   :config
   (global-hl-todo-mode)
   (keymap-set hl-todo-mode-map "C-c o p" #'hl-todo-previous)
@@ -2155,13 +2334,14 @@ slant, utf-8."
   (keymap-set hl-todo-mode-map "C-c o i" #'hl-todo-insert))
 
 (use-package consult-todo
-  :straight (:host github :type git :repo "liuyinz/consult-todo")
+  :ensure (:host github :type git :repo "liuyinz/consult-todo")
   :config
   (keymap-set hl-todo-mode-map "C-c o o" #'consult-todo)
   )
 
 (use-package magit-todos
-  :after magit
+  :ensure t
+  :after (magit)
   :config (magit-todos-mode 1))
 
 
@@ -2173,7 +2353,8 @@ slant, utf-8."
   ;; Explictly tell that we want all the files in extensions (not
   ;; necessary, but don't want be manually dealing with this) since this is
   ;; only building corfu.el
-  :straight (corfu :files ("*.el" "extensions/*.el"))
+  ;; :ensure (corfu :files ("*.el" "extensions/*.el"))
+  :ensure t
   ;; Optional customizations
   :config
   (el-patch-defun corfu--filter-completions (&rest args)
@@ -2183,31 +2364,31 @@ slant, utf-8."
         (if (eval-when-compile (>= emacs-major-version 30))
             (el-patch-splice 2 0
               (static-if (>= emacs-major-version 30)
-                         (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn)
-                         (cl-letf* ((orig-pcm (symbol-function #'completion-pcm--hilit-commonality))
-                                    (orig-flex (symbol-function #'completion-flex-all-completions))
-                                    ((symbol-function #'completion-flex-all-completions)
-                                     (lambda (&rest args)
-                                       ;; Unfortunately for flex we have to undo the lazy highlighting, since flex uses
-                                       ;; the completion-score for sorting, which is applied during highlighting.
-                                       (cl-letf (((symbol-function #'completion-pcm--hilit-commonality) orig-pcm))
-                                         (apply orig-flex args))))
-                                    ((symbol-function #'completion-pcm--hilit-commonality)
-                                     (lambda (pattern cands)
-                                       (setq completion-lazy-hilit-fn
-                                             (lambda (x)
-                                               ;; `completion-pcm--hilit-commonality' sometimes throws an internal error
-                                               ;; for example when entering "/sudo:://u".
-                                               (condition-case nil
-                                                   (car (completion-pcm--hilit-commonality pattern (list x)))
-                                                 (t x))))
-                                       cands))
-                                    ((symbol-function #'completion-hilit-commonality)
-                                     (lambda (cands prefix &optional base)
-                                       (setq completion-lazy-hilit-fn
-                                             (lambda (x) (car (completion-hilit-commonality (list x) prefix base))))
-                                       (and cands (nconc cands base)))))
-                           (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn))))))))
+                  (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn)
+                (cl-letf* ((orig-pcm (symbol-function #'completion-pcm--hilit-commonality))
+                           (orig-flex (symbol-function #'completion-flex-all-completions))
+                           ((symbol-function #'completion-flex-all-completions)
+                            (lambda (&rest args)
+                              ;; Unfortunately for flex we have to undo the lazy highlighting, since flex uses
+                              ;; the completion-score for sorting, which is applied during highlighting.
+                              (cl-letf (((symbol-function #'completion-pcm--hilit-commonality) orig-pcm))
+                                (apply orig-flex args))))
+                           ((symbol-function #'completion-pcm--hilit-commonality)
+                            (lambda (pattern cands)
+                              (setq completion-lazy-hilit-fn
+                                    (lambda (x)
+                                      ;; `completion-pcm--hilit-commonality' sometimes throws an internal error
+                                      ;; for example when entering "/sudo:://u".
+                                      (condition-case nil
+                                          (car (completion-pcm--hilit-commonality pattern (list x)))
+                                        (t x))))
+                              cands))
+                           ((symbol-function #'completion-hilit-commonality)
+                            (lambda (cands prefix &optional base)
+                              (setq completion-lazy-hilit-fn
+                                    (lambda (x) (car (completion-hilit-commonality (list x) prefix base))))
+                              (and cands (nconc cands base)))))
+                  (cons (apply #'completion-all-completions args) completion-lazy-hilit-fn))))))))
 
   (el-patch-defun corfu--delete-dups (list)
     "Delete `equal-including-properties' consecutive duplicates from LIST."
@@ -2226,9 +2407,9 @@ slant, utf-8."
                 ;; `text-properties-at' position 0.
                 (el-patch-swap
                   (if (static-if (< emacs-major-version 29)
-                                 (equal (text-properties-at 0 (car beg))
-                                        (text-properties-at 0 (cadr dup)))
-                                 (equal-including-properties (car beg) (cadr dup)))
+                          (equal (text-properties-at 0 (car beg))
+                                 (text-properties-at 0 (cadr dup)))
+                        (equal-including-properties (car beg) (cadr dup)))
                       (setcdr dup (cddr dup))
                     (pop dup))
                   (if (if (eval-when-compile (< emacs-major-version 29))
@@ -2303,14 +2484,15 @@ slant, utf-8."
   )
 
 (use-package cape
-  :after corfu
+  :ensure t
+  :after (corfu)
   :config
   (general-define-key
    :keymap 'org-mode-map
    "C-M-k" 'cape-file))
 
 (use-package nerd-icons-corfu
-  :straight (:host github :type git :repo "LuigiPiucco/nerd-icons-corfu")
+  :ensure (:host github :type git :repo "LuigiPiucco/nerd-icons-corfu")
   :config
   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
 
@@ -2358,7 +2540,7 @@ slant, utf-8."
   ;; This has a problem with frames-only-mode, I think, since it tries
   ;; to open a new window, it opens a frame, which in turn loses focus
   ;; of the current frame
-  :after frames-only-mode
+  :after (frames-only-mode)
   :if (not frames-only-mode)
   :config
   (general-define-key
@@ -2370,13 +2552,14 @@ slant, utf-8."
 
 ;; (use-package ses-mode
 ;;   :no-require
-;;   :straight nil
+;;   :ensure nil
 ;;   :config
 ;;   (setq ses-after-entry-functions '(next-line))
 ;;   :hook
 ;;   (ses-mode . rainbow-numbers-mode))
 ;;** Lisp things
 (use-package lispy
+  :ensure t
   :defer t
   :init
   (setq lispy-compat '(edebug cider))
@@ -2409,15 +2592,17 @@ slant, utf-8."
 
 (use-package clj-refactor
   :disabled
-  :straight clj-refactor pkg-info
+  :ensure clj-refactor pkg-info
   ;; :config
   ;; (cljr-add-keybindings-with-prefix "C-c m")
   :hook
   (cider-mode . clj-refactor-mode))
 
-(use-package flycheck-clj-kondo)
+(use-package flycheck-clj-kondo
+  :ensure t)
 
 (use-package cider
+  :ensure t
   :defer 5
   :config
   (defun cider-find-and-clear-repl-buffer ()
@@ -2455,6 +2640,7 @@ slant, utf-8."
   (cider-mode . cider-company-enable-fuzzy-completion))
 
 (use-package clojure-mode
+  :ensure t
   :defer 5
   :config
   (require 'flycheck-clj-kondo)
@@ -2483,6 +2669,7 @@ slant, utf-8."
 ;; (use-package edbi)
 
 (use-package ejc-sql
+  :ensure t
   :config
   (setq clomacs-httpd-default-port 8090) ; Use a port other than 8080.
   (setq ejc-result-table-impl 'orgtbl-mode)
@@ -2593,11 +2780,13 @@ slant, utf-8."
   )
 
 (use-package lua-mode
+  :ensure t
   ;; TODO: Delete when updating to emacs 30, since there is a lua-ts-mode
   :hook (lua-mode . lsp)
   )
 
 (use-package dart-mode
+  :ensure t
   :init
   (with-eval-after-load "projectile"
     (add-to-list 'projectile-project-root-files-bottom-up "pubspec.yaml")
@@ -2606,7 +2795,8 @@ slant, utf-8."
   :hook (dart-mode . lsp))
 
 (use-package lsp-dart
-  :after lsp-mode
+  :ensure t
+  :after (lsp-mode)
   :init
   ;; In arch linux, as of 05/05/2024, when installing the flutter-bin
   ;; package, the sdk is in /opt/flutter, but the excutables are in
@@ -2646,7 +2836,7 @@ slant, utf-8."
 (use-package hover
   ;; I don't know why this doesn't work (The executable)
   :disabled
-  :after dart-mode lsp-dart
+  :after (dart-mode lsp-dart)
   :bind (:map hover-minor-mode-map
               ("C-M-z" . #'hover-run-or-hot-reload)
               ("C-M-x" . #'hover-run-or-hot-restart)
@@ -2666,7 +2856,7 @@ slant, utf-8."
 (use-package dart-ts-mode
   ;; For some reason the syntax highlighting is incomplete.
   :disabled
-  :straight (:host github :type git :repo "50ways2sayhard/dart-ts-mode")
+  :ensure (:host github :type git :repo "50ways2sayhard/dart-ts-mode")
   :config
   ;; For all-the-icons users:
   (with-eval-after-load 'all-the-icons
@@ -2681,7 +2871,7 @@ slant, utf-8."
 
 (use-package tree-sitter
   :disabled
-  :straight tree-sitter-langs
+  :ensure tree-sitter-langs
   :config
   (require 'tsc)
   (tree-sitter-require 'python)
@@ -2697,6 +2887,8 @@ slant, utf-8."
 ;;** CSharp
 
 (use-package sharper
+  :after (transient)
+  :ensure t
   :init
   (general-define-key "C-c b" #'sharper-main-transient)
 
@@ -3038,7 +3230,7 @@ slant, utf-8."
    )
 
 
-  (transient-define-prefix mymy-sharper-transient-new
+  (transient-define-prefix mymy-sharper-transient-new ()
     "Dotnet templates"
     ["Projects templates"
      ("Co" "Console" mymy-sharper-transient-new-console)
@@ -3061,6 +3253,7 @@ slant, utf-8."
     '("w" "new" mymy-sharper-transient-new)))
 
 (use-package csproj-mode
+  :ensure t
   :config
   (add-to-list 'auto-mode-alist '("\\.csproj\\'" . csproj-mode))
   (add-hook 'csproj-mode-hook #'aggressive-indent-mode)
@@ -3068,7 +3261,7 @@ slant, utf-8."
 
 (use-package csharp-ts-mode
   :no-require
-  :straight (:type built-in)
+  :ensure nil
   :config
   (defun mymy-csharp-mode-hook ()
     (setq-local flycheck-navigation-minimum-level 'error)
@@ -3145,9 +3338,9 @@ slant, utf-8."
 (use-package lsp-bridge
   ;; It's good but also kind of slow
   :disabled
-  :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
-                         :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
-                         :build (:not compile))
+  :ensure '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
+                       :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+                       :build (:not compile))
   :init
   ;; RUN pip3 install epc orjson sexpdata six setuptools paramiko rapidfuzz
   ;; RUN pacman -S ruff ruff-lsp
@@ -3164,7 +3357,7 @@ slant, utf-8."
   )
 
 (use-package lsp-mode
-  :straight (:host github :type git :repo "emacs-lsp/lsp-mode")
+  :ensure (:host github :type git :repo "emacs-lsp/lsp-mode")
   :init
   (setq lsp-keymap-prefix "C-c l")
   (setq lsp-completion-provider :none)
@@ -3386,12 +3579,14 @@ stores this metadata and filename is returned so lsp-mode can display this file.
          ))
 
 (use-package consult-lsp
-  :after lsp-mode
+  :ensure t
+  :after (lsp-mode)
   :config
   (define-key lsp-mode-map (kbd "M-<f1>") #'consult-lsp-diagnostics)
   )
 
 (use-package lsp-ui
+  :ensure t
   :hook
   (lsp-mode . lsp-ui-mode)
   :config
@@ -3411,6 +3606,7 @@ stores this metadata and filename is returned so lsp-mode can display this file.
   )
 
 (use-package dap-mode
+  :ensure t
   :init
   (setq dap-netcore-install-dir "/usr/bin/netcoredbg")
   (require 'dap-ui)
@@ -3490,6 +3686,7 @@ stores this metadata and filename is returned so lsp-mode can display this file.
   )
 
 (use-package lsp-java
+  :ensure t
   :init
   ;; https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.35.0/jdt-language-server-1.35.0-202404251256.tar.gz
 
@@ -3510,21 +3707,23 @@ stores this metadata and filename is returned so lsp-mode can display this file.
   )
 
 (use-package lsp-pyright
-  :after lsp-mode
+  :ensure t
+  :after (lsp-mode)
   :config
   (add-hook 'python-ts-mode-hook (lambda () (require 'lsp-pyright)))
   (add-hook 'python-ts-mode-hook #'lsp))
 
 (use-package lsp-tailwind
   :disabled
-  :straight (:host github :type git :repo "merrickluo/lsp-tailwindcss")
+  :ensure (:host github :type git :repo "merrickluo/lsp-tailwindcss")
   :init
   (setq lsp-tailwindcss-add-on-mode t)
   )
 
 (use-package lsp-haskell
+  :ensure t
   ;; :defer 5
-  :after lsp-mode
+  :after (lsp-mode)
   ;; Uncontable tales i have of how this monster have ruined my day, not
   ;; because of itself, but because Of how much ram it needs and how my
   ;; little School-gorverment-given computer hogs from the effort of
@@ -3537,6 +3736,7 @@ stores this metadata and filename is returned so lsp-mode can display this file.
   )
 
 (use-package ormolu
+  :ensure t
   :hook (haskell-mode . ormolu-format-on-save-mode)
   :bind
   (:map haskell-mode-map
@@ -3544,7 +3744,7 @@ stores this metadata and filename is returned so lsp-mode can display this file.
 
 (use-package eglot
   :disabled
-  :straight (:type built-in)
+  :ensure nil
   :config
   ;; (load-file "./elpa/eglot-1.16/eglot.el")
   ;; eglot-server-programs
@@ -3567,7 +3767,7 @@ stores this metadata and filename is returned so lsp-mode can display this file.
 
 (use-package php-ts-mode
   :disabled
-  :straight (:host github :type git :repo "emacs-php/php-ts-mode")
+  :ensure (:host github :type git :repo "emacs-php/php-ts-mode")
   :config
   (add-to-list 'treesit-language-source-alist
                '(php "https://github.com/tree-sitter/tree-sitter-php" "master" "php/src"))
@@ -3602,11 +3802,12 @@ stores this metadata and filename is returned so lsp-mode can display this file.
   )
 
 
-(use-package jq-mode)
+(use-package jq-mode
+  :ensure t)
 
 (use-package restclient
-  :straight (restclient :files ("*.el"))
-  :after jq-mode
+  :ensure (restclient :files ("*.el"))
+  :after (jq-mode)
   :config
   (add-to-list 'auto-mode-alist '("\\.http\\'" . restclient-mode))
   (require 'restclient-jq)
@@ -3615,12 +3816,13 @@ stores this metadata and filename is returned so lsp-mode can display this file.
 ;; (use-package ob-restclient
 ;;   :after org)
 
-(use-package gyp
-  :straight (:host github :type git :repo "nodejs/node-gyp" :files ("gyp/tools/emacs/*.el"))
-  )
+;; (use-package gyp
+;;   :ensure (:host github :type git :repo "nodejs/node-gyp" :files ("gyp/tools/emacs/*.el"))
+;;   )
 ;;** Kotlin
 
 (use-package kotlin-ts-mode
+  :ensure t
   :init
   (add-to-list 'treesit-language-source-alist '(kotlin "https://github.com/fwcd/tree-sitter-kotlin"))
   :config
@@ -3631,7 +3833,7 @@ stores this metadata and filename is returned so lsp-mode can display this file.
 
 ;;** Python
 (use-package python
-  :straight (:type built-in)
+  :ensure nil
   :init
   (setq auto-mode-alist (remove '("\\.py[iw]?\\'" . python-mode) auto-mode-alist))
   :config
@@ -3649,10 +3851,12 @@ stores this metadata and filename is returned so lsp-mode can display this file.
     (python-ts-mode . (hs-minor-mode)))))
 
 (use-package blacken
+  :ensure t
   :hook (python-mode . blacken-mode)
   :config (setq blacken-line-length 79))
 
 (use-package poetry
+  :ensure t
   ;;; TODO: Need to solve the initial lag when opening a pyhton file.
   :config
   (setenv "WORKON_HOME" "~/.cache/pypoetry/virtualenvs/")
@@ -3667,19 +3871,21 @@ stores this metadata and filename is returned so lsp-mode can display this file.
 
 ;;** Haskell
 (use-package haskell-mode
-  :straight (haskell-mode :host github :type git :repo "haskell/haskell-mode")
+  :ensure (haskell-mode :host github :type git :repo "haskell/haskell-mode")
   :config
   (define-key haskell-mode-map [f8] 'haskell-navigate-imports)
   (custom-set-variables '(haskell-process-type 'cabal-repl))
   )
 
 (use-package hindent
+  :ensure t
   :config
   (add-hook 'haskell-mode-hook #'hindent-mode))
 
 
 ;;** flycheck
 (use-package flycheck
+  :ensure t
   :config
   (gsetq flycheck-indication-mode 'right-fringe)
   (ryo-modal-keys
@@ -3702,13 +3908,21 @@ stores this metadata and filename is returned so lsp-mode can display this file.
               ("M-n" . flycheck-next-error)
               ("M-u" . flycheck-previous-error)))
 ;;** Magit
-(use-package magit :defer 5)
-;; (use-package forge
-;;   :straight (:host github :type git :repo "magit/forge" :files ("lisp/*.el" "*.el"))
-;;   :after magit
-;;   )
+(use-package transient
+  :ensure t)
+
+(use-package magit
+  :after (transient)
+  :ensure t
+  :defer 5)
+
+(use-package forge
+  :ensure t
+  :after (magit transient)
+  )
 
 (use-package leetcode
+  :ensure t
   :config
   (setq leetcode-prefer-language "python3")
   (setq leetcode-prefer-sql "mysql")
@@ -3733,7 +3947,8 @@ stores this metadata and filename is returned so lsp-mode can display this file.
 ;;** Dired
 
 (use-package dired
-  :straight nil
+  :after hydra
+  :ensure nil
   :bind (:map dired-mode-map
               ("." . hydra-dired/body))
   :init
@@ -3793,6 +4008,8 @@ T - tag prefix
     ("." nil :color blue)))
 
 (use-package dired+
+  :ensure nil
+  :no-require t
   :config
   (remove-hook 'dired-mode-hook 'diredp--set-up-font-locking))
 
@@ -3808,10 +4025,12 @@ T - tag prefix
               ("i" . dired-subtree-toggle)))
 
 (use-package dired-collapse
+  :ensure t
   :hook
   ((dired-mode . dired-collapse-mode)))
 
 (use-package dirvish
+  :ensure t
   ;;; Why did I disable this?
   ;; :disabled
   :init
@@ -3887,7 +4106,7 @@ T - tag prefix
   (emms-default-players)
   (setq emms-source-file-default-directory "~/Music/"))
 ;; (use-package empv
-;;   :straight (empv :type git :host github :repo "isamert/empv.el")
+;;   :ensure (empv :type git :host github :repo "isamert/empv.el")
 ;;   :config
 ;;   (setq empv-base-directory (expand-file-name "~"))
 ;;   (defhydra hydra-empv-volume
@@ -3933,6 +4152,7 @@ T - tag prefix
   (openwith-mode 1))
 
 (use-package org-web-tools
+  :ensure t
   :config
   (require 'org-attach)
   (defhydra hydra-org-web-tools (:hint nil :color blue)
@@ -3952,17 +4172,23 @@ _._ quit    _a_ Add  attachment   _i_ Insert as entry
     ("k" org-web-tools-insert-link-for-url)))
 
 (use-package doct
+  :ensure t
   ;; Description: doct is a function that provides an alternative,
   ;; declarative syntax for describing Org capture templates.
   )
 
+(use-package org-contrib
+  :ensure t)
+
 ;;** Org mode
 (use-package org
-  :straight (org :type built-in)
-  :straight org-contrib
-  :ryo
-  (:mode 'org-agenda-mode)
-  ("okc" org-agenda-exit)
+  :after (org-contrib ryo-modal)
+  ;; :ensure (org :type built-in)
+  :config
+  (ryo-modal-key
+   "okc" #'org-agenda-exit
+   :mode 'org-agenda-mode
+   )
   :init
   (gsetq org-file-apps
          '((auto-mode . emacs)
@@ -4563,6 +4789,7 @@ By default, all subentries are counted; restrict with LEVEL."
 ;;*** org super agenda
 
 (use-package org-super-agenda
+  :ensure t
   :bind (:map org-super-agenda-header-map
               ("n" . org-agenda-next-line)
               ("u" . org-agenda-previous-line)
@@ -4667,11 +4894,12 @@ By default, all subentries are counted; restrict with LEVEL."
   )
 
 (use-package edebug-hydra
-  :straight (edebug-hydra :host github :type git :repo "rgrinberg/edebug-hydra")
+  :ensure (edebug-hydra :host github :type git :repo "rgrinberg/edebug-hydra")
   )
 
 ;;; I STOPPED HERE
-(use-package posframe)
+(use-package posframe
+  :ensure t)
 
 (use-package which-key-posframe
   ;; Sometimes fires, sometimes doesn't and that is a problem
@@ -4690,6 +4918,7 @@ By default, all subentries are counted; restrict with LEVEL."
 ;;   (setq org-journal-dir (concat main-dropbox-dir "journal/")
 ;;         org-journal-date-format "%A, %d %B %Y"))
 (use-package org-superstar
+  :ensure t
   :config
   (setq org-superstar-cycle-headline-bullets t)
   (setq org-hide-leading-stars t)
@@ -4701,6 +4930,7 @@ By default, all subentries are counted; restrict with LEVEL."
   (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄)))
 
 (use-package elisp-slime-nav
+  :ensure t
   :config
   ;; elisp-slime-nav-describe-elisp-thing-at-point C-c C-d C-d
   (if (s-suffix? "laptop" (system-name))
@@ -4713,6 +4943,7 @@ By default, all subentries are counted; restrict with LEVEL."
   (emacs-lisp-mode . elisp-slime-nav-mode))
 
 (use-package csv-mode
+  :ensure t
   :hook (csv-mode . csv-align-mode)
   :config
   (ryo-modal-major-mode-keys
@@ -4721,10 +4952,11 @@ By default, all subentries are counted; restrict with LEVEL."
 
 (use-package git-timemachine
   :disabled
-  :straight t
-  :ryo
-  ("Gt" git-timemachine-toggle)
-  ("GT" hydra-git-timemachine/body)
+  :ensure t
+  :after (ryo-modal)
+  :config
+  (ryo-modal-key "Gt" 'git-timemachine-toggle)
+  (ryo-modal-key "GT" 'hydra-git-timemachine/body)
   :bind (:map git-timemachine-mode-map
               ("n" . git-timemachine-show-next-revision)
               ("u" . git-timemachine-show-previous-revision))
@@ -4749,10 +4981,12 @@ By default, all subentries are counted; restrict with LEVEL."
     ("." nil :color blue)))
 
 (use-package bibtex
+  :ensure nil
   :config
   (setq bibtex-autokey-year-length 4))
 
 (use-package org-ref
+  :ensure t
   :defer 5
   :config
   ;; (setq bibtex-completion-bibliography (list (concat main-dropbox-dir "Main.bib")))
@@ -4760,6 +4994,7 @@ By default, all subentries are counted; restrict with LEVEL."
   (setq bibtex-completion-pdf-field "file"))
 
 (use-package ebib
+  :ensure t
   :config
   (el-patch-defun ebib-create-org-identifier (key _)
     "Create a unique identifier for KEY for use in an org file.
@@ -4873,6 +5108,7 @@ string."
 ;;* Denote
 
 (use-package denote
+  :ensure t
   :hook (;; Note: Only works on files that have an identifier on their
          ;; filename
          ;; (find-file . denote-link-buttonize-buffer)
@@ -4940,6 +5176,7 @@ _._: Exit
   )
 
 (use-package org-ql
+  :ensure t
   :config
   (section "org-ql Queries"
     (defun mymy-org-ql-query-all-backlinks (id)
@@ -4965,18 +5202,21 @@ _._: Exit
 
   (general-define-key "C-c n b" 'mymy-org-ql-see-all-backlinks))
 
+(use-package lister
+  :ensure t)
+
 ;; Looks good
 ;; Even though this package already have some utilities that i have
 ;; implemented there are some that are far better done than mine. So
 ;; with only a little work i can steal some code or make some glue
 ;; with how i want some things to work
 (use-package delve
-  :after org-roam
+  :disabled
+  :after (org-roam lister)
   ;; For some reason it just break, maybe i will report this
   ;; Found out that the reason is because show/hide outline
   ;; functionality is buggy with lister
-  :straight lister
-  :straight (delve :host github :type git :repo "publicimageltd/delve")
+  :ensure (delve :host github :type git :repo "publicimageltd/delve")
   ;; :init
   ;; (setq delve-minor-mode-prefix-ey (kbd "C-c d"))
   :config
@@ -5125,18 +5365,18 @@ Optional argument ARGS is ignored."
 
   ;; It broke for some reason
   (delve-export-new-backend 'mymy-yank-into-org
-    "Print Delve zettels as links of the form that i use"
-    :parent 'yank-into-org
-    :separator "\n"
-    :printers `((delve--pile    . ,(lambda (p o)
-				     (concat
-				      (string-join (--map (delve-export--item-string it o)
-							  (delve--pile-zettels p))
-						   ", ")
-				      ",")))
-		(delve--heading . ,(lambda (h _) (concat "- " (delve--heading-text h))))
-		(delve--zettel  . ,#'mymy-delve-export--zettel-to-link)
-		))
+                            "Print Delve zettels as links of the form that i use"
+                            :parent 'yank-into-org
+                            :separator "\n"
+                            :printers `((delve--pile    . ,(lambda (p o)
+				                             (concat
+				                              (string-join (--map (delve-export--item-string it o)
+							                          (delve--pile-zettels p))
+						                           ", ")
+				                              ",")))
+		                        (delve--heading . ,(lambda (h _) (concat "- " (delve--heading-text h))))
+		                        (delve--zettel  . ,#'mymy-delve-export--zettel-to-link)
+		                        ))
 
   (setq delve-export--yank-handlers (list 'mymy-yank-into-org))
   (el-patch-defvar delve-export--yank-handlers
@@ -5302,7 +5542,7 @@ Optional argument ARGS is ignored."
 
 (use-package vulpea
   :disabled
-  :straight (vulpea :type git :host github :repo "d12frosted/vulpea")
+  :ensure (vulpea :type git :host github :repo "d12frosted/vulpea")
   ;; hook into org-roam-db-autosync-mode you wish to enable
   ;; persistence of meta values (see respective section in README too
   ;; find out what meta means)
@@ -5311,12 +5551,14 @@ Optional argument ARGS is ignored."
   )
 
 (use-package doct-org-roam
-  :straight nil
+  :after (doct)
+  :ensure nil
   )
 
 ;;** Org roam
 (use-package org-roam
-  :after org el-patch
+  :ensure t
+  :after (org el-patch)
   :init
   ;; (require 'org-roam-patch)
 
@@ -6030,11 +6272,19 @@ _._: Quit _q_: Quit
     ("C-c C-j j" . mymy-org-roam-dailies-today)
     )))
 
+(use-package websocket
+  :disabled
+  :ensure t)
+
+(use-package simple-httpd
+  :disabled
+  :ensure t)
+
 (use-package org-roam-ui
   :disabled
-  :straight (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
-  :straight websocket simple-httpd
-  :after org-roam
+  :after (simple-httpd websocket)
+  :ensure (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+  :after (org-roam)
   :config
   (require 'org-roam-protocol)
   (setq org-roam-ui-sync-theme t
@@ -6042,9 +6292,11 @@ _._: Quit _q_: Quit
         org-roam-ui-update-on-save t
         org-roam-ui-open-on-start t))
 
-(use-package org-transclusion)
+(use-package org-transclusion
+  :ensure t)
 
 (use-package org-roam-bibtex
+  :ensure t
   :config
   (setq orb-roam-ref-format 'org-ref-v3)
   (org-roam-bibtex-mode)
@@ -6054,13 +6306,13 @@ _._: Quit _q_: Quit
 
 
 (use-package asoc
-  :straight (asoc :type git :host github :repo "troyp/asoc.el"))
+  :ensure (asoc :type git :host github :repo "troyp/asoc.el"))
 
 (use-package org-capture-ref
   :defer 5
-  :after org-roam
-  ;; :straight (asoc.el :type git :host github :repo "troyp/asoc.el")
-  :straight (org-capture-ref :type git :host github :repo "yantar92/org-capture-ref")
+  :after (org-roam)
+  ;; :ensure (asoc.el :type git :host github :repo "troyp/asoc.el")
+  :ensure (org-capture-ref :type git :host github :repo "yantar92/org-capture-ref")
   :config
   (el-patch-defun org-capture-ref-clean-bibtex (string &optional no-hook)
     "Make sure that BiBTeX entry STRING is a valid BiBTeX.
@@ -6222,6 +6474,7 @@ If a keyword from the template is missing, it will remain empty."
   (setq org-capture-ref-capture-template-set-p t))
 
 (use-package org-pomodoro
+  :ensure t
   ;; Works using org mode headings
   :config
   (ryo-modal-key "Sm" 'org-pomodoro)
@@ -6256,6 +6509,7 @@ If a keyword from the template is missing, it will remain empty."
 ;; (use-package org-hyperscheduler)
 
 (use-package eww
+  :ensure nil
   :config
   (bind-key "u" nil eww-link-keymap)
   (bind-key "u" nil eww-image-link-keymap)
@@ -6264,6 +6518,7 @@ If a keyword from the template is missing, it will remain empty."
   ((eww-mode . olivetti-mode)))
 
 (use-package gnus
+  :ensure nil
   :config
   (add-hook 'gnus-group-mode-hook 'gnus-topic-mode)
   (add-hook 'gnus-summary-mode-hook #'gnus-undo-mode)
@@ -6298,7 +6553,7 @@ If a keyword from the template is missing, it will remain empty."
 ;; I would normally take screenshots of org mode and source code and
 ;; send it through whatsapp
 (use-package screenshot
-  :straight (:type git :host github :repo "tecosaur/screenshot")
+  :ensure (:type git :host github :repo "tecosaur/screenshot")
   )
 
 (use-package nov
@@ -6315,12 +6570,14 @@ If a keyword from the template is missing, it will remain empty."
    (nov-mode . (lambda () (whitespace-mode -1)))))
 
 (use-package treemacs
+  :ensure t
   :config
   :bind
   (:map global-map
         ("M-0"       . treemacs-select-window)))
 
 (use-package projectile
+  :ensure t
   ;; TODO: Come here later
   :init
   ;; (general-define-key
@@ -6333,40 +6590,46 @@ If a keyword from the template is missing, it will remain empty."
   (setq projectile-completion-system 'auto)
   :config
   (add-to-list 'projectile-project-root-functions
-               #'not-mymy-find-nearest-chsarp-project
-               )
-  (general-define-key
-   :keymaps 'projectile-mode-map
-   "C-c t" 'hydra-projectile/body)
-  (with-eval-after-load 'hydra
-    (defhydra hydra-projectile (:hint nil :color blue)
-      "
-  ^Projectile^        ^Buffers^           ^Find^              ^Search^
-  ^──────────^────────^───────^───────────^────^──────────────^──────^────────────
-  _q_ quit            _b_ list            _d_ directory       _r_ replace
-  _i_ reset cache     _k_ kill all        _D_ root            _R_ regexp replace
-  _._ quit            _S_ save all        _f_ file            _s_ search
-  _h_ consult         ^^                  _p_ project
-  "
-      ("q" nil :color blue)
-      ("." nil :color blue)
-      ("b" consult-projectile-switch-to-buffer)
-      ("d" consult-projectile-find-dir)
-      ("D" projectile-dired)
-      ("f" consult-projectile-find-file)
-      ("i" projectile-invalidate-cache :color red)
-      ("k" projectile-kill-buffers)
-      ("p" consult-projectile-switch-project)
-      ("r" projectile-replace)
-      ("h" consult-projectile)
-      ("R" projectile-replace-regexp)
-      ("s" consult-ripgrep)
-      ("S" projectile-save-project-buffers)))
+               #'mymy-find-nearest-solution-file t)
+  (add-to-list 'projectile-project-root-functions
+               #'not-mymy-find-nearest-chsarp-project t)
+
 
   :hook
   (after-init . projectile-mode))
 
+(use-package consult-projectile
+  :after (consult projectile)
+  :ensure t
+  :config
+
+  (setq consult-projectile-sources
+        '(consult-projectile--source-projectile-buffer
+          consult-projectile--source-projectile-file
+          consult-projectile--source-projectile-dir))
+
+  (defvar mymy-projectile-map
+    (-doto (make-sparse-keymap)
+      (define-key (kbd "p") #'consult-projectile)
+      (define-key (kbd "s") #'consult-projectile-switch-project)
+      (define-key (kbd "S") #'projectile-save-project-buffers)
+      (define-key (kbd "fb") #'consult-projectile-switch-to-buffer)
+      (define-key (kbd "fd") #'consult-projectile-find-dir)
+      (define-key (kbd "ff") #'consult-projectile-find-file)
+      (define-key (kbd "d") #'consult-projectile-find-dir)
+      (define-key (kbd "D") #'projectile-dired)
+      (define-key (kbd "i") #'projectile-invalidate-cache)
+      (define-key (kbd "k") #'projectile-kill-buffers)
+      (define-key (kbd "r") #'projectile-replace)
+      (define-key (kbd "R") #'projectile-replace-regexp)
+      (define-key (kbd "g") #'consult-ripgrep)
+      ))
+
+  (define-key ryo-modal-mode-map (kbd "SPC p") mymy-projectile-map)
+  )
+
 (use-package frames-only-mode
+  :ensure t
   ;; Set this to non-nil value if you want to have frame functionality
   :if (intern (or (getenv "EMACS_FRAMES") "nil"))
   :hook
@@ -6510,6 +6773,8 @@ If a keyword from the template is missing, it will remain empty."
   )
 
 (use-package avy
+  :disabled
+  :ensure t
   :init
   (require 'linum)
   :config
@@ -6561,18 +6826,22 @@ _._ cancel
   (set-face-attribute 'avy-lead-face-0 nil
                       :background "#bdbca6" :foreground "#000000"))
 (use-package ace-window
+  :ensure t
   :config
   (setq aw-keys '(?n ?e ?i ?o ?k ?m ?u ?y))
   ;; (ace-window-display-mode)
   (ryo-modal-key "owf" #'ace-window))
 
 (use-package windmove
+  :disabled
+  :ensure t
   :config
   (windmove-default-keybindings)
   (setq windmove-wrap-around t))
 
 ;; Configure Tempel
 (use-package tempel
+  :ensure t
   ;; Require trigger prefix before template name when completing.
   ;; :custom
   ;; (tempel-trigger-prefix "<")
@@ -6672,83 +6941,14 @@ It is essentially the element include but with args."
   (add-to-list 'tempel-template-sources #'mymy-tempel-add-org-babel-languages))
 
 (use-package yasnippet-snippets
-  :after yasnippet
+  :ensure t
+  :after (yasnippet)
   ;; :disabled
   ;; :defer 5
   )
 
-(use-package yasnippet
-  ;; :bind (("TAB" . yas-expand))
-  :config
-  ;; (add-to-list 'company-backends 'company-yasnippet t)
-  ;; (add-to-list 'warning-suppress-types '(yasnippet backquote-change))
-
-  (defun mymy-yasnippet-hook ()
-    (yas-define-snippets
-     'prog-mode
-     '(;; "Key" "Template" "Name"
-                                        ; git1: To give context the moment I do a commit
-                                        ; git2: Make "g" snippet use comment depending on the mode
-       ("g" "`(org-trim comment-start)` git: " "Git reminder")))
-    (yas-define-snippets
-     'emacs-lisp-mode
-     '(;; "Key" "Template" "Name"
-       ("up" "(use-package ${1:package-name}$0)" "use-package")
-       (":c" ":config" "Use package :config")
-       (":i" ":init" "Use package :init")
-       (":b" ":bind (($1))" "Use package :bind")
-       (":bd" "(\"${1:keys}\" . ${2:function})" "Use package :bind binding")
-       (":s" ":straight " "Use package :straigth")
-       (":ss" ":straight (:host github :type git :repo \"${1:repo}\" :files (${2:files}))" ":straight repo")
-       (":h" ":hook" "Use package :hook")))
-    (yas-define-snippets
-     'python-mode
-     '(;; "Key" "Template" "Name"
-       ("pr" "print(${1:`(when (region-active-p) (yas-selected-text))`})$0" "print")))
-    (yas-define-snippets
-     'org-mode
-     '(;; "Key" "Template" "Name"
-       ("clj" "#+begin_src clojure\n\n#+end_src\n" "Clojure source block")
-       ("<co" "#+STARTUP: content" "Content")
-       ("<n" "#+STARTUP: nofold" "No fold")
-
-       ;; Git: More easy to type
-       (">el" "\\begin{${1:env}}\n\\end{${1:$(yas-field-value 1)}}" "Enviroment")
-       (">a" "align" "Aling env")
-       (">a*" "align*" "Align* env")
-       (">e" "equation" "Equation env")
-       (">e*" "equation*" "Equation* env")
-
-       (">>frac" "\\frac{${1:a}}{${2:b}}" "Fraction")
-       (">>div" "{${1:a} \\div ${2:b}}" "Division")
-       (">>cdot" "{${1:a} \\cdot ${2:b}}" "Multiplication")
-       (">>=" "{${1:a} = ${2:b}}" "Equality")
-       (">>nck" "{${1:n} \\choose ${2:k}}" "Choose function")
-       (">>int" "\\int_{${1:a}}^{${2:b}} ${3:f(x)} \\,dx" "Integrals")
-       (">>sum" "\\sum_{${1:a}}^{${2:b}}" "Summation"))))
-
-  (add-hook 'prog-mode-hook #'yas-minor-mode)
-
-  ;; (add-hook 'prog-mode-hook #'yas-minor-mode)
-  ;; (add-hook 'text-mode-hook #'yas-minor-mode)
-  ;; (add-hook 'yas-minor-mode-hook #'mymy-yasnippet-hook)
-  (ryo-modal-keys
-    ("gy" yas-visit-snippet-file)
-    ("Gy" yas-insert-snippet))
-  ;; :bind ((;; C-c y is reserved for yasnippets and, possibly, its
-  ;;         ;; snippets shortcuts
-  ;;         "C-c y y" . company-yasnippet))
-  ;; :hook
-  ;; ;; Doesn't work for some reason
-  ;; ;; (after-init . yas-global-mode)
-  ;; ;; (yas-global-mode-hook . mymy-yasnippet-hook)
-  ;; (prog-mode . yas-minor-mode)
-  ;; (text-mode . yas-minor-mode)
-  ;; ;; I'm really getting sure this things run
-  ;; (yas-minor-mode . mymy-yasnippet-hook)
-  )
-
 (use-package sly
+  :ensure t
   :config
   (setq inferior-lisp-program "/usr/bin/sbcl --dynamic-space-size 1024")
   ;; (setq inferior-lisp-program "/usr/bin/sbcl --dynamic-space-size 2048")
@@ -6794,12 +6994,9 @@ It is essentially the element include but with args."
   (lisp-mode . aggressive-indent-mode))
 
 (use-package dashboard
-  :straight t
-  :straight all-the-icons page-break-lines
+  :ensure t
   :init
-  ;; Set the banner
-  ;; (setq dashboard-startup-banner [VALUE])
-  (dashboard-setup-startup-hook)
+  (setq dashboard-icon-type 'nerd-icons)
   (setq dashboard-set-footer nil)
   (setq dashboard-show-shortcuts t)
   (setq dashboard-set-heading-icons t)
@@ -6808,45 +7005,64 @@ It is essentially the element include but with args."
   ;; Projects, Areas of activity, Reading list
   (setq dashboard-items '((bookmarks . 5)
                           (projects . 5)))
-  :bind (:map dashboard-mode-map
-              ("TAB" . dashboard-next-section)
-              ("<backtab>" . dashboard-previous-section))
-  :config ;; For now i'm going to try something
-  (setq inhibit-startup-screen t)
+  :config
+  (add-hook 'elpaca-after-init-hook #'dashboard-insert-startupify-lists)
+  (add-hook 'elpaca-after-init-hook #'dashboard-initialize)
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
-  ;; (setq initial-buffer-choice (concat org-roam-directory "Projects/20210715113548-projects.org"))
-  (bookmark-location (car bookmark-alist))
-  ;; TODO: Make own section of fast access files.
-  (el-patch-defun dashboard-insert-bookmarks (list-size)
-    "Add the list of LIST-SIZE items of bookmarks."
-    (require 'bookmark)
-    (dashboard-insert-section
-     "Bookmarks:"
-     (dashboard-subseq (bookmark-all-names) list-size)
-     list-size
-     'bookmarks
-     (dashboard-get-shortcut 'bookmarks)
-     (el-patch-swap `(lambda (&rest _) (bookmark-jump ,el))
-                    `(lambda (&rest _) (find-file ,el)))
-     (if-let* ((filename el)
-               (path (bookmark-get-filename el))
-               (path-shorten (dashboard-shorten-path path 'bookmarks)))
-         (cl-case dashboard-bookmarks-show-base
-           (`align
-            (unless dashboard--bookmarks-cache-item-format
-              (let* ((len-align (dashboard--align-length-by-type 'bookmarks))
-                     (new-fmt (dashboard--generate-align-format
-                               dashboard-bookmarks-item-format len-align)))
-                (setq dashboard--bookmarks-cache-item-format new-fmt)))
-            (format dashboard--bookmarks-cache-item-format filename path-shorten))
-           (`nil path-shorten)
-           (t (format dashboard-bookmarks-item-format filename path-shorten)))
-       el))))
+  (dashboard-setup-startup-hook))
+
+(use-package all-the-icons
+  :ensure t)
+
+(use-package page-break-lines
+  :ensure t)
+
+(use-package doom-dashboard
+  ;; Use my repo for the moment
+  :ensure (doom-dashboard :host github
+                          :repo "cheerio-pixel/doom-dashboard"
+                          :files ("*.el" "banners/*.txt"))
+  :after (dashboard all-the-icons)
+  :demand t
+  ;; Movement keys like doom.
+  :bind
+  (:map dashboard-mode-map
+        ("<remap> <dashboard-previous-line>" . widget-backward)
+        ("<remap> <dashboard-next-line>" . widget-forward)
+        ("<remap> <previous-line>" . widget-backward)
+        ("<remap> <next-line>"  . widget-forward)
+        ("<remap> <right-char>" . widget-forward)
+        ("<remap> <left-char>"  . widget-backward))
+  :config
+  (gsetq dashboard-banner-logo-title "E M A C S")
+  (gsetq dashboard-startup-banner
+         (concat (file-name-directory (locate-library "doom-dashboard")) "bcc.txt")) ; Use banner you want
+  (gsetq dashboard-footer-icon
+         (nerd-icons-faicon "nf-fa-github_alt" :face 'success :height 1.5))
+  (gsetq dashboard-page-separator "\n")
+  (gsetq dashboard-startupify-list `(dashboard-insert-banner
+                                     dashboard-insert-banner-title
+                                     dashboard-insert-newline
+                                     dashboard-insert-items
+                                     ,(dashboard-insert-newline 2)
+                                     dashboard-insert-init-info
+                                     ,(dashboard-insert-newline 2)
+                                     doom-dashboard-insert-homepage-footer))
+  (gsetq dashboard-item-generators
+         '((recents   . doom-dashboard-insert-recents-shortmenu)
+           (bookmarks . doom-dashboard-insert-bookmark-shortmenu)
+           (projects  . doom-dashboard-insert-project-shortmenu)
+           (agenda    . doom-dashboard-insert-org-agenda-shortmenu)))
+  (gsetq dashboard-items '(projects agenda bookmarks recents)))
 
 (use-package undo-tree
-  :ryo
-  ("q /" undo-tree-visualize)
-  ("?" undo-tree-redo)
+  :ensure t
+  :after (ryo-modal)
+  :config
+  (ryo-modal-key "q /" undo-tree-visualize)
+  (ryo-modal-key "?" undo-tree-redo)
+  :config
+  (global-undo-tree-mode)
   :bind
   (:map undo-tree-visualizer-mode-map
         ("q" . undo-tree-visualizer-quit)
@@ -6858,7 +7074,7 @@ It is essentially the element include but with args."
 (use-package selected ;; Special keybindings when a region is active
   ;; Not in current use
   :disabled
-  :straight t
+  :ensure t
   ;; selected-<major-mode>-map for major mode specific keybindings
   ;; (setq selected-org-mode-map (make-sparse-keymap)) example org mode
   :commands selected-minor-mode
@@ -6868,7 +7084,8 @@ It is essentially the element include but with args."
               ("q" . selected-off)
               ("" . count-words-region)))
 
-(use-package multiple-cursors)
+(use-package multiple-cursors
+  :ensure t)
 
 (use-package ace-mc
   ;; Not in current use
@@ -6916,6 +7133,7 @@ It is essentially the element include but with args."
   ("C-S-z" . centaur-tabs-forward-group))
 
 (use-package which-key ;; Useful to tell what is the next command that i can do
+  :ensure t
   :init
   (setq which-key-enable-extended-define-key t)
   (setq which-key-side-window-location 'bottom)
@@ -6944,10 +7162,12 @@ It is essentially the element include but with args."
     "rd" "Debugging"
     "rr" "Refractoring"))
 
-(use-package combobulate)
+(use-package combobulate
+  :disabled
+  :ensure t)
 
 (use-package expreg
-  :straight (:type git :host github :repo "casouri/expreg")
+  :ensure (:type git :host github :repo "casouri/expreg")
   :init
   (ryo-modal-key "\'" #'expreg-expand)
   )
@@ -6996,6 +7216,7 @@ _C-._ Deactivate mark _._: Quit.
   ("C-'" . er/expand-region))
 
 (use-package yequake
+  :ensure t
   :config
   (gsetq yequake-frames
          '(("org-capture"
@@ -7031,6 +7252,7 @@ _C-._ Deactivate mark _._: Quit.
   )
 
 (use-package terminal-here
+  :ensure t
   :config
   (global-set-key (kbd "C-<f5>") #'terminal-here-launch)
   (global-set-key (kbd "C-<f6>") #'terminal-here-project-launch)
@@ -7050,9 +7272,9 @@ _C-._ Deactivate mark _._: Quit.
 
 (use-package eaf
   :disabled
-  :straight nil
+  :ensure nil
   ;; https://github.com/emacs-eaf/emacs-application-framework/discussions/799#discussioncomment-1222055
-  ;; :straight ( eaf
+  ;; :ensure ( eaf
   ;;             :type git
   ;;             :host github
   ;;             :repo "emacs-eaf/emacs-application-framework"
@@ -7103,6 +7325,7 @@ _C-._ Deactivate mark _._: Quit.
 ;; modifyProject (\p -> p { projectDirectory = dir })
 
 (use-package emacs
+  :ensure nil
   :config
   (defun my-unfill-paragraph (&optional region)
     "Make multi-line paragraph into a single line of text.
@@ -7153,7 +7376,8 @@ _N_   _U_   _o_k        _y_ank       /,`.-'`'   .‗  \-;;,‗
     ("." nil nil))
 
   (global-set-key (kbd "C-x SPC") 'hydra-rectangle/body)
-  (ryo-modal-key "V v" 'hydra-rectangle/body)
+  (global-set-key (kbd "C-v") 'hydra-rectangle/body)
+  ;; (ryo-modal-key "V v" 'hydra-rectangle/body)
   )
 
 (prefer-coding-system 'utf-8)
@@ -7317,8 +7541,7 @@ _N_   _U_   _o_k        _y_ank       /,`.-'`'   .‗  \-;;,‗
 
 (add-hook 'after-init-hook
           (lambda ()
-            (which-function-mode t)
-            (global-undo-tree-mode)))
+            (which-function-mode t)))
 (add-hook 'after-init-hook #'winner-mode)
 ;; (add-hook 'prog-mode
 ;;           (lambda ()
@@ -7327,8 +7550,6 @@ _N_   _U_   _o_k        _y_ank       /,`.-'`'   .‗  \-;;,‗
 (add-hook 'TeX-after-compilation-finished-functions
           #'TeX-revert-document-buffer)
 
-(add-hook 'lisp-data-mode-hook
-          #'aggressive-indent-mode)
 
 ;; MyMy mode
 

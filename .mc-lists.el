@@ -118,6 +118,7 @@
         special-lispy-move-up
         special-lispy-new-copy
         special-lispy-other-mode
+        special-lispy-paste
         special-lispy-raise
         special-lispy-repeat
         special-lispy-right
@@ -164,6 +165,7 @@
         sp-remove-active-pair-overlay
         special-lispy-ace-paren
         special-lispy-eval-other-window
+        special-lispy-flow
         special-lispy-narrow
         special-lispy-occur
         special-lispy-tab

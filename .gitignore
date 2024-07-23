@@ -55,6 +55,7 @@ workspace/
 /dap-ui-repl-python-history
 /%backup%~
 *~$
+elpaca/
 
 
 # Undo-tree files
