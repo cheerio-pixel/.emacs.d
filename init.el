@@ -256,7 +256,7 @@
   (setq nyan-animate-nyancat t
         nyan-wavy-trail t)
   :hook
-  (after-init . nyan-mode))
+  (elpaca-after-init . nyan-mode))
 
 (defcustom powerline-buffer-size-suffix t
   "Display the buffer size suffix."
@@ -311,7 +311,7 @@ current window."
             ))))))
 
 (add-hook
- 'after-init-hook
+ 'elpaca-after-init-hook
  ;; Darkula messing up with my modeline look
  (lambda ()
    (set-face-attribute
@@ -392,7 +392,7 @@ current window."
                           (member extension '("csproj" "fsproj"))))
                       files))))))))
 
-(defun mymy-find-nearest-solution-file (&opitonal _dir)
+(defun mymy-find-nearest-solution-file (&optional _dir)
   (let ((start-from (or (buffer-file-name)
                         (when (eq major-mode
                                   'dired-mode)
@@ -487,12 +487,30 @@ Version: 2019-11-04 2023-04-05 2023-06-26"
         ((eq system-type 'berkeley-unix)
          (mapc (lambda (xfpath) (let ((process-connection-type nil)) (start-process "" nil "xdg-open" xfpath))) xfileList)))))))
 
-;; (defun mymy-hook-to-read-only-in-straigth-package ()
-;;   "Open files under straight as read-only"
-;;   (when (string-match-p (straight--dir) (buffer-file-name))
-;;     (read-only-mode 1)))
+(defvar mymy-readonly-directories
+  '()
+  )
 
-;; (add-hook 'find-file-hook #'mymy-hook-to-read-only-in-straigth-package)
+(with-eval-after-load 'straight
+  (add-to-list 'mymy-readonly-directories (straight--dir))
+  )
+
+(with-eval-after-load 'elpaca
+  (add-to-list 'mymy-readonly-directories elpaca-directory)
+  )
+
+(defun mymy-hook-to-read-only-in-selected-dirs ()
+  "Open files under straight as read-only"
+  ;; (when (string-match-p (straight--dir) (buffer-file-name))
+  ;;   (read-only-mode 1))
+  (when (-first (lambda (d) (string-match-p d (buffer-file-name)))
+                mymy-readonly-directories
+                )
+    (read-only-mode 1)
+    )
+  )
+
+(add-hook 'find-file-hook #'mymy-hook-to-read-only-in-selected-dirs)
 
 ;; (defun append-date-to-file (file)
 ;;   "docstring"
@@ -1039,7 +1057,7 @@ By default the minibuffer is excluded.")
   ;;         "C-c y y" . company-yasnippet))
   ;; :hook
   ;; ;; Doesn't work for some reason
-  ;; ;; (after-init . yas-global-mode)
+  ;; ;; (elpaca-after-init . yas-global-mode)
   ;; ;; (yas-global-mode-hook . mymy-yasnippet-hook)
   ;; (prog-mode . yas-minor-mode)
   ;; (text-mode . yas-minor-mode)
@@ -1320,6 +1338,7 @@ By default the minibuffer is excluded.")
   (add-hook 'text-mode #'visual-line-mode)
 
   (use-package adaptive-wrap
+    :ensure t
     :hook (text-mode . adaptive-wrap-prefix-mode)
     :init
     (setq adaptive-wrap-extra-indent 0)
@@ -1420,7 +1439,7 @@ By default the minibuffer is excluded.")
          mymy-bookmarked-files-save-file
          mymy-bookmarked-files)))
 
-    (add-hook 'after-init-hook #'mymy-bookmarked-files-init)
+    (add-hook 'elpaca-after-init-hook #'mymy-bookmarked-files-init)
 
     (defun mymy-bookmarked-files-clean (files)
       "Function that cleans the files in bookmarked files"
@@ -1678,22 +1697,32 @@ By default the minibuffer is excluded.")
   (add-to-list 'completion-styles 'hotfuzz t)
   )
 
+;; Optionally use the `orderless' completion style.
 (use-package orderless
   :ensure t
-  :config
-  ;; ;; Put orderless at last since orderless put me things almost at random.
-  ;; ;; (add-to-list 'completion-styles 'orderless t)
-  ;; ;; (setq completion-styles '(basic partial-completion orderless))
-  (setq completion-styles '(basic partial-completion substring orderless))
-  ;; ;; matching characters in order, but non-consecutively
-  ;; ;; (add-to-list 'orderless-matching-styles 'orderless-flex t)
-  ;; (setq orderless-matching-styles '(;; orderless-literal
-  ;;                                   orderless-regexp orderless-prefixes))
-  (setq orderless-matching-styles '( orderless-literal orderless-regexp ;; orderless-flex
-                                     
-                                     ))
-  (setq completion-category-overrides '((file (styles basic partial-completion substring))))
-  )
+  :custom
+  ;; Configure a custom style dispatcher (see the Consult wiki)
+  ;; (orderless-style-dispatchers '(+orderless-dispatch))
+  ;; (orderless-component-separator #'orderless-escapable-split-on-space)
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides '((file (styles partial-completion)))))
+
+;; (use-package orderless
+;;   :ensure t
+;;   :config
+;;   ;; ;; Put orderless at last since orderless put me things almost at random.
+;;   ;; ;; (add-to-list 'completion-styles 'orderless t)
+;;   ;; ;; (setq completion-styles '(basic partial-completion orderless))
+;;   (setq completion-styles '(basic partial-completion substring orderless))
+;;   ;; ;; matching characters in order, but non-consecutively
+;;   ;; ;; (add-to-list 'orderless-matching-styles 'orderless-flex t)
+;;   ;; (setq orderless-matching-styles '(;; orderless-literal
+;;   ;;                                   orderless-regexp orderless-prefixes))
+;;   (setq orderless-matching-styles '( orderless-literal orderless-regexp ;; orderless-flex
+;;                                      ))
+;;   (setq completion-category-overrides '((file (styles basic partial-completion substring))))
+;;   )
 
 (use-package fussy
   :disabled
@@ -2034,7 +2063,7 @@ By default the minibuffer is excluded.")
   ;; python
   (wrap-region-add-wrapper "print(" ")" "p" 'python-mode)
   (wrap-region-global-mode t)
-  :hook (after-init . wrap-region-global-mode))
+  :hook (elpaca-after-init . wrap-region-global-mode))
 
 (use-package aggressive-indent
   :ensure t
@@ -2113,6 +2142,8 @@ By default the minibuffer is excluded.")
   )
 
 (use-package lsp-razor
+  ;; I think this is a crashing my emacs
+  :disabled
   :after (lsp-mode web-mode)
   :ensure nil
   :load-path "lsp-razor.el"
@@ -2179,7 +2210,7 @@ By default the minibuffer is excluded.")
     (show-smartparens-global-mode))
   (setq mymy-lisp-modes '(emacs-lisp-mode clojure-mode cider-mode slime-mode lisp-mode))
   :config (sp-local-pair mymy-lisp-modes "'" "'" :actions nil)
-  :hook ((after-init . mymy/smartparens-hook)
+  :hook ((elpaca-after-init . mymy/smartparens-hook)
          (prog-mode . smartparens-strict-mode)
          (haskell-mode . (lambda () (require 'smartparens-haskell)))
          ))
@@ -2468,14 +2499,17 @@ slant, utf-8."
    )
 
   (general-define-key
-   :keymap 'corfu-map
+   :keymaps 'corfu-map
    ;; Default: M-h
    "M-h" 'corfu-info-documentation
    ;; Default: M-g
    "M-g" 'corfu-info-location
    ;; Default: completion-at-point, TAB
    [completion-at-point] 'corfu-complete
-   "TAB" 'corfu-complete)
+   "TAB" 'corfu-complete
+   "SPC" 'corfu-insert-separator
+   "RET" 'corfu-complete
+   )
 
   (global-corfu-mode)
   (corfu-echo-mode)
@@ -2488,7 +2522,6 @@ slant, utf-8."
   :after (corfu)
   :config
   (general-define-key
-   :keymap 'org-mode-map
    "C-M-k" 'cape-file))
 
 (use-package nerd-icons-corfu
@@ -3276,6 +3309,25 @@ slant, utf-8."
      (maphash (lambda (key value) (message "%S" value)) diagnostic)
      )
    )
+
+  (defun mymy-find-closest-csproj ()
+    "Find the closest .csproj file in the current directory or its parents."
+    (interactive)
+    (let ((current-dir (file-name-directory (or buffer-file-name default-directory)))
+          (found nil))
+      (while (and (not found) (not (string= current-dir "/")))
+        (let ((csproj-files (directory-files current-dir t "\.csproj$")))
+          (if csproj-files
+              (setq found (car csproj-files))
+            (setq current-dir (file-name-directory (directory-file-name current-dir))))))
+      (if found
+          (progn
+            (find-file found)
+            (message "Opened %s" found))
+        (message "No .csproj file found in the current directory or its parents."))))
+
+  (ryo-modal-key "SPC pfp" #'mymy-find-closest-csproj
+                 :mode 'csharp-ts-mode-map)
   ;; (add-hook 'csharp-ts-mode-hook #'aggressive-indent-mode)
   )
 
@@ -4616,8 +4668,8 @@ By default, all subentries are counted; restrict with LEVEL."
 
   (ryo-modal-keys
     (:norepeat t)
-    ("O" (("a" org-agenda)
-          ("u" org-clock-goto))))
+    ("SPC" (("a" org-agenda)
+            ("u" org-clock-goto))))
   (ryo-modal-key "Og" #'org-mark-ring-goto)
 
   (with-eval-after-load 'expand-region
@@ -5172,7 +5224,7 @@ _._: Exit
     ("." nil :color blue))
 
   (general-define-key "C-c m" 'hydra-denote/body)
-  :hook (after-init . denote-fontify-links-mode)
+  :hook (elpaca-after-init . denote-fontify-links-mode)
   )
 
 (use-package org-ql
@@ -6577,32 +6629,62 @@ If a keyword from the template is missing, it will remain empty."
         ("M-0"       . treemacs-select-window)))
 
 (use-package projectile
+  :demand t
   :ensure t
   ;; TODO: Come here later
   :init
+
+  (defun mymy-projectile-root-csharp (dir)
+    "Retrieve the root directory of a C# project in DIR.
+This function gives priority to .sln files over .csproj files."
+    (let ((root (or (projectile-locate-dominating-file dir "*.sln")
+                    (projectile-locate-dominating-file dir "*.csproj"))))
+      (and root (expand-file-name root))))
+
+
+  ;; This is my fault, but some projects are just not git repositories so I
+  ;; have to do some preprocesing in emacs to compensate.
+  (gsetq projectile-indexing-method
+         'hybrid)
   ;; (general-define-key
   ;;  :keymaps 'projectile-mode-map
   ;;  "C-c t" 'projectile-command-map)
-  (setq-default projectile-project-search-path `("~/Projects/"
-                                                 ,mymy-organization-system-directory
-                                                 ("~/.emacs.d" . 1)))
+  ;; Defaults to 1
 
   (setq projectile-completion-system 'auto)
+  (setq projectile-enable-caching t)
   :config
-  (add-to-list 'projectile-project-root-functions
-               #'mymy-find-nearest-solution-file t)
-  (add-to-list 'projectile-project-root-functions
-               #'not-mymy-find-nearest-chsarp-project t)
+  (setq projectile-project-root-functions
+        '(projectile-root-local
+          projectile-root-marked
+          mymy-projectile-root-csharp
+          projectile-root-bottom-up
+          projectile-root-top-down
+          projectile-root-top-down-recurring))
+  (add-to-list 'projectile-project-search-path '("~/Projects/" . 5))
+  (add-to-list 'projectile-project-search-path mymy-organization-system-directory)
+  (add-to-list 'projectile-project-search-path "~/.xmonad/")
+  (add-to-list 'projectile-project-search-path `(,user-emacs-directory . 1))
 
+  (add-to-list 'projectile-globally-ignored-directories
+               "^node_modules$")
+  ;; Will do things like this manually.
+  (setq projectile-auto-discover nil)
+  ;; Order is impportant
+  ;; (add-to-list 'projectile-project-root-functions
+  ;;              #'mymy-find-nearest-solution-file t)
+  ;; (add-to-list 'projectile-project-root-functions
+  ;;              #'not-mymy-find-nearest-chsarp-project t)
+  ;; (add-to-list 'projectile-project-root-files
+  ;;              "*.sln")
 
   :hook
-  (after-init . projectile-mode))
+  (elpaca-after-init . projectile-mode))
 
 (use-package consult-projectile
   :after (consult projectile)
   :ensure t
-  :config
-
+  :init
   (setq consult-projectile-sources
         '(consult-projectile--source-projectile-buffer
           consult-projectile--source-projectile-file
@@ -6633,7 +6715,7 @@ If a keyword from the template is missing, it will remain empty."
   ;; Set this to non-nil value if you want to have frame functionality
   :if (intern (or (getenv "EMACS_FRAMES") "nil"))
   :hook
-  (after-init . frames-only-mode)
+  (elpaca-after-init . frames-only-mode)
   :init
   (setq frames-only-mode-kill-frame-when-buffer-killed-buffer-list
         ;; Default
@@ -6650,7 +6732,7 @@ If a keyword from the template is missing, it will remain empty."
   :config
   ;; This is a temporary solution
   (unless (equal "DESKTOP-GTTJN7V" (system-name))
-    (add-hook 'after-init-hook #'frames-only-mode))
+    (add-hook 'elpaca-after-init-hook #'frames-only-mode))
   ;; (advice-add 'org-roam-dailies-capture-today :around 'frames-only-mode-advice-use-windows)
   :config
   (with-eval-after-load 'gnus
@@ -6785,6 +6867,8 @@ If a keyword from the template is missing, it will remain empty."
       (avy-goto-word-0 nil (line-beginning-position) (line-end-position))))
 
   :config
+  (ryo-modal-key "SPC SPC" #'self-insert-command)
+  
   (defhydra hydra-avy (:hint nil :color amaranth :exit t)
     "
 ^Char^   ^Word^    ^line^
@@ -6921,7 +7005,7 @@ It is essentially the element include but with args."
                     ,(concat "#+begin_src " (symbol-name it))
                     n q n r n> "#+end_src" )))))
 
-  (defun mymy-projectile-get-path-from-root-like-csharp (&optional dir remove-string)
+  (defun mymy-get-path-from-root-like-csharp (&optional dir remove-string)
     "Get the current path from root in a csharp way."
     (when-let ((file-name (buffer-file-name)))
       (replace-regexp-in-string
@@ -6929,7 +7013,7 @@ It is essentially the element include but with args."
        "."
        (directory-file-name
         (replace-regexp-in-string
-         (thread-last (projectile-project-root)
+         (thread-last (or (not-mymy-find-nearest-chsarp-project) "")
                       expand-file-name
                       directory-file-name
                       file-name-directory
@@ -7048,6 +7132,11 @@ It is essentially the element include but with args."
                                      dashboard-insert-init-info
                                      ,(dashboard-insert-newline 2)
                                      doom-dashboard-insert-homepage-footer))
+  (gsetq doom-dashboard-shortmenu-functions
+         `((recents   . recentf)
+           (bookmarks . bookmark-jump)
+           (projects  . consult-projectile-switch-project)
+           (agenda    . org-agenda)))
   (gsetq dashboard-item-generators
          '((recents   . doom-dashboard-insert-recents-shortmenu)
            (bookmarks . doom-dashboard-insert-bookmark-shortmenu)
@@ -7059,10 +7148,14 @@ It is essentially the element include but with args."
   :ensure t
   :after (ryo-modal)
   :config
-  (ryo-modal-key "q /" undo-tree-visualize)
-  (ryo-modal-key "?" undo-tree-redo)
-  :config
+  (ryo-modal-key "q /" #'undo-tree-visualize)
+  (ryo-modal-key "?" #'undo-tree-redo)
+
   (global-undo-tree-mode)
+
+  ;; Prevent undo tree files from polluting your git repo
+  (setq undo-tree-history-directory-alist
+        `(("." . ,(concat user-emacs-directory "undo"))))
   :bind
   (:map undo-tree-visualizer-mode-map
         ("q" . undo-tree-visualizer-quit)
@@ -7378,6 +7471,35 @@ _N_   _U_   _o_k        _y_ank       /,`.-'`'   .‗  \-;;,‗
   (global-set-key (kbd "C-x SPC") 'hydra-rectangle/body)
   (global-set-key (kbd "C-v") 'hydra-rectangle/body)
   ;; (ryo-modal-key "V v" 'hydra-rectangle/body)
+  (gsetq read-extended-command-predicate #'command-completion-default-include-p)
+
+  ;; Courtesy of https://www.reddit.com/r/emacs/comments/t07e7e/comment/hy88bum/
+  (defun doom-make-hashed-auto-save-file-name-a (fn)
+    "Compress the auto-save file name so paths don't get too long."
+    (let ((buffer-file-name
+           (if (or (null buffer-file-name)
+                   (find-file-name-handler buffer-file-name 'make-auto-save-file-name))
+               buffer-file-name
+             (sha1 buffer-file-name))))
+      (funcall fn)))
+  (advice-add #'make-auto-save-file-name :around #'doom-make-hashed-auto-save-file-name-a)
+
+  (defun doom-make-hashed-backup-file-name-a (fn file)
+    "A few places use the backup file name so paths don't get too long."
+    (let ((alist backup-directory-alist)
+          backup-directory)
+      (while alist
+        (let ((elt (car alist)))
+          (if (string-match (car elt) file)
+              (setq backup-directory (cdr elt) alist nil)
+            (setq alist (cdr alist)))))
+      (let ((file (funcall fn file)))
+        (if (or (null backup-directory)
+                (not (file-name-absolute-p backup-directory)))
+            file
+          (expand-file-name (sha1 (file-name-nondirectory file))
+                            (file-name-directory file))))))
+  (advice-add #'make-backup-file-name-1 :around #'doom-make-hashed-backup-file-name-a)
   )
 
 (prefer-coding-system 'utf-8)
@@ -7539,10 +7661,10 @@ _N_   _U_   _o_k        _y_ank       /,`.-'`'   .‗  \-;;,‗
 
 
 
-(add-hook 'after-init-hook
+(add-hook 'elpaca-after-init-hook
           (lambda ()
             (which-function-mode t)))
-(add-hook 'after-init-hook #'winner-mode)
+(add-hook 'elpaca-after-init-hook #'winner-mode)
 ;; (add-hook 'prog-mode
 ;;           (lambda ()
 ;;             (auto-fill-mode t)))
@@ -7587,7 +7709,8 @@ _N_   _U_   _o_k        _y_ank       /,`.-'`'   .‗  \-;;,‗
  ;; If there is more than one, they won't work right.
  '(haskell-process-type 'cabal-repl)
  '(safe-local-variable-values
-   '((org-tag-alist
+   '((checkdoc-package-keywords-flag)
+     (org-tag-alist
       (:startgroup)
       ("@phone")
       ("@pc")
