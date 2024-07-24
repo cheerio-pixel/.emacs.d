@@ -2104,14 +2104,6 @@ By default, all subentries are counted; restrict with LEVEL."
   (setq org-superstar-prettify-item-bullets nil)
   (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄)))
 
-(use-package org-modern
-  :ensure t
-  :config
-  (setq org-modern-todo-faces org-todo-keyword-faces)
-  :hook
-  (org-mode . org-modern-mode)
-  (org-agenda-finalize . org-modern-agenda))
-
 (use-package org-pomodoro
   :ensure t
   :demand t
