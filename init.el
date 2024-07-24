@@ -771,60 +771,6 @@ Version: 2019-11-04 2023-04-05 2023-06-26"
 
 ;;* Ryo modal
 
-;; (use-package evil
-;;   :config
-;;   (evil-mode)
-;;   (gsetq evil-undo-system 'undo-redo)
-;;   (general-def 'normal emacs-lisp-mode-map
-;;     "K" 'elisp-slime-nav-describe-elisp-thing-at-point)
-
-;;   (general-override-mode 1)
-
-;;   ;; (general-create-definer lift-def
-;;   ;;   :states '(normal motion visual)
-;;   ;;   :keymaps 'override
-;;   ;;   :prefix "SPC"
-;;   ;;   )
-
-;;   (general-define-key
-;;    :states '(normal motion visual)
-;;    :keymaps 'override
-;;    :prefix "SPC"
-
-;;    "s" 'save-buffer
-;;    "b" 'switch-to-last-buffer
-;;    "fb" 'consult-buffer
-;;    "ff" 'find-file
-;;    "fx" 'reopen-killed-file
-;;    "fX" 'reopen-killed-file-fancy
-;;    "fl" #'consult-line
-;;    "fg" #'consult-ripgrep
-;;    )
-;;   ;; SPC = Lift
-;;   ;; f = prefix find
-;;   ;; fb = Find buffer
-;;   ;; ff = Find file
-;;   ;; fx = Open last closed file
-;;   ;; fX = Open history of closed files
-;;   ;; fl = Consult line
-;;   ;; fg = Consult ripgrep
-;;   ;; fr = Find references of thing at point
-;;   ;; r = prefix replace
-;;   ;; rs = replace-string
-;;   ;; rr = replace-regex
-;;   )
-
-;; (use-package evil-colllection
-;;   :ensure (:type git :host github :repo "emacs-evil/evil-collection")
-;;   :config
-;;   (evil-collection-init '(dired consult))
-;;   )
-
-;; (use-package lispyville
-;;   :init
-;;   (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode)
-;;   :config
-;;   (lispyville-set-key-theme '(operators c-w additional)))
 
 (use-package ryo-modal
   :ensure t
@@ -835,7 +781,7 @@ Version: 2019-11-04 2023-04-05 2023-06-26"
   ;; if lambda-name exists, if not then complain
   :commands ryo-modal-mode
   :bind
-  ("S-SPC" . ryo-modal-global-mode)
+  ;; ("S-SPC" . ryo-modal-global-mode)
   ("ç" . ryo-modal-global-mode)
   ("C-t" . ryo-modal-global-mode)
   :config
@@ -1069,7 +1015,112 @@ By default the minibuffer is excluded.")
 ;; each other at the package dependency level.
 (elpaca-wait)
 
+;; * EVIL
+;; Expands to: (elpaca evil (use-package evil :demand t))
+;; Make emacs vim
+(use-package evil
+  :ensure t
+  :demand t
+  :init
+  (setq evil-want-keybinding nil)
+  (setq evil-search-module 'evil-search)
+  :config
+  (evil-mode)
+  (gsetq evil-undo-system 'undo-redo)
+  (general-def 'normal emacs-lisp-mode-map
+    "K" 'elisp-slime-nav-describe-elisp-thing-at-point)
 
+  (general-override-mode 1)
+  ;; (define-key evil-emacs-state-map (kbd "S-SPC") 'evil-normal-state)
+
+  ;; It get's kind of annoying, maybe will activate later.
+  (gsetq evil-want-empty-ex-last-command nil)
+
+  (defvar mymy-buffer-map
+    (-doto (make-sparse-keymap)
+      (define-key (kbd "b") #'switch-to-last-buffer)
+      (define-key (kbd "d") #'kill-current-buffer)
+      ))
+
+  (defvar mymy-find-map
+    (-doto (make-sparse-keymap)
+      (define-key (kbd "b") #'consult-buffer)
+      (define-key (kbd "f") #'find-file)
+      (define-key (kbd "f") #'find-file)
+      (define-key (kbd "x") #'reopen-killed-file)
+      (define-key (kbd "X") #'reopen-killed-file-fancy)
+      (define-key (kbd "l") #'consult-line)
+      (define-key (kbd "g") #'mymy-consult-grep-change-depending-on-arg)
+      (define-key (kbd "s") #'describe-symbol)
+      (define-key (kbd "d") #'mymy-find-definition-at-point)
+      ))
+
+  (defvar mymy-flycheck-map
+    (-doto (make-sparse-keymap)
+      (define-key (kbd "c") #'flycheck-buffer)
+      (define-key (kbd "e") #'flycheck-explain-error-at-point)
+      (define-key (kbd "l") #'flycheck-list-errors)
+      (define-key (kbd "x") #'flycheck-disable-checker)
+      (define-key (kbd "m") #'flycheck-mode)
+      ))
+
+  (defvar mymy-replace-map
+    (-doto (make-sparse-keymap)
+      (define-key (kbd "s") #'replace-string)
+      (define-key (kbd "r") #'replace-regexp)
+      ))
+
+  (general-define-key
+   :states '(normal motion visual)
+   :keymaps 'override
+   :prefix "SPC"
+
+   "n" #'make-frame-command
+   "b" mymy-buffer-map
+   "f" mymy-find-map
+   "!" mymy-flycheck-map
+   "r" mymy-replace-map
+   "a" #'org-agenda
+   "g" #'magit
+   )
+
+  ;; Change shape and color of each state
+  (setq evil-normal-state-cursor '(hollow)
+        evil-insert-state-cursor '(bar)
+        evil-visual-state-cursor '(box))
+  )
+
+;; Extensions with evil and others
+(use-package evil-collection
+  :after evil
+  :ensure t
+  ;; :ensure (evil-collection :host github :repo "emacs-evil/evil-collection")
+  :config
+  (evil-collection-init '( dired consult corfu
+                           elisp-slime-nav elisp-mode
+                           debug
+                           magit magit-section magit-repos
+                           magit-todos
+                           org
+                           vertico
+                           wgrep wdired
+                           flycheck
+                           ))
+  )
+
+;; Integration of lispy with evil
+(use-package lispyville
+  :ensure t
+  :after evil lispy
+  :init
+  (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode)
+  :config
+  (lispyville-set-key-theme '(operators c-w additional)))
+
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
 ;;* Keys
 
 ;; Same as global-set-key
@@ -1163,7 +1214,7 @@ By default the minibuffer is excluded.")
 
 (general-define-key
  :keymaps 'override
- "S-SPC" 'ryo-modal-global-mode
+ ;; "S-SPC" 'ryo-modal-global-mode
  "C-t" 'ryo-modal-global-mode
  )
 ;;** lispy-mode-map
@@ -1491,7 +1542,7 @@ By default the minibuffer is excluded.")
            :narrow   ?i
            :face     consult-file
            :history  file-name-history
-           :state    ,#'consult--file-state
+           ,#'consult--file-state
            :new      ,#'consult--file-action
            :items    ,(lambda ()
                         mymy-bookmarked-files)))
@@ -2142,8 +2193,6 @@ By default the minibuffer is excluded.")
   )
 
 (use-package lsp-razor
-  ;; I think this is a crashing my emacs
-  :disabled
   :after (lsp-mode web-mode)
   :ensure nil
   :load-path "lsp-razor.el"
@@ -2612,11 +2661,11 @@ slant, utf-8."
       (lispy-mode -1)))
   (ryo-modal-major-mode-keys
     'clojure-mode
-    ("S-SPC" tmp-lispy-fix)
+    ;; ("S-SPC" tmp-lispy-fix)
     ("C-t" tmp-lispy-fix))
   (ryo-modal-major-mode-keys
     'lisp-mode
-    ("S-SPC" tmp-lispy-fix)
+    ;; ("S-SPC" tmp-lispy-fix)
     ("C-t" tmp-lispy-fix))
   :hook
   (clojure-mode . lispy-mode)
@@ -3326,6 +3375,17 @@ slant, utf-8."
             (message "Opened %s" found))
         (message "No .csproj file found in the current directory or its parents."))))
 
+  (general-define-key
+   :keymaps 'csharp-ts-mode-map
+   :states '(normal motion visual)
+   "SPC pfp" #'mymy-find-closest-csproj
+   )
+  (general-define-key
+   :keymaps 'razor-web-mode-map
+   :states '(normal motion visual)
+   "SPC pfp" #'mymy-find-closest-csproj
+   )
+
   (ryo-modal-key "SPC pfp" #'mymy-find-closest-csproj
                  :mode 'csharp-ts-mode-map)
   ;; (add-hook 'csharp-ts-mode-hook #'aggressive-indent-mode)
@@ -3411,6 +3471,8 @@ slant, utf-8."
 (use-package lsp-mode
   :ensure (:host github :type git :repo "emacs-lsp/lsp-mode")
   :init
+  (defun mymy-lsp-mode-hook ()
+    (setq mymy-find-definition-at-point #'lsp-find-definition))
   (setq lsp-keymap-prefix "C-c l")
   (setq lsp-completion-provider :none)
   ;; (setq lsp-enable-snippet nil)
@@ -3621,6 +3683,7 @@ stores this metadata and filename is returned so lsp-mode can display this file.
   :hook ((vue-web-mode . lsp)
          ;; (typescript-ts-mode . mymy-javascript-mode-lsp-hook)
          ;; (js-ts-mode . mymy-javascript-mode-lsp-hook)
+         (lsp-mode . mymy-lsp-mode-hook)
          (typescript-ts-mode . lsp)
          (js-ts-mode . lsp)
          (csharp-ts-mode . lsp)
@@ -3958,7 +4021,7 @@ stores this metadata and filename is returned so lsp-mode can display this file.
                        ("q" nil "cancel" :color blue)))
   :bind (:map flycheck-mode-map
               ("M-n" . flycheck-next-error)
-              ("M-u" . flycheck-previous-error)))
+              ("M-p" . flycheck-previous-error)))
 ;;** Magit
 (use-package transient
   :ensure t)
@@ -4981,18 +5044,27 @@ By default, all subentries are counted; restrict with LEVEL."
   (setq org-superstar-prettify-item-bullets nil)
   (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄)))
 
+;; (use-package elisp-slime-nav
+;;   :ensure t
+;;   :config
+;;   ;; elisp-slime-nav-describe-elisp-thing-at-point C-c C-d C-d
+;;   (if (s-suffix? "laptop" (system-name))
+;;       (bind-key "C-." 'elisp-slime-nav-find-elisp-thing-at-point
+;;                 emacs-lisp-mode-map
+;;                 )
+;;     (bind-key "M-." 'elisp-slime-nav-find-elisp-thing-at-point
+;;               emacs-lisp-mode-map))
+;;   :hook
+;;   (emacs-lisp-mode . elisp-slime-nav-mode))
 (use-package elisp-slime-nav
   :ensure t
-  :config
-  ;; elisp-slime-nav-describe-elisp-thing-at-point C-c C-d C-d
-  (if (s-suffix? "laptop" (system-name))
-      (bind-key "C-." 'elisp-slime-nav-find-elisp-thing-at-point
-                emacs-lisp-mode-map
-                )
-    (bind-key "M-." 'elisp-slime-nav-find-elisp-thing-at-point
-              emacs-lisp-mode-map))
+  :init
+  (defun mymy-emacs-lisp-hook ()
+    (setq mymy-find-definition-at-point
+          #'elisp-slime-nav-find-elisp-thing-at-point)
+    (elisp-slime-nav-mode))
   :hook
-  (emacs-lisp-mode . elisp-slime-nav-mode))
+  (emacs-lisp-mode . mymy-emacs-lisp-hook))
 
 (use-package csv-mode
   :ensure t
@@ -6708,6 +6780,12 @@ This function gives priority to .sln files over .csproj files."
       ))
 
   (define-key ryo-modal-mode-map (kbd "SPC p") mymy-projectile-map)
+  (general-define-key
+   :states '(normal motion visual)
+   :keymaps 'override
+   :prefix "SPC"
+   "p" mymy-projectile-map
+   )
   )
 
 (use-package frames-only-mode
@@ -7500,6 +7578,19 @@ _N_   _U_   _o_k        _y_ank       /,`.-'`'   .‗  \-;;,‗
           (expand-file-name (sha1 (file-name-nondirectory file))
                             (file-name-directory file))))))
   (advice-add #'make-backup-file-name-1 :around #'doom-make-hashed-backup-file-name-a)
+  ;; * Find reference
+
+  (defun mymy-find-defnition-at-point-noop ()
+    (interactive)
+    (user-error "`mymy-find-definition-at-point' as not been set."))
+
+  (defvar-local mymy-find-definition-at-point #'mymy-find-defnition-at-point-noop
+    "Function that is run when searching for reference, they find what
+is the thing at point by themselves")
+
+  (defun mymy-find-definition-at-point ()
+    (interactive)
+    (funcall mymy-find-definition-at-point))
   )
 
 (prefer-coding-system 'utf-8)
@@ -7698,7 +7789,7 @@ _N_   _U_   _o_k        _y_ank       /,`.-'`'   .‗  \-;;,‗
 
 ;; Load all functions
 (require 'functions)
-(ryo-modal-global-mode t)
+;; (ryo-modal-global-mode t)
 
 ;; Init.el ends here
 
