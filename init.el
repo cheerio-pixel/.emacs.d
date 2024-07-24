@@ -218,6 +218,7 @@
   ;; * Find reference
 
   (defun mymy-find-defnition-at-point-noop ()
+    (interactive)
     (user-error "`mymy-find-definition-at-point' as not been set."))
 
   (defvar-local mymy-find-definition-at-point #'mymy-find-defnition-at-point-noop
