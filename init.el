@@ -307,6 +307,35 @@ current window."
 
   (add-to-list 'default-frame-alist
                '(alpha-background . 99))
+  (custom-set-variables '(read-extended-command-predicate #'command-completion-default-include-p))
+
+  ;; Courtesy of https://www.reddit.com/r/emacs/comments/t07e7e/comment/hy88bum/
+  (defun doom-make-hashed-auto-save-file-name-a (fn)
+    "Compress the auto-save file name so paths don't get too long."
+    (let ((buffer-file-name
+           (if (or (null buffer-file-name)
+                   (find-file-name-handler buffer-file-name 'make-auto-save-file-name))
+               buffer-file-name
+             (sha1 buffer-file-name))))
+      (funcall fn)))
+  (advice-add #'make-auto-save-file-name :around #'doom-make-hashed-auto-save-file-name-a)
+
+  (defun doom-make-hashed-backup-file-name-a (fn file)
+    "A few places use the backup file name so paths don't get too long."
+    (let ((alist backup-directory-alist)
+          backup-directory)
+      (while alist
+        (let ((elt (car alist)))
+          (if (string-match (car elt) file)
+              (setq backup-directory (cdr elt) alist nil)
+            (setq alist (cdr alist)))))
+      (let ((file (funcall fn file)))
+        (if (or (null backup-directory)
+                (not (file-name-absolute-p backup-directory)))
+            file
+          (expand-file-name (sha1 (file-name-nondirectory file))
+                            (file-name-directory file))))))
+  (advice-add #'make-backup-file-name-1 :around #'doom-make-hashed-backup-file-name-a)
   )
 
 (use-package elisp-slime-nav
@@ -357,29 +386,29 @@ current window."
 
 ;; Explicit patching of functions and variables.
 (use-package el-patch
-  :ensure (:wait t)
+  :ensure t
   :demand t)
 
 ;; Bring a little bit of clojure and more
 (use-package dash
-  :ensure (:wait t)
+  :ensure t
   :demand t
   :config (global-dash-fontify-mode))
 
 ;; Some string utitlities
 (use-package s
-  :ensure (:wait t))
+  :ensure t)
 
 ;; The best menu library
 (use-package transient
-  :ensure (:no-wait t))
+  :ensure t)
 
 ;;When installing a package used in the init file itself,
 ;;e.g. a package which adds a use-package key word,
 ;;use the :wait recipe keyword to block until that package is installed/configured.
 ;;For example:
 (use-package general
-  :ensure (:wait t)
+  :ensure t
   :demand t
   :config
   (defalias 'yes-or-no-p 'y-or-n-p)
@@ -475,6 +504,11 @@ current window."
             (daemonp))
     (exec-path-from-shell-initialize)))
 
+;; * 1# Wait
+;; All previous packages are somehow used later on and do not depend on
+;; each other at the package dependency level.
+(elpaca-wait)
+
 ;; * EVIL
 ;; Expands to: (elpaca evil (use-package evil :demand t))
 ;; Make emacs vim
@@ -540,7 +574,8 @@ current window."
    "f" mymy-find-map
    "!" mymy-flycheck-map
    "r" mymy-replace-map
-   "p"  #'consult-projectile
+   "a" #'org-agenda
+   "g" #'magit
    )
 
   ;; Change shape and color of each state
@@ -575,6 +610,11 @@ current window."
   (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode)
   :config
   (lispyville-set-key-theme '(operators c-w additional)))
+
+(use-package evil-surround
+  :ensure t
+  :config
+  (global-evil-surround-mode 1))
 
 
 ;; Vim-like state in lisp
@@ -836,73 +876,99 @@ current window."
    "M-x" 'execute-extended-command
    "C-x b" 'consult-buffer
    "C-x C-f" 'find-file
-   "C-c h s" 'consult-line
-   "C-c t h" 'consult-projectile)
+   "C-c h s" 'consult-line)
 
   ;; Much better than openning a window
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref))
 
 ;; * Projectile
-
 (use-package projectile
-  ;; TODO: Come here later
+  :demand t
   :ensure t
+  ;; TODO: Come here later
   :init
-  (setq-default projectile-project-search-path `("~/Projects/"
-                                                 ;; ,mymy-organization-system-directory
-                                                 ("~/.config/emacs/" . 1)))
+
+  (defun mymy-projectile-root-csharp (dir)
+    "Retrieve the root directory of a C# project in DIR.
+This function gives priority to .sln files over .csproj files."
+    (let ((root (or (projectile-locate-dominating-file dir "*.sln")
+                    (projectile-locate-dominating-file dir "*.csproj"))))
+      (and root (expand-file-name root))))
+
+
+  ;; This is my fault, but some projects are just not git repositories so I
+  ;; have to do some preprocesing in emacs to compensate.
+  (gsetq projectile-indexing-method
+         'hybrid)
+  ;; (general-define-key
+  ;;  :keymaps 'projectile-mode-map
+  ;;  "C-c t" 'projectile-command-map)
+  ;; Defaults to 1
 
   (setq projectile-completion-system 'auto)
+  (setq projectile-enable-caching t)
   :config
+  (setq projectile-project-root-functions
+        '(projectile-root-local
+          projectile-root-marked
+          mymy-projectile-root-csharp
+          projectile-root-bottom-up
+          projectile-root-top-down
+          projectile-root-top-down-recurring))
+  (add-to-list 'projectile-project-search-path '("~/Projects/" . 5))
+  (add-to-list 'projectile-project-search-path mymy-organization-system-directory)
+  (add-to-list 'projectile-project-search-path "~/.xmonad/")
+  (add-to-list 'projectile-project-search-path `(,user-emacs-directory . 1))
+
+  (add-to-list 'projectile-globally-ignored-directories
+               "^node_modules$")
+  ;; Will do things like this manually.
+  (setq projectile-auto-discover nil)
+  ;; Order is impportant
   ;; (add-to-list 'projectile-project-root-functions
-  ;;              #'not-mymy-find-nearest-chsarp-project
-  ;;              )
-  (general-define-key
-   :keymaps 'projectile-mode-map
-   "C-c t" 'hydra-projectile/body)
-
-  ;; Order is important
-
-  (add-to-list 'projectile-project-root-functions
-               #'mymy-find-nearest-solution-file t)
-
-  (add-to-list 'projectile-project-root-functions
-               #'not-mymy-find-nearest-chsarp-project t)
-
-  (with-eval-after-load 'hydra
-    ;; TODO: Check this out again
-    ;; (defhydra hydra-projectile (:hint nil :color blue)
-    ;;     "
-    ;; ^Projectile^        ^Buffers^           ^Find^              ^Search^
-    ;; ^──────────^────────^───────^───────────^────^──────────────^──────^────────────
-    ;; _q_ quit            _b_ list            _d_ directory       _r_ replace
-    ;; _i_ reset cache     _k_ kill all        _D_ root            _R_ regexp replace
-    ;; _._ quit            _S_ save all        _f_ file            _s_ search
-    ;; _h_ consult         ^^                  _p_ project
-    ;; "
-    ;;     ("q" nil :color blue)
-    ;;     ("." nil :color blue)
-    ;;     ("b" consult-projectile-switch-to-buffer)
-    ;;     ("d" consult-projectile-find-dir)
-    ;;     ("D" projectile-dired)
-    ;;     ("f" consult-projectile-find-file)
-    ;;     ("i" projectile-invalidate-cache :color red)
-    ;;     ("k" projectile-kill-buffers)
-    ;;     ("p" consult-projectile-switch-project)
-    ;;     ("r" projectile-replace)
-    ;;     ("h" consult-projectile)
-    ;;     ("R" projectile-replace-regexp)
-    ;;     ("s" mymy-consult-grep-change-depending-on-arg)
-    ;;     ("S" projectile-save-project-buffers))
-    )
+  ;;              #'mymy-find-nearest-solution-file t)
+  ;; (add-to-list 'projectile-project-root-functions
+  ;;              #'not-mymy-find-nearest-chsarp-project t)
+  ;; (add-to-list 'projectile-project-root-files
+  ;;              "*.sln")
 
   :hook
-  (after-init . projectile-mode))
+  (elpaca-after-init . projectile-mode))
 
 (use-package consult-projectile
-  :after projectile consult
-  :ensure t)
+  :after (consult projectile)
+  :ensure t
+  :init
+  (setq consult-projectile-sources
+        '(consult-projectile--source-projectile-buffer
+          consult-projectile--source-projectile-file
+          consult-projectile--source-projectile-dir))
+
+  (defvar mymy-projectile-map
+    (-doto (make-sparse-keymap)
+      (define-key (kbd "p") #'consult-projectile)
+      (define-key (kbd "s") #'consult-projectile-switch-project)
+      (define-key (kbd "S") #'projectile-save-project-buffers)
+      (define-key (kbd "fb") #'consult-projectile-switch-to-buffer)
+      (define-key (kbd "fd") #'consult-projectile-find-dir)
+      (define-key (kbd "ff") #'consult-projectile-find-file)
+      (define-key (kbd "d") #'consult-projectile-find-dir)
+      (define-key (kbd "D") #'projectile-dired)
+      (define-key (kbd "i") #'projectile-invalidate-cache)
+      (define-key (kbd "k") #'projectile-kill-buffers)
+      (define-key (kbd "r") #'projectile-replace)
+      (define-key (kbd "R") #'projectile-replace-regexp)
+      (define-key (kbd "g") #'consult-ripgrep)
+      ))
+
+  (general-define-key
+   :states '(normal motion visual)
+   :keymaps 'override
+   :prefix "SPC"
+   "p" mymy-projectile-map
+   )
+  )
 
 ;; * Vertico
 (use-package vertico
@@ -1193,9 +1259,6 @@ current window."
 
 (use-package undo-tree
   :ensure t
-  ;; :ryo
-  ;; ("q /" undo-tree-visualize)
-  ;; ("?" undo-tree-redo)
   :bind
   (:map undo-tree-visualizer-mode-map
         ("q" . undo-tree-visualizer-quit)
@@ -1205,25 +1268,6 @@ current window."
         ("U" . undo-tree-visualize-switch-branch-right)))
 
 ;; * Dashboard
-
-;; (use-package dashboard
-;;   :ensure t
-;;   :init
-;;   ;; Set the banner
-;;   ;; (setq dashboard-startup-banner [VALUE])
-;;   (dashboard-setup-startup-hook)
-;;   (setq dashboard-set-footer nil)
-;;   (setq dashboard-show-shortcuts t)
-;;   (setq dashboard-set-heading-icons t)
-;;   (setq dashboard-set-file-icons t)
-;;   (setq dashboard-center-content t)
-;;   ;; Projects, Areas of activity, Reading list
-;;   (setq dashboard-items '((bookmarks . 5)
-;;                           (projects . 5)))
-;;   :config ;; For now i'm going to try something
-;;   (setq inhibit-startup-screen t)
-;;   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
-;;   )
 (use-package dashboard
   :ensure t
   :init
@@ -1253,7 +1297,7 @@ current window."
   :ensure (doom-dashboard :host github
                           :repo "cheerio-pixel/doom-dashboard"
                           :files ("*.el" "banners/*.txt"))
-  :after dashboard all-the-icons
+  :after (dashboard all-the-icons)
   :demand t
   ;; Movement keys like doom.
   :bind
@@ -1279,6 +1323,11 @@ current window."
                                      dashboard-insert-init-info
                                      ,(dashboard-insert-newline 2)
                                      doom-dashboard-insert-homepage-footer))
+  (gsetq doom-dashboard-shortmenu-functions
+         `((recents   . recentf)
+           (bookmarks . bookmark-jump)
+           (projects  . consult-projectile-switch-project)
+           (agenda    . org-agenda)))
   (gsetq dashboard-item-generators
          '((recents   . doom-dashboard-insert-recents-shortmenu)
            (bookmarks . doom-dashboard-insert-bookmark-shortmenu)
@@ -1440,11 +1489,13 @@ It is essentially the element include but with args."
 (use-package doct
   ;; Description: doct is a function that provides an alternative,
   ;; declarative syntax for describing Org capture templates.
-  :ensure
+  :ensure t
   )
 
 (use-package org-contrib
   :ensure t)
+
+
 (use-package org
   :after doct org-contrib
   :init
@@ -1940,6 +1991,194 @@ By default, all subentries are counted; restrict with LEVEL."
   (org-mode . (lambda () (setq-local tab-width 2
                                      indent-tabs-mode nil
                                      python-shell-interpreter "python3"))))
+
+(use-package org-super-agenda
+  :after org
+  :ensure t
+  :bind (:map org-super-agenda-header-map
+              ("n" . org-agenda-next-line)
+              ("u" . org-agenda-previous-line)
+              :map org-agenda-mode-map
+              ("n" . org-agenda-next-line)
+              ("u" . org-agenda-previous-line))
+  :init
+  (setq mymy-org-agenda-tags-width 0)
+  (setq org-agenda-custom-commands
+        '(("n" "Agenda and all TODOs"
+           ((agenda #1="")
+            ;; (agenda "" ((org-agenda-overriding-header (mymy-get-count-of-tags))
+            ;;             ;; No time grid
+            ;;             (org-agenda-time-grid nil)
+            ;;             ;; Delete the date
+            ;;             (org-agenda-format-date (lambda (x) (ignore x) ""))
+            ;;             ))
+            (alltodo #1#)))
+          ("o" "Agenda for today" ;; agenda ""
+           ((todo "TODO"
+                  ((org-agenda-overriding-header "")
+                   (org-super-agenda-groups
+                    '((:name "Homework"
+                             :and (:todo ("TODO" "NEXT") :tag "school"))
+                      (:discard (:anything t))))))
+            (agenda "" ((org-agenda-span 'day)
+                        (org-agenda-overriding-header "Today's agenda")))
+            (todo "NEXT"
+                  ((org-agenda-overriding-header "")
+                   (org-super-agenda-groups
+                    '((:name "Floating tasks"
+                             :and (:todo "NEXT" :scheduled nil))
+                      (:discard (:anything t)))))))
+           ((org-agenda-compact-blocks nil)))
+          ("c" "Inbox/Capture"
+           ((todo "" ((org-agenda-files (list (concat mymy-org-roam-dir "inbox/capture.org")))
+                      (org-super-agenda-groups
+                       '((:name "Up to review"
+                                :todo "TODO")
+                         (:name "Up to processing"
+                                :todo "NEXT")
+                         (:name "Waiting for new notes"
+                                :todo "STRAY")
+                         (:name "To archive"
+                                :todo "DONE")))))))))
+
+  ;; Previously called org-agenda-ndays
+  ;; (setq org-agenda-span 1)
+  ;; (setq org-agenda-span 'week)
+  (setq org-agenda-span 8)
+  (setq org-agenda-start-on-weekday nil)
+  ;; (setq org-agenda-start-day "1d")
+  ;; Start two days in the past
+  ;; (setq org-agenda-start-day "-2d")
+  ;; Start in the present
+  (setq org-agenda-start-day "1d")
+  (setq org-super-agenda-groups
+        '((:name "At Phone"
+                 :and (:todo "TODO" :tag "@phone"))
+          (:name "Homework"
+                 :and (:todo ("TODO" "NEXT") :tag "school"))
+          (:name "Pinned to do now"
+                 :and (:todo "NEXT" :scheduled t))
+          (:name "Schedule of the day"
+                 :and (:todo "TODO" :scheduled t))
+          ;; :auto-planning
+          (:name "Done" :todo "DONE")
+          ;; (:discard (:todo "DONE"))
+          (:name "Stuck" :anything)
+          ;; (:discard (:anything t))
+          ))
+  :config
+  (defun mymy-get-count-of-tags ()
+    "Return a string with the counting of tags in the buffer"
+    (save-window-excursion
+      (org-id-goto "Project_stack")
+      (let ((count 0))
+        (--reduce (concat acc (if (< count mymy-org-agenda-tags-width)
+                                  (progn (setq count (1+ count))
+                                         " ")
+                                (progn (setq count 0)
+                                       "\n"))
+                          it )
+                  ;; Get a list of the local buffer
+                  (--> org-current-tag-alist
+                       (-map #'car it)
+                       (-remove #'keywordp it)
+                       (--map (org-count-subentries nil it nil 1) it)
+                       (--remove (< (cadr it) 0) it)
+                       (--map (format "%s" it) it)
+                       (--map (--> it
+                                   (s-chop-prefix "(" it)
+                                   (s-chop-suffix ")" it))
+                              it))))))
+  )
+
+(use-package org-superstar
+  :after org
+  :ensure t
+  :config
+  (setq org-superstar-cycle-headline-bullets t)
+  (setq org-hide-leading-stars t)
+  (setq org-superstar-todo-bullet-alist '(("TODO" . ?☐)
+                                          ("NEXT" . ?☐)
+                                          ("DONE" . ?☑)))
+  (setq org-superstar-special-todo-items t)
+  (setq org-superstar-prettify-item-bullets nil)
+  (setq org-superstar-headline-bullets-list '(?▹ ?⭆ ?○ ?✸ ?✿ ?✥ ?❂ ?❄)))
+
+(use-package org-modern
+  :ensure t
+  :config
+  (setq org-modern-todo-faces org-todo-keyword-faces)
+  :hook
+  (org-mode . org-modern-mode)
+  (org-agenda-finalize . org-modern-agenda))
+
+(use-package org-pomodoro
+  :ensure t
+  :demand t
+  ;; Works using org mode headings
+  :config
+  (general-define-key
+   :states '(normal motion)
+   :keymaps 'override
+   :prefix "SPC"
+   "m" 'org-pomodoro
+   )
+  (setq alert-user-configuration '((((:category . "org-pomodoro")) libnotify nil)))
+  (setq org-pomodoro-length 30
+        org-pomodoro-short-break-length 6
+        org-pomodoro-long-break-length 24)
+  ;; (setq org-pomodoro-length 57
+  ;;       org-pomodoro-short-break-length 11
+  ;;       org-pomodoro-long-break-length 46)
+  ;; (setq
+  ;;  org-pomodoro-length 52
+  ;;  org-pomodoro-short-break-length 17
+  ;;  org-pomodoro-long-break-length 39
+  ;;  )
+  (defun ruborcalor/org-pomodoro-time ()
+    "Return the remaining pomodoro time"
+    (if (org-pomodoro-active-p)
+        (cl-case org-pomodoro-state
+          (:pomodoro
+           (format "Pomo: %d minutes - %s" (/ (org-pomodoro-remaining-seconds) 60) org-clock-heading))
+          (:short-break
+           (format "Short break time: %d minutes" (/ (org-pomodoro-remaining-seconds) 60)))
+          (:long-break
+           (format "Long break time: %d minutes" (/ (org-pomodoro-remaining-seconds) 60)))
+          (:overtime
+           (format "Overtime! %d minutes" (/ (org-pomodoro-remaining-seconds) 60))))
+      "No active pomo"))
+  :hook
+  (org-pomodoro-short-break-finished . (lambda () (interactive) (org-pomodoro '(16)))))
+
+;; * Text mode utils
+
+;; Put a more comfortable fill-column
+(setq-default fill-column 75)
+
+;; Run olivetti, adaptative-wrap and visual-line mode to
+(add-hook 'text-mode #'visual-line-mode)
+
+(use-package adaptive-wrap
+  :ensure t
+  :hook (text-mode . adaptive-wrap-prefix-mode)
+  :init
+  (setq adaptive-wrap-extra-indent 0)
+  )
+
+(use-package olivetti
+  :ensure t
+  :hook ((olivetti-mode . mymy-configure-olivetti)
+         (text-mode . olivetti-mode))
+  :init
+  (setq fringes-outside-margins t)
+  (custom-set-faces
+   '(olivetti-fringe ((t (:foreground "#353535" :background "#353535")))))
+  (gsetq olivetti-style 'fancy)
+  (defun mymy-configure-olivetti ()
+    (interactive)
+    (setq olivetti-body-width (+ 4 fill-column))))
+
 
 ;; * Flycheck
 
@@ -2479,3 +2718,21 @@ _._: Exit
   (global-set-key (kbd "C->") 'mc/mark-next-like-this)
   (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
   (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
+
+
+;; * CSV mode
+
+(use-package csv-mode
+  :ensure t
+  :hook (csv-mode . csv-align-mode)
+  )
+
+
+;; * Common lisp
+
+(use-package sly
+  :ensure t
+  :config
+  (setq inferior-lisp-program "/usr/bin/sbcl --dynamic-space-size 1024")
+  (setq sly-lisp-implementations
+        '((sbcl ("sbcl" "--dynamic-space-size" "1024")))))

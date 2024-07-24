@@ -4,8 +4,23 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(haskell-process-type 'cabal-repl)
+ '(read-extended-command-predicate #'command-completion-default-include-p)
  '(safe-local-variable-values
-   '((haskell-compiler-type quote stack)
+   '((org-tag-alist
+      (:startgroup)
+      ("@phone")
+      ("@pc")
+      (:endgroup)
+      ("ARCHIVE")
+      ("resources")
+      ("projects")
+      ("watch")
+      ("math")
+      ("extras")
+      ("additions")
+      ("references")
+      ("readings"))
+     (haskell-compiler-type quote stack)
      (haskell-process-type quote stack))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
