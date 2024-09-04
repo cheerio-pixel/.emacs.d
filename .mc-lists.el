@@ -4,6 +4,8 @@
 (setq mc/cmds-to-run-for-all
       '(
         evil-backward-char
+        evil-delete
+        evil-delete-char
         evil-forward-char
         evil-visual-char
         lispy-braces
@@ -89,4 +91,5 @@
 (setq mc/cmds-to-run-once
       '(
         lispy-cursor-down
+        lispyville-yank
         ))

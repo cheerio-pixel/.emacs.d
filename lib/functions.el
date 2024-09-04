@@ -64,16 +64,15 @@
                           default-directory))))
     (when start-from
       (locate-dominating-file
-       start-from
-       (lambda (directory)
-         (when (file-directory-p directory)
-           ;; Strangely enough, in Windows directory-files ignores a path
-           ;; that is a file, but under Linux it fails. Adding a guard...
-           (let ((files (directory-files directory t)))
-             (cl-some (lambda (filename)
-                        (let ((extension (file-name-extension filename)))
-                          (member extension '("csproj" "fsproj"))))
-                      files))))))))
+       start-from (lambda (directory)
+                    (when (file-directory-p directory)
+                      ;; Strangely enough, in Windows directory-files ignores a path
+                      ;; that is a file, but under Linux it fails. Adding a guard...
+                      (let ((files (directory-files directory t)))
+                        (cl-some (lambda (filename)
+                                   (let ((extension (file-name-extension filename)))
+                                     (member extension '("csproj" "fsproj"))))
+                                 files))))))))
 
 (defun mymy-find-nearest-solution-file (&opitonal _dir)
   (let ((start-from (or (buffer-file-name)
@@ -93,7 +92,7 @@
                           (member extension '("sln"))))
                       files))))))))
 
-(defun mymy-projectile-get-path-from-root-like-csharp (&optional dir remove-string)
+(defun mymy-get-path-from-root-like-csharp (&optional dir remove-string)
   "Get the current path from root in a csharp way."
   (when-let ((file-name (buffer-file-name)))
     (replace-regexp-in-string
@@ -101,10 +100,10 @@
      "."
      (directory-file-name
       (replace-regexp-in-string
-       (thread-last (projectile-project-root)
+       (thread-last (or (not-mymy-find-nearest-chsarp-project) "")
                     expand-file-name
                     directory-file-name
-                    ;; file-name-directory ;; With the addition of solutions this should work correctly
+                    file-name-directory
                     regexp-quote)
        ""
        (file-name-directory file-name))))))
@@ -142,5 +141,22 @@ FILTER-FN: Takes a plist of an object and returns true."
 (defun switch-to-last-buffer ()
   (interactive)
   (switch-to-buffer nil))
+
+(defun new-line-dwim ()
+  (interactive)
+  (let ((break-open-pair (or (and (looking-back "{") (looking-at "}"))
+                             (and (looking-back ">") (looking-at "<"))
+                             (and (looking-back "(") (looking-at ")"))
+                             (and (looking-back "\\[") (looking-at "\\]")))))
+    (cond
+     ((save-excursion (comment-beginning))
+      (call-interactively #'default-indent-new-line)
+      )
+     (t
+      (newline)
+      (when break-open-pair
+        (save-excursion
+          (newline-and-indent)))
+      (indent-for-tab-command)))))
 
 (provide 'functions.el)

@@ -8,19 +8,27 @@
 
 (setq mymy-org-roam-dir (concat main-dropbox-dir "Notes/"))
 
-(defvar mymy-organization-system-directory (concat dropbox-dir "org/")
+(defconst mymy-organization-system-directory (concat dropbox-dir "org/")
   "General purpose root directory of notes")
+
+(defconst mymy-organization-system-directory-text
+  (expand-file-name
+   "text"
+   mymy-organization-system-directory)
+  "The directory of the text files.")
 
 ;; Check
 (unless (file-exists-p mymy-organization-system-directory)
   (error "Cannot find '%s'. Directory doesn't exist " mymy-organization-system-directory))
 
-(defvar mymy-organization-system-directory-attachments
+(defconst mymy-organization-system-directory-attachments
   (concat mymy-organization-system-directory "attachments/")
   "Attachment directory")
 
-(defvar mymy-bibliography-system-directory
-  (concat mymy-organization-system-directory "bibliography_system/")
+(defconst mymy-bibliography-system-directory
+  (expand-file-name 
+   "bibliography_system" 
+   mymy-organization-system-directory-text)
   "Diretory of bibliography references.")
 
 (unless (file-exists-p mymy-bibliography-system-directory)
