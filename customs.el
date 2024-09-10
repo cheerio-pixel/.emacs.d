@@ -7,7 +7,11 @@
  '(haskell-process-type 'cabal-repl)
  '(read-extended-command-predicate #'command-completion-default-include-p)
  '(safe-local-variable-values
-   '((cov-lcov-file-name . "./test/ProyectoFinal.Domain.Tests/coverage.info")
+   '((eval setq-local hl-todo--regexp
+           (concat "\\["
+                   (hl-todo--regexp)
+                   "|"))
+     (cov-lcov-file-name . "./test/ProyectoFinal.Domain.Tests/coverage.info")
      (package-lint-main-file . "haskell-mode.el")
      (etags-regen-ignores "test/manual/etags/")
      (etags-regen-regexp-alist

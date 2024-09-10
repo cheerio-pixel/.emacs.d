@@ -151,10 +151,10 @@
   (setq redisplay-dont-pause t)
   (setq frame-resize-pixelwise t)
   ;; Increase the amount of bytes that emacs can read from an extenarl process
-  (setq read-process-output-max (* 1024 1024)) ;; 1mb
-  (tool-bar-mode -1)                           ; This is much easier
-  (menu-bar-mode -1)                           ; than needing to change
-  (scroll-bar-mode -1)                         ; this on every OS
+  (setq read-process-output-max (* 1024 1024))       ;; 1mb
+  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))        ; This is much easier
+  (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))        ; than needing to change
+  (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))    ; this on every OS
   (setq byte-compile-warnings '(not obsolete)) ;; Cl warnings
   (setq save-abbrevs 'silently)
   (setq-default abbrev-mode t)
@@ -709,6 +709,12 @@ current window."
   :ensure t
   ;; :ensure (evil-collection :host github :repo "emacs-evil/evil-collection")
   :config
+  ;; (with-eval-after-load 'pdf-tools
+  ;;   (evil-collection-init '(pdf))
+  ;;   )
+
+  ;; For some reason not being loaded
+  (evil-collection-pdf-setup)
   (evil-collection-init '(dired consult corfu
                                 elisp-slime-nav elisp-mode
                                 debug help
@@ -720,6 +726,7 @@ current window."
                                 flycheck
                                 bookmark
                                 ;; vterm
+                                pdf
                                 sly)))
 
 ;; Integration of lispy with evil
@@ -743,7 +750,8 @@ current window."
   :hook (org-mode . evil-org-mode)
   :config
   (require 'evil-org-agenda)
-  (evil-org-agenda-set-keys))
+  (evil-org-agenda-set-keys)
+  (setq evil-org-special-o/O '(table-row)))
 
 (use-package evil-matchit
   :ensure t
@@ -3950,9 +3958,24 @@ then go back 1."
 (use-package pdf-tools
   :unless (eq system-type 'android)
   :ensure t
+  :config
+  (pdf-loader-install) ; On demand loading, leads to faster startup time
+  )
+
+(use-package saveplace-pdf-view
+  :ensure t
+  :after (pdf-tools)
+  :demand t
+  :config
+  ;; Not loading for some reason
+  (require 'bookmark)
+  (require 'saveplace-pdf-view)
+  (save-place-mode 1)
   )
 
 (use-package org-noter
   :unless (eq system-type 'android)
   :after (pdf-tools)
-  :ensure t)
+  :ensure t
+  :config
+  (setq org-noter-doc-split-percentage '(0.7 . 0.3)))
