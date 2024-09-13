@@ -157,8 +157,8 @@
             ((control) . 5)))
 
   (setq mouse-wheel-tilt-scroll t)
-  (global-set-key [C-right] [mouse-6])
-  (global-set-key [C-left] [mouse-7])
+  (global-set-key [C-right] [mouse-7])
+  (global-set-key [C-left] [mouse-6])
 
   (setq mouse-wheel-flip-direction 'wheel-right)
   ;; (with-eval-after-load 'org
