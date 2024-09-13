@@ -69,6 +69,10 @@
   ;; Enable use-package :ensure support for Elpaca.
   (elpaca-use-package-mode))
 
+(defun mymy-is-android ()
+  (equal system-configuration
+         "aarch64-unknown-linux-android"))
+
 (use-package use-package
   :config
   ;; Copy of consult--outline-candidates
@@ -827,7 +831,7 @@ current window."
 
 ;; * Lsp mode
 (use-package lsp-mode
-  :unless (eq system-type 'android)
+  :unless (mymy-is-android)
   :ensure t
   :init
   (setq lsp-keymap-prefix "C-c l")
@@ -893,7 +897,7 @@ current window."
    "K" 'lsp-ui-doc-show))
 
 (use-package lsp-pyright
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :init
   (defun mymy-python-lsp-hook ()
@@ -932,7 +936,7 @@ current window."
   (razor-web-mode . mymy-lsp-razor-hook))
 
 (use-package lsp-java
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :config
   (add-hook 'java-mode-hook 'lsp)
@@ -945,7 +949,7 @@ current window."
   )
 
 (use-package lsp-haskell
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   ;; :defer 5
   :after lsp-mode
@@ -960,7 +964,7 @@ current window."
   (setq lsp-haskell-server-path (expand-file-name "~/.ghcup/bin/haskell-language-server-wrapper")))
 
 (use-package dap-mode
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :after lsp-mode
   :init
@@ -1036,7 +1040,7 @@ current window."
   )
 
 (use-package lsp-ui
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :hook
   (lsp-mode . lsp-ui-mode)
@@ -1055,7 +1059,7 @@ current window."
 
 ;; * Haskell
 (use-package haskell-mode
-  :unless (eq system-type 'android)
+  :unless (is-android)
   ;; :ensure (haskell-mode :host github :type git :repo "haskell/haskell-mode")
   :ensure t
   :config
@@ -1064,11 +1068,11 @@ current window."
 
 ;; * Magit
 (use-package magit
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t)
 
 (use-package forge
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :after magit
   :ensure t)
 
@@ -1446,7 +1450,7 @@ This function gives priority to .sln files over .csproj files."
   (setq enable-recursive-minibuffers t))
 
 (use-package vertico-posframe
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :disabled
   :ensure t
   :config
@@ -1647,7 +1651,7 @@ This function gives priority to .sln files over .csproj files."
 ;; * Terminal here
 ;; Love this, just a open-system terminal here
 (use-package terminal-here
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :config
   (global-set-key (kbd "C-<f5>") #'terminal-here-launch)
@@ -2498,7 +2502,7 @@ By default, all subentries are counted; restrict with LEVEL."
                                      python-shell-interpreter "python3"))))
 
 (use-package org-roam
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :init
   (setq org-roam-directory (expand-file-name
@@ -2896,7 +2900,7 @@ then go back 1."
 
 ;; * Csharp
 (use-package sharper
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :init
   (general-define-key "C-c b" #'sharper-main-transient)
@@ -3262,14 +3266,14 @@ then go back 1."
     '("w" "new" mymy-sharper-transient-new)))
 
 (use-package csproj-mode
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :config
   (add-to-list 'auto-mode-alist '("\\.csproj\\'" . csproj-mode))
   (add-hook 'csproj-mode-hook #'aggressive-indent-mode))
 
 (use-package csharp-ts-mode
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :no-require t
   :ensure nil
   :config
@@ -3383,7 +3387,7 @@ then go back 1."
 
 ;; * Common lisp
 (use-package sly
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :config
   ;; (general-define-key
@@ -3410,7 +3414,7 @@ then go back 1."
 
 ;; * Web mode
 (use-package web-mode
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :init
   ;; Neat trick
@@ -3435,7 +3439,7 @@ then go back 1."
 
 ;; * Ispell/Aspell
 (use-package ispell
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure nil
   ;; https://200ok.ch/posts/2020-08-22_setting_up_spell_checking_with_multiple_dictionaries.html
   :config
@@ -3456,7 +3460,7 @@ then go back 1."
     (write-region "" nil ispell-personal-dictionary nil 0)))
 
 (use-package jinx
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :config
   (dolist (hook '(text-mode-hook))
@@ -3471,7 +3475,7 @@ then go back 1."
 
 ;; * Restclient
 (use-package restclient
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure (restclient :files ("*.el"))
   ;; :ensure t
   :after (jq-mode)
@@ -3480,19 +3484,19 @@ then go back 1."
   (require 'restclient-jq))
 
 (use-package jq-mode
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t)
 
 ;; * Nix
 (use-package nix-ts-mode
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :mode "\\.nix\\'")
 
 
 ;; * Harpoon
 (use-package harpoon
-  :unless (eq system-type 'android)
+  :unless (is-android)
   ;; Nah, feel like the other approach I was going can adapt to emacs
   :disabled
   :ensure t
@@ -3703,7 +3707,7 @@ then go back 1."
   )
 
 (use-package bookmark+
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure nil
   :no-require t
   :config
@@ -3753,7 +3757,7 @@ then go back 1."
 
 ;; * Lua
 (use-package lua-mode
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :mode "\\.lua$"
   :hook (lua-mode . lsp)
@@ -3765,7 +3769,7 @@ then go back 1."
 
 ;; * Leetcode
 (use-package leetcode
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :init
   ;; (setq leetcode-prefer-language "python3")
@@ -3779,14 +3783,14 @@ then go back 1."
 
 ;; * Zig
 (use-package zig-mode
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :config
   ;; Slow on river project, don't know why
   (setq zig-format-on-save nil))
 
 (use-package lsp-zig
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :after (zig-mode lsp-mode)
   :ensure nil
   :no-require t
@@ -3794,7 +3798,7 @@ then go back 1."
 
 ;; * tab-bar
 (use-package tab-bar
-  :unless (eq system-type 'android)
+  :unless (is-android)
   ;; From https://www.reddit.com/r/emacs/comments/r16adq/comment/hlxl1ek/
   :bind (:map tab-prefix-map ("p" . my/new-project-tab))
   :init
@@ -3810,7 +3814,7 @@ then go back 1."
 
 ;; * Ace window
 (use-package ace-window
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :init
   ;;global could be cool if I didn't use a tiling window manager.
@@ -3830,7 +3834,7 @@ then go back 1."
 
 ;; * Vterm
 (use-package vterm
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :demand t
   :config
@@ -3929,7 +3933,7 @@ then go back 1."
   (vterm-copy-mode . mymy-vterm-copy-hook))
 
 (use-package multi-vterm
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :after (vterm)
   :ensure t
   :init
@@ -3949,7 +3953,7 @@ then go back 1."
 
 ;; * Python
 (use-package poetry
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
 ;;; TODO: Need to solve the initial lag when opening a pyhton file.
   :config
@@ -3966,7 +3970,7 @@ then go back 1."
   )
 
 (use-package pdf-tools
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :ensure t
   :config
   (pdf-loader-install) ; On demand loading, leads to faster startup time
@@ -3984,7 +3988,7 @@ then go back 1."
   )
 
 (use-package org-noter
-  :unless (eq system-type 'android)
+  :unless (is-android)
   :after (pdf-tools)
   :ensure t
   :config
