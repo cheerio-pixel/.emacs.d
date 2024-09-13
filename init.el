@@ -165,10 +165,12 @@
   ;;   (add-hook 'org-agenda-mode-hook
   ;;             #'visual-line-mode)
   ;;   )
-  (general-define-key
-   "M-h" 'evil-scroll-column-left
-   "M-l" 'evil-scroll-column-right
-   )
+  (with-eval-after-load 'general
+    (general-define-key
+     "M-h" 'evil-scroll-column-left
+     "M-l" 'evil-scroll-column-right
+     )
+    )
   )
 
 (put 'scroll-left 'disabled nil)
