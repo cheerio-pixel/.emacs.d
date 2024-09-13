@@ -827,6 +827,7 @@ current window."
 
 ;; * Lsp mode
 (use-package lsp-mode
+  :unless (eq system-type 'android)
   :ensure t
   :init
   (setq lsp-keymap-prefix "C-c l")
@@ -892,6 +893,7 @@ current window."
    "K" 'lsp-ui-doc-show))
 
 (use-package lsp-pyright
+  :unless (eq system-type 'android)
   :ensure t
   :init
   (defun mymy-python-lsp-hook ()
@@ -930,6 +932,7 @@ current window."
   (razor-web-mode . mymy-lsp-razor-hook))
 
 (use-package lsp-java
+  :unless (eq system-type 'android)
   :ensure t
   :config
   (add-hook 'java-mode-hook 'lsp)
@@ -942,6 +945,7 @@ current window."
   )
 
 (use-package lsp-haskell
+  :unless (eq system-type 'android)
   :ensure t
   ;; :defer 5
   :after lsp-mode
@@ -956,6 +960,7 @@ current window."
   (setq lsp-haskell-server-path (expand-file-name "~/.ghcup/bin/haskell-language-server-wrapper")))
 
 (use-package dap-mode
+  :unless (eq system-type 'android)
   :ensure t
   :after lsp-mode
   :init
@@ -1031,6 +1036,7 @@ current window."
   )
 
 (use-package lsp-ui
+  :unless (eq system-type 'android)
   :ensure t
   :hook
   (lsp-mode . lsp-ui-mode)
@@ -1049,6 +1055,7 @@ current window."
 
 ;; * Haskell
 (use-package haskell-mode
+  :unless (eq system-type 'android)
   ;; :ensure (haskell-mode :host github :type git :repo "haskell/haskell-mode")
   :ensure t
   :config
@@ -1057,9 +1064,11 @@ current window."
 
 ;; * Magit
 (use-package magit
+  :unless (eq system-type 'android)
   :ensure t)
 
 (use-package forge
+  :unless (eq system-type 'android)
   :after magit
   :ensure t)
 
@@ -2457,7 +2466,7 @@ By default, all subentries are counted; restrict with LEVEL."
   (setq org-todo-keyword-faces
         '(("NEXT" . (:foreground "blue" :weight bold))
           ("TODO" . (:foreground "#F09432" :weight bold))
-          ("CANCELLED" . (:foreground "red" :weight bold))
+          ("KILL" . (:foreground "red" :weight bold))
           ("SOMEDAY" . (:foreground "#F09432" :weight italics))
           ;; PROJect, as in something without a clear goal
           ;; ("PROJ" . (:foreground "white" :weight bold))
@@ -2465,7 +2474,7 @@ By default, all subentries are counted; restrict with LEVEL."
 
   (setq org-todo-keywords
         '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(s)")
-          (type "CANCELLED(c)" "SOMEDAY(o)")
+          (type "KILL(k)" "SOMEDAY(o)")
           ;; (type "PROJ(p)")
           ))
 
@@ -2543,24 +2552,25 @@ By default, all subentries are counted; restrict with LEVEL."
                         :todo "NEXT")
                       (:discard (:anything t))))))))
           ("nh" "Homework NEXT list"
-           ((tags-todo
-             "school"
+           ((;; tags-todo "school"
+             agenda ""
              ((org-agenda-overriding-header "")
+              (org-agenda-span 1)
+              (org-agenda-sorting-strategy
+               (quote ((agenda time-up priority-down tag-up))))
+              ;; (org-deadline-warning-days 0)
               (org-super-agenda-groups
                ;; I know that is not necessary to specify the todo
                ;; type since its already specified. Is just
                ;; redundancy.
-               '(( :name "Scheduled"
-                   :and ( :todo "NEXT"
-                          :scheduled t
-                          )
-                   )
-                 ( :name "Now"
-                   :todo "NEXT")
-                 ( :name "Later"
-                   :anything t
-                   )
-                 ))))))
+               '((:name "Scheduled"
+                        :and (:todo "NEXT"
+                                    :scheduled t))
+                 (:name "Now"
+                        :todo "NEXT")
+                 (:name "Later"
+                        :anything t))))))
+           ((org-agenda-tag-filter-preset '("+school"))))
           ("nt" "Agenda and all TODOs"
            ((agenda #1="")
             ;; (agenda "" ((org-agenda-overriding-header (mymy-get-count-of-tags))
