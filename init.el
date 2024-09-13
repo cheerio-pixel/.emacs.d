@@ -157,15 +157,22 @@
             ((control) . 5)))
 
   (setq mouse-wheel-tilt-scroll t)
-  (global-set-key [C-right] [mouse-7])
-  (global-set-key [C-left] [mouse-6])
+  ;; (global-set-key [C-right] [mouse-7])
+  ;; (global-set-key [C-left] [mouse-6])
 
   (setq mouse-wheel-flip-direction 'wheel-right)
   ;; (with-eval-after-load 'org
   ;;   (add-hook 'org-agenda-mode-hook
   ;;             #'visual-line-mode)
   ;;   )
+  (general-define-key
+   "M-h" 'evil-scroll-column-left
+   "M-l" 'evil-scroll-column-right
+   )
   )
+
+(put 'scroll-left 'disabled nil)
+(put 'scroll-right 'disabled nil)
 
 ;;Turns off elpaca-use-package-mode current declaration
 ;;Note this will cause evaluate the declaration immediately. It is not deferred.
@@ -178,10 +185,10 @@
   (setq frame-resize-pixelwise t)
   ;; Increase the amount of bytes that emacs can read from an extenarl process
   (setq read-process-output-max (* 1024 1024))       ;; 1mb
-  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))        ; This is much easier
-  (when (fboundp 'tool-bar-mode) (tool-bar-mode -1))        ; than needing to change
-  (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))    ; this on every OS
-  (setq byte-compile-warnings '(not obsolete)) ;; Cl warnings
+  (when (fboundp 'menu-bar-mode) (menu-bar-mode -1)) ; This is much easier
+  (when (fboundp 'tool-bar-mode) (tool-bar-mode -1)) ; than needing to change
+  (when (fboundp 'scroll-bar-mode) (scroll-bar-mode -1)) ; this on every OS
+  (setq byte-compile-warnings '(not obsolete))           ;; Cl warnings
   (setq save-abbrevs 'silently)
   (setq-default abbrev-mode t)
   (setq native-comp-async-report-warnings-errors 'silent)
