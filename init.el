@@ -532,6 +532,10 @@ current window."
 (use-package s
   :ensure t)
 
+;; Some file utitlities
+(use-package f
+  :ensure f)
+
 ;; The best menu library
 (use-package transient
   :ensure t)
