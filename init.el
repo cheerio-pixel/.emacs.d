@@ -167,8 +167,12 @@
   ;;   )
   (with-eval-after-load 'general
     (general-define-key
-     "M-h" 'evil-scroll-column-left
-     "M-l" 'evil-scroll-column-right
+     "M-h" (lambda ()
+             (interactive)
+             (evil-scroll-column-left 10))
+     "M-l" (lambda ()
+             (interactive)
+             (evil-scroll-column-right 10))
      )
     )
   )
