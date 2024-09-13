@@ -147,6 +147,15 @@
   (text-mode . mymy-display-line-numbers-configure)
   )
 
+(when mymy-is-android
+  (setq mouse-wheel-tilt-scroll t)
+  (setq mouse-wheel-flip-direction 'wheel-right)
+  ;; (with-eval-after-load 'org
+  ;;   (add-hook 'org-agenda-mode-hook
+  ;;             #'visual-line-mode)
+  ;;   )
+  )
+
 ;;Turns off elpaca-use-package-mode current declaration
 ;;Note this will cause evaluate the declaration immediately. It is not deferred.
 ;;Useful for configuring built-in emacs features.
