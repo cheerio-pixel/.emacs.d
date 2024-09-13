@@ -2073,9 +2073,12 @@ It is essentially the element include but with args."
    "c" 'org-capture
    "w" 'hydra-org-web-tools/body
    "a" 'org-agenda
+   "t" 'mymy-org-clock-toggle
    )
   (general-define-key
    "<f12>" 'org-agenda
+   "C-c a" 'org-agenda
+   "C-c c" 'org-capture
    )
 
   ;; Set indentation level one to one with src declaration
@@ -2363,8 +2366,6 @@ By default, all subentries are counted; restrict with LEVEL."
     (if (org-clocking-p)
         (org-clock-out)
       (org-clock-in-last)))
-  ;; Prefix C-c c
-  (general-define-key "C-c c c" 'mymy-org-clock-toggle)
 
   (defun +org-toggle-inline-image-at-point ()
     "Toggle inline image at point."
