@@ -72,6 +72,8 @@
 (defun mymy-is-android ()
   (equal system-configuration
          "aarch64-unknown-linux-android"))
+(setq mymy-is-android (mymy-is-android))
+(setq mymy-is-not-android (not (mymy-is-android)))
 
 (use-package use-package
   :config
