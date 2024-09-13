@@ -148,7 +148,18 @@
   )
 
 (when mymy-is-android
+  (load "mwheel")
+  (mwheel-install)
+  (mouse-wheel-mode 1)
+  (setq mouse-wheel-progressive-speed nil)
+  (setq mouse-wheel-scroll-amount
+        '(1 ((shift) . 1)
+            ((control) . 5)))
+
   (setq mouse-wheel-tilt-scroll t)
+  (global-set-key [C-right] [mouse-6])
+  (global-set-key [C-left] [mouse-7])
+
   (setq mouse-wheel-flip-direction 'wheel-right)
   ;; (with-eval-after-load 'org
   ;;   (add-hook 'org-agenda-mode-hook
