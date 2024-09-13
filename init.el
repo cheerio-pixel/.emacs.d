@@ -2891,14 +2891,15 @@ then go back 1."
   :config
   (keymap-set hl-todo-mode-map "C-c o o" #'consult-todo))
 
-(use-package magit-todos
-  :ensure t
-  :after magit
-  :config
-  (add-to-list 'magit-todos-exclude-globs
-               ;; Exclude dotnet MVC wwwroot libraries
-               "**/wwwroot/lib/")
-  (magit-todos-mode 1))
+(when mymy-is-not-android
+  (use-package magit-todos
+    :ensure t
+    :after magit
+    :config
+    (add-to-list 'magit-todos-exclude-globs
+                 ;; Exclude dotnet MVC wwwroot libraries
+                 "**/wwwroot/lib/")
+    (magit-todos-mode 1)))
 
 ;; * Csharp
 (when mymy-is-not-android
