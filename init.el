@@ -832,29 +832,29 @@ current window."
   (which-key-mode))
 
 ;; * Lsp mode
-(use-package lsp-mode
-  :unless (mymy-is-android)
-  :ensure t
-  :init
-  (setq lsp-keymap-prefix "C-c l")
-  (setq lsp-disabled-clients
-        '(semgrep-ls emmet-ls))
-  (setq lsp-auto-execute-action nil)
-  (setq lsp-completion-provider :none)
-  (setq lsp-signature-function #'lsp-signature-posframe)
-  :config
-  (define-key lsp-mode-map (kbd "M-?") #'lsp-find-references)
-  (define-key lsp-mode-map (kbd "M-/") #'lsp-find-implementation)
-  (define-key lsp-mode-map (kbd "M-.") #'lsp-find-definition)
-  (define-key lsp-mode-map (kbd "C-;") #'lsp-iedit-highlights)
-  (define-key lsp-mode-map (kbd "C-M-;") #'lsp-iedit-highlights)
-  ;; (define-key lsp-signature-mode-map (kbd "M-N") #'lsp-signature-next)
-  ;; (define-key lsp-signature-mode-map (kbd "M-p") #'lsp-signature-previous)
-  (define-key lsp-signature-mode-map (kbd "C-M-n") #'lsp-signature-next)
-  (define-key lsp-signature-mode-map (kbd "C-M-p") #'lsp-signature-previous)
-  ;; (define-key lsp-signature-mode-map (kbd "M-n") #'lsp-signature-next)
-  ;; (define-key lsp-signature-mode-map (kbd "M-p") #'lsp-signature-previous)
-  )
+(when mymy-is-not-android
+  (use-package lsp-mode
+    :ensure t
+    :init
+    (setq lsp-keymap-prefix "C-c l")
+    (setq lsp-disabled-clients
+          '(semgrep-ls emmet-ls))
+    (setq lsp-auto-execute-action nil)
+    (setq lsp-completion-provider :none)
+    (setq lsp-signature-function #'lsp-signature-posframe)
+    :config
+    (define-key lsp-mode-map (kbd "M-?") #'lsp-find-references)
+    (define-key lsp-mode-map (kbd "M-/") #'lsp-find-implementation)
+    (define-key lsp-mode-map (kbd "M-.") #'lsp-find-definition)
+    (define-key lsp-mode-map (kbd "C-;") #'lsp-iedit-highlights)
+    (define-key lsp-mode-map (kbd "C-M-;") #'lsp-iedit-highlights)
+    ;; (define-key lsp-signature-mode-map (kbd "M-N") #'lsp-signature-next)
+    ;; (define-key lsp-signature-mode-map (kbd "M-p") #'lsp-signature-previous)
+    (define-key lsp-signature-mode-map (kbd "C-M-n") #'lsp-signature-next)
+    (define-key lsp-signature-mode-map (kbd "C-M-p") #'lsp-signature-previous)
+    ;; (define-key lsp-signature-mode-map (kbd "M-n") #'lsp-signature-next)
+    ;; (define-key lsp-signature-mode-map (kbd "M-p") #'lsp-signature-previous)
+    ))
 
 ;; (use-package lsp-snippet-tempel
 ;;   :after tempel
@@ -898,16 +898,16 @@ current window."
    ;; "K" 'lsp-describe-thing-at-point
    "K" 'lsp-ui-doc-show))
 
-(use-package lsp-pyright
-  :unless (mymy-is-android)
-  :ensure t
-  :init
-  (defun mymy-python-lsp-hook ()
-    (require 'lsp-pyright)
-    (lsp))
-  :hook
-  (python-mode . mymy-python-lsp-hook)
-  (python-ts-mode . mymy-python-lsp-hook))
+(when mymy-is-not-android
+  (use-package lsp-pyright
+    :ensure t
+    :init
+    (defun mymy-python-lsp-hook ()
+      (require 'lsp-pyright)
+      (lsp))
+    :hook
+    (python-mode . mymy-python-lsp-hook)
+    (python-ts-mode . mymy-python-lsp-hook)))
 
 (use-package lsp-omnisharp
   :ensure nil
@@ -937,146 +937,146 @@ current window."
   :hook
   (razor-web-mode . mymy-lsp-razor-hook))
 
-(use-package lsp-java
-  :unless (mymy-is-android)
-  :ensure t
-  :config
-  (add-hook 'java-mode-hook 'lsp)
-  (add-hook 'java-ts-mode-hook 'lsp)
+(when mymy-is-not-android
+  (use-package lsp-java
+    :ensure t
+    :config
+    (add-hook 'java-mode-hook 'lsp)
+    (add-hook 'java-ts-mode-hook 'lsp)
 
-  (gsetq
-   lsp-java-compile-null-analysis-mode
-   "interactive "
-   )
-  )
+    (gsetq
+     lsp-java-compile-null-analysis-mode
+     "interactive "
+     )
+    ))
 
-(use-package lsp-haskell
-  :unless (mymy-is-android)
-  :ensure t
-  ;; :defer 5
-  :after lsp-mode
-  ;; Uncontable tales i have of how this monster have ruined my day, not
-  ;; because of itself, but because Of how much ram it needs and how my
-  ;; little School-gorverment-given computer hogs from the effort of
-  ;; keeping this thing afloat
-  :config
-  (add-hook 'haskell-mode-hook #'lsp)
-  (add-hook 'haskell-literate-mode-hook #'lsp)
-  (setenv "PATH" (concat (getenv "PATH") ":" (expand-file-name "~/.ghcup/bin/")))
-  (setq lsp-haskell-server-path (expand-file-name "~/.ghcup/bin/haskell-language-server-wrapper")))
+(when mymy-is-not-android
+  (use-package lsp-haskell
+    :ensure t
+    ;; :defer 5
+    :after lsp-mode
+    ;; Uncontable tales i have of how this monster have ruined my day, not
+    ;; because of itself, but because Of how much ram it needs and how my
+    ;; little School-gorverment-given computer hogs from the effort of
+    ;; keeping this thing afloat
+    :config
+    (add-hook 'haskell-mode-hook #'lsp)
+    (add-hook 'haskell-literate-mode-hook #'lsp)
+    (setenv "PATH" (concat (getenv "PATH") ":" (expand-file-name "~/.ghcup/bin/")))
+    (setq lsp-haskell-server-path (expand-file-name "~/.ghcup/bin/haskell-language-server-wrapper"))))
 
-(use-package dap-mode
-  :unless (mymy-is-android)
-  :ensure t
-  :after lsp-mode
-  :init
-  (setq dap-netcore-install-dir "/usr/bin/netcoredbg")
-  (require 'dap-ui)
-  :config
+(when mymy-is-not-android
+  (use-package dap-mode
+    :ensure t
+    :after lsp-mode
+    :init
+    (setq dap-netcore-install-dir "/usr/bin/netcoredbg")
+    (require 'dap-ui)
+    :config
 
-  ;; (setq dap-print-io nil)
-  ;; (setq dap-print-io t)
-  (require 'dap-python)
+    ;; (setq dap-print-io nil)
+    ;; (setq dap-print-io t)
+    (require 'dap-python)
 
-  (require 'dap-netcore)
-  (require 'dap-php)
-  (add-hook 'dap-stopped-hook
-            (lambda (arg) (call-interactively #'dap-hydra)))
+    (require 'dap-netcore)
+    (require 'dap-php)
+    (add-hook 'dap-stopped-hook
+              (lambda (arg) (call-interactively #'dap-hydra)))
 
-  (defun mymy-dap-eval-dwim (arg)
-    (interactive "P")
-    (if (equal '(4) arg)
-        (dap-eval)
-      (if (region-active-p)
-          (call-interactively #'dap-eval-region)
-        (dap-eval-thing-at-point))))
+    (defun mymy-dap-eval-dwim (arg)
+      (interactive "P")
+      (if (equal '(4) arg)
+          (dap-eval)
+        (if (region-active-p)
+            (call-interactively #'dap-eval-region)
+          (dap-eval-thing-at-point))))
 
-  (general-define-key
-   :keymaps 'csharp-ts-mode-map
-   "C-x C-e" #'mymy-dap-eval-dwim)
+    (general-define-key
+     :keymaps 'csharp-ts-mode-map
+     "C-x C-e" #'mymy-dap-eval-dwim)
 
-  (setq dap-internal-terminal #'dap-internal-terminal-vterm)
+    (setq dap-internal-terminal #'dap-internal-terminal-vterm)
 
-  ;; TODO: Deal with default template, like dotnet.
-  (dap-register-debug-template ".NET Core Launch (web)"
-                               (list :type "coreclr"
-                                     :request "launch"
-                                     :mode "launch"
-                                     :dap-compilation "dotnet build"
-                                     :stopAtEntry :json-false
-                                     :serverReadyAction '(("action" . "openExternally")
-                                                          ("pattern" . "\\bNow listening on:\\s+(https?://\\S+)"))
-                                     :env '(("ASPNETCORE_ENVIRONMENT" . "Development")
-                                            ("COMPLUS_ReadyToRun" . "0"))))
+    ;; TODO: Deal with default template, like dotnet.
+    (dap-register-debug-template ".NET Core Launch (web)"
+                                 (list :type "coreclr"
+                                       :request "launch"
+                                       :mode "launch"
+                                       :dap-compilation "dotnet build"
+                                       :stopAtEntry :json-false
+                                       :serverReadyAction '(("action" . "openExternally")
+                                                            ("pattern" . "\\bNow listening on:\\s+(https?://\\S+)"))
+                                       :env '(("ASPNETCORE_ENVIRONMENT" . "Development")
+                                              ("COMPLUS_ReadyToRun" . "0"))))
 
-  (setq dap-ui-expressions-expand-depth 1)
+    (setq dap-ui-expressions-expand-depth 1)
 
-  (defun mymy-dap-netcore--populate-args (conf)
-    "Populate CONF with arguments to launch or attach netcoredbg."
-    (dap--put-if-absent conf :dap-server-path (list (dap-netcore--debugger-locate-or-install) "--interpreter=vscode"))
-    (pcase (plist-get conf :mode)
-      ("launch"
-       (dap-netcore--populate-args conf))
-      ("attach"
-       (dap--put-if-absent conf :processId
-                           (string-to-number
-                            (plist-get
-                             (mymy-select-process
-                              ;; (lambda (it)
-                              ;;   (s-contains? "dotnet" (plist-get it :command)))
-                              )
-                             :pid))))))
+    (defun mymy-dap-netcore--populate-args (conf)
+      "Populate CONF with arguments to launch or attach netcoredbg."
+      (dap--put-if-absent conf :dap-server-path (list (dap-netcore--debugger-locate-or-install) "--interpreter=vscode"))
+      (pcase (plist-get conf :mode)
+        ("launch"
+         (dap-netcore--populate-args conf))
+        ("attach"
+         (dap--put-if-absent conf :processId
+                             (string-to-number
+                              (plist-get
+                               (mymy-select-process
+                                ;; (lambda (it)
+                                ;;   (s-contains? "dotnet" (plist-get it :command)))
+                                )
+                               :pid))))))
 
-  (dap-register-debug-provider
-   "coreclr"
-   'mymy-dap-netcore--populate-args)
+    (dap-register-debug-provider
+     "coreclr"
+     'mymy-dap-netcore--populate-args)
 
-  (dap-register-debug-template ".NET Core Attach (web)"
-                               (list :type "coreclr"
-                                     :request "attach"
-                                     :mode "attach"
-                                     :env '(("COMPLUS_ReadyToRun" . "0"))))
+    (dap-register-debug-template ".NET Core Attach (web)"
+                                 (list :type "coreclr"
+                                       :request "attach"
+                                       :mode "attach"
+                                       :env '(("COMPLUS_ReadyToRun" . "0"))))
 
-  ;; If I run dotnet test with env VSTEST_HOST_DEBUG=1 I can attach a
-  ;; debugger and debug a test
-  )
+    ;; If I run dotnet test with env VSTEST_HOST_DEBUG=1 I can attach a
+    ;; debugger and debug a test
+    ))
 
-(use-package lsp-ui
-  :unless (mymy-is-android)
-  :ensure t
-  :hook
-  (lsp-mode . lsp-ui-mode)
-  :config
-  (setq lsp-ui-sideline-show-hover nil)
-  (setq lsp-ui-sideline-delay 0.5)
-  (setq lsp-ui-doc-delay 0.5)
-  (setq lsp-ui-doc-max-width 80)
-  ;; (setq lsp-ui-doc-max-width 150)
-  (setq lsp-ui-sideline-ignore-duplicates t)
-  (setq lsp-ui-doc-position 'top)
-  (setq lsp-ui-doc-alignment 'window)
-  (setq lsp-ui-doc-header nil)
-  (setq lsp-ui-doc-include-signature t)
-  (setq lsp-ui-doc-use-childframe t))
+(when mymy-is-not-android
+  (use-package lsp-ui
+    :ensure t
+    :hook
+    (lsp-mode . lsp-ui-mode)
+    :config
+    (setq lsp-ui-sideline-show-hover nil)
+    (setq lsp-ui-sideline-delay 0.5)
+    (setq lsp-ui-doc-delay 0.5)
+    (setq lsp-ui-doc-max-width 80)
+    ;; (setq lsp-ui-doc-max-width 150)
+    (setq lsp-ui-sideline-ignore-duplicates t)
+    (setq lsp-ui-doc-position 'top)
+    (setq lsp-ui-doc-alignment 'window)
+    (setq lsp-ui-doc-header nil)
+    (setq lsp-ui-doc-include-signature t)
+    (setq lsp-ui-doc-use-childframe t)))
 
 ;; * Haskell
-(use-package haskell-mode
-  :unless (mymy-is-android)
-  ;; :ensure (haskell-mode :host github :type git :repo "haskell/haskell-mode")
-  :ensure t
-  :config
-  (define-key haskell-mode-map [f8] 'haskell-navigate-imports)
-  (custom-set-variables '(haskell-process-type 'cabal-repl)))
+(when mymy-is-not-android
+  (use-package haskell-mode
+    ;; :ensure (haskell-mode :host github :type git :repo "haskell/haskell-mode")
+    :ensure t
+    :config
+    (define-key haskell-mode-map [f8] 'haskell-navigate-imports)
+    (custom-set-variables '(haskell-process-type 'cabal-repl))))
 
 ;; * Magit
-(use-package magit
-  :unless (mymy-is-android)
-  :ensure t)
+(when mymy-is-not-android
+  (use-package magit
+    :ensure t))
 
-(use-package forge
-  :unless (mymy-is-android)
-  :after magit
-  :ensure t)
+(when mymy-is-not-android
+  (use-package forge
+    :after magit
+    :ensure t))
 
 ;; * Consult
 (use-package consult
@@ -1451,16 +1451,16 @@ This function gives priority to .sln files over .csproj files."
   :config
   (setq enable-recursive-minibuffers t))
 
-(use-package vertico-posframe
-  :unless (mymy-is-android)
-  :disabled
-  :ensure t
-  :config
-  (require 'vertico-multiform)
-  (add-to-list 'vertico-multiform-commands
-               '(t posframe)
-               )
-  (vertico-multiform-mode 1))
+(when mymy-is-not-android
+  (use-package vertico-posframe
+    :disabled
+    :ensure t
+    :config
+    (require 'vertico-multiform)
+    (add-to-list 'vertico-multiform-commands
+                 '(t posframe)
+                 )
+    (vertico-multiform-mode 1)))
 
 ;; * Marginalia
 (use-package marginalia
@@ -1652,23 +1652,23 @@ This function gives priority to .sln files over .csproj files."
 
 ;; * Terminal here
 ;; Love this, just a open-system terminal here
-(use-package terminal-here
-  :unless (mymy-is-android)
-  :ensure t
-  :config
-  (global-set-key (kbd "C-<f5>") #'terminal-here-launch)
-  (global-set-key (kbd "C-<f6>") #'terminal-here-project-launch)
-  (setq terminal-here-linux-terminal-command '("kitty" "--single-instance"))
-  (setq terminal-here-command-flag "--")
-  ;; (when (executable-find "poetry")
-  ;;   (global-set-key (kbd "C-<f3>") (lambda () (interactive) (terminal-here-launch (list (executable-find "poetry") "shell")))))
+(when mymy-is-not-android
+  (use-package terminal-here
+    :ensure t
+    :config
+    (global-set-key (kbd "C-<f5>") #'terminal-here-launch)
+    (global-set-key (kbd "C-<f6>") #'terminal-here-project-launch)
+    (setq terminal-here-linux-terminal-command '("kitty" "--single-instance"))
+    (setq terminal-here-command-flag "--")
+    ;; (when (executable-find "poetry")
+    ;;   (global-set-key (kbd "C-<f3>") (lambda () (interactive) (terminal-here-launch (list (executable-find "poetry") "shell")))))
 
-  (defun mymy-set-xmonad-project-dir-here ()
-    (interactive)
-    (and (y-or-n-p "Want to change the xmonad directory?")
-         (when (not (= 0 (shell-command (format (expand-file-name "~/Scripts/xmonadctl -a XMONAD_CHANGE_DIR %S") default-directory))))
-           (error "Error setting the xmonad dir"))))
-  (global-set-key (kbd "C-<f4>") #'mymy-set-xmonad-project-dir-here))
+    (defun mymy-set-xmonad-project-dir-here ()
+      (interactive)
+      (and (y-or-n-p "Want to change the xmonad directory?")
+           (when (not (= 0 (shell-command (format (expand-file-name "~/Scripts/xmonadctl -a XMONAD_CHANGE_DIR %S") default-directory))))
+             (error "Error setting the xmonad dir"))))
+    (global-set-key (kbd "C-<f4>") #'mymy-set-xmonad-project-dir-here)))
 
 ;; * Undo tree
 (use-package undo-tree
@@ -2503,28 +2503,28 @@ By default, all subentries are counted; restrict with LEVEL."
                                      indent-tabs-mode nil
                                      python-shell-interpreter "python3"))))
 
-(use-package org-roam
-  :unless (mymy-is-android)
-  :ensure t
-  :init
-  (setq org-roam-directory (expand-file-name
-                            mymy-organization-system-directory-text))
-  :config
-  (general-define-key
-   :keymap 'global
-   :prefix "C-c n"
+(when mymy-is-not-android
+  (use-package org-roam
+    :ensure t
+    :init
+    (setq org-roam-directory (expand-file-name
+                              mymy-organization-system-directory-text))
+    :config
+    (general-define-key
+     :keymap 'global
+     :prefix "C-c n"
 
-   "l" 'org-roam-buffer-toggle
-   "f" 'org-roam-node-find
-   "g" 'org-roam-graph
-   "i" 'org-roam-node-insert
-   "c" 'org-roam-capture
-   "j" 'org-roam-dailies-capture-today)
-  ;; If you're using a vertical completion framework, you might want a more informative completion interface
-  (setq org-roam-node-display-template
-        (concat "${title:*} "
-                (propertize "${tags:10}" 'face 'org-tag)))
-  (org-roam-db-autosync-mode))
+     "l" 'org-roam-buffer-toggle
+     "f" 'org-roam-node-find
+     "g" 'org-roam-graph
+     "i" 'org-roam-node-insert
+     "c" 'org-roam-capture
+     "j" 'org-roam-dailies-capture-today)
+    ;; If you're using a vertical completion framework, you might want a more informative completion interface
+    (setq org-roam-node-display-template
+          (concat "${title:*} "
+                  (propertize "${tags:10}" 'face 'org-tag)))
+    (org-roam-db-autosync-mode)))
 
 (use-package org-super-agenda
   :after org
@@ -2901,397 +2901,397 @@ then go back 1."
   (magit-todos-mode 1))
 
 ;; * Csharp
-(use-package sharper
-  :unless (mymy-is-android)
-  :ensure t
-  :init
-  (general-define-key "C-c b" #'sharper-main-transient)
+(when mymy-is-not-android
+  (use-package sharper
+    :ensure t
+    :init
+    (general-define-key "C-c b" #'sharper-main-transient)
 
-  (comment
-   (defvar mymy-sharper--new-list "dotnet new list"
-     "Get a list of all of the avaliable templates.")
+    (comment
+     (defvar mymy-sharper--new-list "dotnet new list"
+       "Get a list of all of the avaliable templates.")
 
-   (defconst mymy-sharper--command-get-all-templates "dotnet new list --columns-all | awk -F'  +' 'NR > 4 {printf \"{\\\"TemplateName\\\":\\\"%s\\\",\\\"ShortName\\\":\\\"%s\\\",\\\"Language\\\":\\\"%s\\\",\\\"Type\\\":\\\"%s\\\",\\\"Author\\\":\\\"%s\\\",\\\"Tags\\\":\\\"%s %s %s\\\"}\\n\", $1, $2, $3, $4, $5, $6, $7, $8}' | sed -z '$ s/\\n$//' | tr '\\n' ',' | awk '{print \"[\" $0 \"]\"}'"
-     "Shell command that returns the avalibles templates")
+     (defconst mymy-sharper--command-get-all-templates "dotnet new list --columns-all | awk -F'  +' 'NR > 4 {printf \"{\\\"TemplateName\\\":\\\"%s\\\",\\\"ShortName\\\":\\\"%s\\\",\\\"Language\\\":\\\"%s\\\",\\\"Type\\\":\\\"%s\\\",\\\"Author\\\":\\\"%s\\\",\\\"Tags\\\":\\\"%s %s %s\\\"}\\n\", $1, $2, $3, $4, $5, $6, $7, $8}' | sed -z '$ s/\\n$//' | tr '\\n' ',' | awk '{print \"[\" $0 \"]\"}'"
+       "Shell command that returns the avalibles templates")
 
-   (defun mymy-sharper--new-get-all-options-as-json ()
-     (butlast (json-parse-string (shell-command-to-string mymy-sharper--command-get-all-templates)
-                                 :object-type 'plist
-                                 :array-type 'list)))
+     (defun mymy-sharper--new-get-all-options-as-json ()
+       (butlast (json-parse-string (shell-command-to-string mymy-sharper--command-get-all-templates)
+                                   :object-type 'plist
+                                   :array-type 'list)))
 
-   (defun mymy-sharper--new-get-header-names (json)
-     (-map (lambda (it) (s-join " " (s-split-words (substring (symbol-name it) 1))))
-           (-filter #'keywordp (aref json 0))))
+     (defun mymy-sharper--new-get-header-names (json)
+       (-map (lambda (it) (s-join " " (s-split-words (substring (symbol-name it) 1))))
+             (-filter #'keywordp (aref json 0))))
 
-   (defun mymy-sharper--new-get-short-names (json)
-     (-map (lambda (it) (plist-get it :ShortName)) json))
+     (defun mymy-sharper--new-get-short-names (json)
+       (-map (lambda (it) (plist-get it :ShortName)) json))
 
-   (transient-define-argument mymy-sharper--option-template-short-name ()
-     :description "<template-short-name>"
-     :class 'transient-option
-     :shortarg "T"
-     :argument "<template-short-name>="
-     :reader (lambda (_prompt _initial-input _history)
-               (completing-read
-                "Template short name: "
-                (->> (mymy-sharper--new-get-all-options-as-json)
-                     mymy-sharper--new-get-short-names
-                     (-map (lambda (it) (s-split "," it)))
-                     -flatten))))
+     (transient-define-argument mymy-sharper--option-template-short-name ()
+       :description "<template-short-name>"
+       :class 'transient-option
+       :shortarg "T"
+       :argument "<template-short-name>="
+       :reader (lambda (_prompt _initial-input _history)
+                 (completing-read
+                  "Template short name: "
+                  (->> (mymy-sharper--new-get-all-options-as-json)
+                       mymy-sharper--new-get-short-names
+                       (-map (lambda (it) (s-split "," it)))
+                       -flatten))))
 
-   (comment
-    (->> mymy-temp-json-of-templates
-         mymy-sharper--new-get-header-names
-         (-map (lambda (it) `(,it . 50)))))
+     (comment
+      (->> mymy-temp-json-of-templates
+           mymy-sharper--new-get-header-names
+           (-map (lambda (it) `(,it . 50)))))
 
-   (defconst mymy-sharper--new-template "dotnet new --project %t %o"
-     "Common prefix for template commands")
+     (defconst mymy-sharper--new-template "dotnet new --project %t %o"
+       "Common prefix for template commands")
 
-   (defun mymy-sharper--new (&optional transient-params)
-     (interactive
-      (list (transient-args 'sharper-transient-publish)))
-     (transient-set)))
+     (defun mymy-sharper--new (&optional transient-params)
+       (interactive
+        (list (transient-args 'sharper-transient-publish)))
+       (transient-set)))
 
-  (defcustom mymy-sharper-framework-lists
-    '("net7.0" "net8.0" "net6.0")
-    "Target frameworks for dotnet. The framework on the left is used as the default framework")
+    (defcustom mymy-sharper-framework-lists
+      '("net7.0" "net8.0" "net6.0")
+      "Target frameworks for dotnet. The framework on the left is used as the default framework")
 
-  (defmacro mymy-shaper--new-transient-prefix (short-name long-name description &rest options)
-    (let ((sharper-alias-name (intern (concat "mymy-sharper-new-" short-name)))
-          (sharper-transient-prefix-name (intern (concat "mymy-sharper-transient-new-" short-name)))
-          )
-      `(progn
-         (defalias ',sharper-alias-name
-           (mymy-shaper-new-- ,short-name ',sharper-transient-prefix-name))
+    (defmacro mymy-shaper--new-transient-prefix (short-name long-name description &rest options)
+      (let ((sharper-alias-name (intern (concat "mymy-sharper-new-" short-name)))
+            (sharper-transient-prefix-name (intern (concat "mymy-sharper-transient-new-" short-name)))
+            )
+        `(progn
+           (defalias ',sharper-alias-name
+             (mymy-shaper-new-- ,short-name ',sharper-transient-prefix-name))
 
-         (transient-define-prefix ,sharper-transient-prefix-name ()
-           ,description
-           :value `("--use-program-main" ,(concat "--framework=" (car mymy-sharper-framework-lists)))
-           ["Options"
-            ,@(plist-get options :options)
-            ]
-           ,@(plist-get options :rest)
-           ["Actions"
-            ("n" ,(concat "New " long-name) ,sharper-alias-name)
-            ("q" "Quit" transient-quit-all)
-            ])))
-    )
+           (transient-define-prefix ,sharper-transient-prefix-name ()
+             ,description
+             :value `("--use-program-main" ,(concat "--framework=" (car mymy-sharper-framework-lists)))
+             ["Options"
+              ,@(plist-get options :options)
+              ]
+             ,@(plist-get options :rest)
+             ["Actions"
+              ("n" ,(concat "New " long-name) ,sharper-alias-name)
+              ("q" "Quit" transient-quit-all)
+              ])))
+      )
 
-  ;; TODO: Make this work like it should work
+    ;; TODO: Make this work like it should work
 ;;; For some reason this allows the user to select something even if the
 ;;; predicate sharper--filename-proj-p returns nil
-  ;; (expand-file-name
-  ;;  (read-file-name
-  ;;   "Select project: "
-  ;;   nil
-  ;;   nil
-  ;;   #'sharper--filename-proj-p
-  ;;   nil
-  ;;   (lambda (filename)
-  ;;     (or (file-directory-p filename)
-  ;;         (sharper--filename-proj-p filename)
-  ;;         ))
-  ;;   )
-  ;;  )
+    ;; (expand-file-name
+    ;;  (read-file-name
+    ;;   "Select project: "
+    ;;   nil
+    ;;   nil
+    ;;   #'sharper--filename-proj-p
+    ;;   nil
+    ;;   (lambda (filename)
+    ;;     (or (file-directory-p filename)
+    ;;         (sharper--filename-proj-p filename)
+    ;;         ))
+    ;;   )
+    ;;  )
 
-  (transient-define-infix mymy-sharper--option-framework ()
-    :description "Target framework"
-    :class 'transient-option
-    :shortarg "-f"
-    :argument "--framework="
-    :choices mymy-sharper-framework-lists)
+    (transient-define-infix mymy-sharper--option-framework ()
+      :description "Target framework"
+      :class 'transient-option
+      :shortarg "-f"
+      :argument "--framework="
+      :choices mymy-sharper-framework-lists)
 
-  (transient-define-infix mymy-sharper--option-output ()
-    :description "Output directory"
-    :class 'transient-option
-    :shortarg "-o"
-    :argument "--output="
-    :prompt "Output directory: "
-    :always-read t
-    :reader (lambda (prompt _initial-input _history)
-              (expand-file-name
-               (read-file-name
-                prompt nil default-directory nil nil #'file-directory-p))))
+    (transient-define-infix mymy-sharper--option-output ()
+      :description "Output directory"
+      :class 'transient-option
+      :shortarg "-o"
+      :argument "--output="
+      :prompt "Output directory: "
+      :always-read t
+      :reader (lambda (prompt _initial-input _history)
+                (expand-file-name
+                 (read-file-name
+                  prompt nil default-directory nil nil #'file-directory-p))))
 
-  (transient-define-infix mymy-sharper--option-csproj ()
-    :description ".csproj to use for context"
-    :class 'transient-option
-    :shortarg "-p"
-    :argument "--project="
-    :prompt "Output directory: "
-    :reader (lambda (_prompt _initial-input _history)
-              (sharper--read--project)))
+    (transient-define-infix mymy-sharper--option-csproj ()
+      :description ".csproj to use for context"
+      :class 'transient-option
+      :shortarg "-p"
+      :argument "--project="
+      :prompt "Output directory: "
+      :reader (lambda (_prompt _initial-input _history)
+                (sharper--read--project)))
 
-  (transient-define-infix mymy-sharper--option-project-name ()
-    :description "Project name"
-    :class 'transient-option
-    :shortarg "-n"
-    :argument "--name="
-    :prompt "Project name: "
-    :reader (lambda (prompt _ _)
-              (read-from-minibuffer
-               prompt nil mymy-sharper--project-name-map)))
+    (transient-define-infix mymy-sharper--option-project-name ()
+      :description "Project name"
+      :class 'transient-option
+      :shortarg "-n"
+      :argument "--name="
+      :prompt "Project name: "
+      :reader (lambda (prompt _ _)
+                (read-from-minibuffer
+                 prompt nil mymy-sharper--project-name-map)))
 
-  (transient-define-infix mymy-sharper--option-force-project-creation ()
-    :description "Force project generation"
-    :class 'transient-option
-    :shortarg "-F"
-    :argument "--force")
+    (transient-define-infix mymy-sharper--option-force-project-creation ()
+      :description "Force project generation"
+      :class 'transient-option
+      :shortarg "-F"
+      :argument "--force")
 
-  (defconst mymy-sharper--project-name-map
-    (copy-keymap minibuffer-local-map)
-    "Mode map for read-from-minibuffer of Project name")
-  (keymap-set mymy-sharper--project-name-map "SPC" 'ignore)
-  (keymap-set mymy-sharper--project-name-map "-" 'ignore)
+    (defconst mymy-sharper--project-name-map
+      (copy-keymap minibuffer-local-map)
+      "Mode map for read-from-minibuffer of Project name")
+    (keymap-set mymy-sharper--project-name-map "SPC" 'ignore)
+    (keymap-set mymy-sharper--project-name-map "-" 'ignore)
 
-  (defun mymy-sharper-new--create-command (template &optional transient-params)
-    (format-spec
-     "dotnet new %t %o"
-     (list (cons ?t template)
-           (cons ?o (s-join " " (-map
-                                 (lambda (s)
-                                   (string-replace "=" " " s))
-                                 transient-params))))))
+    (defun mymy-sharper-new--create-command (template &optional transient-params)
+      (format-spec
+       "dotnet new %t %o"
+       (list (cons ?t template)
+             (cons ?o (s-join " " (-map
+                                   (lambda (s)
+                                     (string-replace "=" " " s))
+                                   transient-params))))))
 
-  (defun mymy-shaper-new-- (template-shortname transient-prefix)
-    (lambda (&optional transient-params)
-      (interactive
-       (list (transient-args transient-prefix)))
-      (let ((command (mymy-sharper-new--create-command template-shortname transient-params)))
-        (sharper--log-command "New" command)
-        (compile command))))
+    (defun mymy-shaper-new-- (template-shortname transient-prefix)
+      (lambda (&optional transient-params)
+        (interactive
+         (list (transient-args transient-prefix)))
+        (let ((command (mymy-sharper-new--create-command template-shortname transient-params)))
+          (sharper--log-command "New" command)
+          (compile command))))
 
-  (defalias 'mymy-sharper-new-console (mymy-shaper-new-- "console" 'mymy-sharper-transient-new-console))
+    (defalias 'mymy-sharper-new-console (mymy-shaper-new-- "console" 'mymy-sharper-transient-new-console))
 
-  (transient-define-prefix mymy-sharper-transient-new-console ()
-    "Dotnet Console project"
-    :value `("--use-program-main" ,(concat "--framework=" (car mymy-sharper-framework-lists)))
-    ["Options"
-     (mymy-sharper--option-csproj)
-     (mymy-sharper--option-project-name)
-     (mymy-sharper--option-output)
-     (mymy-sharper--option-force-project-creation)
-     ]
-    ["Template options"
-     ("-m" "Use Program class with Main method" "--use-program-main")
-     (mymy-sharper--option-framework)]
-    ["Actions"
-     ("n" "New console" mymy-sharper-new-console)
-     ("q" "Quit" transient-quit-all)
-     ])
+    (transient-define-prefix mymy-sharper-transient-new-console ()
+      "Dotnet Console project"
+      :value `("--use-program-main" ,(concat "--framework=" (car mymy-sharper-framework-lists)))
+      ["Options"
+       (mymy-sharper--option-csproj)
+       (mymy-sharper--option-project-name)
+       (mymy-sharper--option-output)
+       (mymy-sharper--option-force-project-creation)
+       ]
+      ["Template options"
+       ("-m" "Use Program class with Main method" "--use-program-main")
+       (mymy-sharper--option-framework)]
+      ["Actions"
+       ("n" "New console" mymy-sharper-new-console)
+       ("q" "Quit" transient-quit-all)
+       ])
 
-  (defalias 'mymy-sharper-new-web-api (mymy-shaper-new-- "webapi" 'mymy-sharper-transient-new-web-api))
+    (defalias 'mymy-sharper-new-web-api (mymy-shaper-new-- "webapi" 'mymy-sharper-transient-new-web-api))
 
-  (transient-define-prefix mymy-sharper-transient-new-web-api ()
-    "Dotnet WebApi project"
-    :value `("--use-program-main" ,(concat "--framework=" (car mymy-sharper-framework-lists))
-             "--use-controllers")
-    :incompatible '(("--use-minimal-apis" "--use-controllers"))
-    ["Options"
-     (mymy-sharper--option-csproj)
-     (mymy-sharper--option-project-name)
-     (mymy-sharper--option-output)
-     (mymy-sharper--option-force-project-creation)
-     ]
-    ["Template options"
-     ("-m" "Use Program class with Main method" "--use-program-main")
-     ("-c" "Use controllers" "--use-controllers")
-     ("-i" "Use minimal apis" "--use-minimal-apis")
-     ("-O" "No OpenAPI suppor (Swagger)" "--no-openapi")
-     ("-au" "The type of authentication to use" "--auth="
-      :choices ("None"
-                "IndividualB2C"
-                "SingleOrg"
-                "Windows")
-      )
-     (mymy-sharper--option-framework)
-     ]
-    ["Actions"
-     ("n" "New web API" mymy-sharper-new-web-api)
-     ("q" "Quit" transient-quit-all)
-     ])
+    (transient-define-prefix mymy-sharper-transient-new-web-api ()
+      "Dotnet WebApi project"
+      :value `("--use-program-main" ,(concat "--framework=" (car mymy-sharper-framework-lists))
+               "--use-controllers")
+      :incompatible '(("--use-minimal-apis" "--use-controllers"))
+      ["Options"
+       (mymy-sharper--option-csproj)
+       (mymy-sharper--option-project-name)
+       (mymy-sharper--option-output)
+       (mymy-sharper--option-force-project-creation)
+       ]
+      ["Template options"
+       ("-m" "Use Program class with Main method" "--use-program-main")
+       ("-c" "Use controllers" "--use-controllers")
+       ("-i" "Use minimal apis" "--use-minimal-apis")
+       ("-O" "No OpenAPI suppor (Swagger)" "--no-openapi")
+       ("-au" "The type of authentication to use" "--auth="
+        :choices ("None"
+                  "IndividualB2C"
+                  "SingleOrg"
+                  "Windows")
+        )
+       (mymy-sharper--option-framework)
+       ]
+      ["Actions"
+       ("n" "New web API" mymy-sharper-new-web-api)
+       ("q" "Quit" transient-quit-all)
+       ])
 
-  (defalias 'mymy-sharper-new-nunit (mymy-shaper-new-- "nunit" 'mymy-sharper-transient-new-nunit))
+    (defalias 'mymy-sharper-new-nunit (mymy-shaper-new-- "nunit" 'mymy-sharper-transient-new-nunit))
 
-  (transient-define-prefix mymy-sharper-transient-new-nunit ()
-    "Dotnet Nunit project"
-    :value `(,(concat "--framework=" (car mymy-sharper-framework-lists)))
-    ["Options"
-     (mymy-sharper--option-csproj)
-     (mymy-sharper--option-project-name)
-     (mymy-sharper--option-output)
-     (mymy-sharper--option-force-project-creation)
-     ]
-    ["Template options"
-     (mymy-sharper--option-framework)
-     ]
-    ["Actions"
-     ("n" "New NUnit 3 Test Project" mymy-sharper-new-nunit)
-     ("q" "Quit" transient-quit-all)
-     ])
+    (transient-define-prefix mymy-sharper-transient-new-nunit ()
+      "Dotnet Nunit project"
+      :value `(,(concat "--framework=" (car mymy-sharper-framework-lists)))
+      ["Options"
+       (mymy-sharper--option-csproj)
+       (mymy-sharper--option-project-name)
+       (mymy-sharper--option-output)
+       (mymy-sharper--option-force-project-creation)
+       ]
+      ["Template options"
+       (mymy-sharper--option-framework)
+       ]
+      ["Actions"
+       ("n" "New NUnit 3 Test Project" mymy-sharper-new-nunit)
+       ("q" "Quit" transient-quit-all)
+       ])
 
-  (defalias 'mymy-sharper-new-editorconfig
-    (mymy-shaper-new-- "editorconfig" 'mymy-sharper-transient-new-editorconfig))
+    (defalias 'mymy-sharper-new-editorconfig
+      (mymy-shaper-new-- "editorconfig" 'mymy-sharper-transient-new-editorconfig))
 
-  (transient-define-prefix mymy-sharper-transient-new-editorconfig ()
-    "Dotnet .editorconfig item"
-    :value `(,(concat "--framework=" (car mymy-sharper-framework-lists)))
-    ["Options"
-     (mymy-sharper--option-csproj)
-     (mymy-sharper--option-project-name)
-     (mymy-sharper--option-output)
-     (mymy-sharper--option-force-project-creation)
-     ]
-    ["Template options"
-     ("-e" "Create empty instead of .NET defaults" "--empty")
-     ]
-    ["Actions"
-     ("n" "New editorconfig" mymy-sharper-new-editorconfig)
-     ("q" "Quit" transient-quit-all)
-     ])
+    (transient-define-prefix mymy-sharper-transient-new-editorconfig ()
+      "Dotnet .editorconfig item"
+      :value `(,(concat "--framework=" (car mymy-sharper-framework-lists)))
+      ["Options"
+       (mymy-sharper--option-csproj)
+       (mymy-sharper--option-project-name)
+       (mymy-sharper--option-output)
+       (mymy-sharper--option-force-project-creation)
+       ]
+      ["Template options"
+       ("-e" "Create empty instead of .NET defaults" "--empty")
+       ]
+      ["Actions"
+       ("n" "New editorconfig" mymy-sharper-new-editorconfig)
+       ("q" "Quit" transient-quit-all)
+       ])
 
-  (defalias 'mymy-sharper-new-gitignore
-    (mymy-shaper-new-- "gitignore" 'mymy-sharper-transient-new-gitignore))
+    (defalias 'mymy-sharper-new-gitignore
+      (mymy-shaper-new-- "gitignore" 'mymy-sharper-transient-new-gitignore))
 
-  (transient-define-prefix mymy-sharper-transient-new-gitignore ()
-    "Dotnet .gitignore item"
-    :value `(,(concat "--framework=" (car mymy-sharper-framework-lists)))
-    ["Options"
-     (mymy-sharper--option-csproj)
-     (mymy-sharper--option-project-name)
-     (mymy-sharper--option-output)
-     (mymy-sharper--option-force-project-creation)
-     ]
-    ["Actions"
-     ("n" "New .gitignore" mymy-sharper-new-gitignore)
-     ("q" "Quit" transient-quit-all)
-     ])
+    (transient-define-prefix mymy-sharper-transient-new-gitignore ()
+      "Dotnet .gitignore item"
+      :value `(,(concat "--framework=" (car mymy-sharper-framework-lists)))
+      ["Options"
+       (mymy-sharper--option-csproj)
+       (mymy-sharper--option-project-name)
+       (mymy-sharper--option-output)
+       (mymy-sharper--option-force-project-creation)
+       ]
+      ["Actions"
+       ("n" "New .gitignore" mymy-sharper-new-gitignore)
+       ("q" "Quit" transient-quit-all)
+       ])
 
-  (mymy-shaper--new-transient-prefix
-   "classlib"
-   "Class library"
-   "Dotnet Class library project"
-   :options
-   ((mymy-sharper--option-csproj)
-    (mymy-sharper--option-project-name)
-    (mymy-sharper--option-output)
-    (mymy-sharper--option-force-project-creation))
-   )
+    (mymy-shaper--new-transient-prefix
+     "classlib"
+     "Class library"
+     "Dotnet Class library project"
+     :options
+     ((mymy-sharper--option-csproj)
+      (mymy-sharper--option-project-name)
+      (mymy-sharper--option-output)
+      (mymy-sharper--option-force-project-creation))
+     )
 
-  (mymy-shaper--new-transient-prefix
-   "sln"
-   "Solution file"
-   "Solution item"
-   :options
-   ((mymy-sharper--option-csproj)
-    (mymy-sharper--option-project-name)
-    (mymy-sharper--option-output)
-    (mymy-sharper--option-force-project-creation))
-   )
+    (mymy-shaper--new-transient-prefix
+     "sln"
+     "Solution file"
+     "Solution item"
+     :options
+     ((mymy-sharper--option-csproj)
+      (mymy-sharper--option-project-name)
+      (mymy-sharper--option-output)
+      (mymy-sharper--option-force-project-creation))
+     )
 
-  (mymy-shaper--new-transient-prefix
-   "xunit"
-   "xUnit Test Project"
-   "xUnit Test Project"
-   :options
-   ((mymy-sharper--option-csproj)
-    (mymy-sharper--option-project-name)
-    (mymy-sharper--option-output)
-    (mymy-sharper--option-force-project-creation))
-   )
+    (mymy-shaper--new-transient-prefix
+     "xunit"
+     "xUnit Test Project"
+     "xUnit Test Project"
+     :options
+     ((mymy-sharper--option-csproj)
+      (mymy-sharper--option-project-name)
+      (mymy-sharper--option-output)
+      (mymy-sharper--option-force-project-creation))
+     )
 
-  (mymy-shaper--new-transient-prefix
-   "mvc" ()
-   "ASP.NET Core Web App (MVC)"
-   "ASP.NET Core Web App Project"
-   :options
-   ((mymy-sharper--option-csproj)
-    (mymy-sharper--option-project-name)
-    (mymy-sharper--option-output)
-    (mymy-sharper--option-force-project-creation))
-   :rest
-   (["Template options"
-     ("-m" "Use Program class with Main method" "--use-program-main")
-     ("-au" "The type of authentication to use" "--auth="
-      :choices ("None"
-                "IndividualB2C"
-                "SingleOrg"
-                "Windows")
-      )
-     (mymy-sharper--option-framework)
-     ])
-   )
+    (mymy-shaper--new-transient-prefix
+     "mvc" ()
+     "ASP.NET Core Web App (MVC)"
+     "ASP.NET Core Web App Project"
+     :options
+     ((mymy-sharper--option-csproj)
+      (mymy-sharper--option-project-name)
+      (mymy-sharper--option-output)
+      (mymy-sharper--option-force-project-creation))
+     :rest
+     (["Template options"
+       ("-m" "Use Program class with Main method" "--use-program-main")
+       ("-au" "The type of authentication to use" "--auth="
+        :choices ("None"
+                  "IndividualB2C"
+                  "SingleOrg"
+                  "Windows")
+        )
+       (mymy-sharper--option-framework)
+       ])
+     )
 
-  (mymy-shaper--new-transient-prefix
-   "webapp"
-   "ASP.NET Core Web App (Razor Pages)"
-   "ASP.NET Core Web App Project"
-   :options
-   ((mymy-sharper--option-csproj)
-    (mymy-sharper--option-project-name)
-    (mymy-sharper--option-output)
-    (mymy-sharper--option-force-project-creation))
-   :rest
-   (["Template options"
-     ("-m" "Use Program class with Main method" "--use-program-main")
-     ("-au" "The type of authentication to use" "--auth="
-      :choices ("None"
-                "IndividualB2C"
-                "SingleOrg"
-                "Windows")
-      )
-     (mymy-sharper--option-framework)
-     ])
-   )
+    (mymy-shaper--new-transient-prefix
+     "webapp"
+     "ASP.NET Core Web App (Razor Pages)"
+     "ASP.NET Core Web App Project"
+     :options
+     ((mymy-sharper--option-csproj)
+      (mymy-sharper--option-project-name)
+      (mymy-sharper--option-output)
+      (mymy-sharper--option-force-project-creation))
+     :rest
+     (["Template options"
+       ("-m" "Use Program class with Main method" "--use-program-main")
+       ("-au" "The type of authentication to use" "--auth="
+        :choices ("None"
+                  "IndividualB2C"
+                  "SingleOrg"
+                  "Windows")
+        )
+       (mymy-sharper--option-framework)
+       ])
+     )
 
 
-  (transient-define-prefix mymy-sharper-transient-new ()
-    "Dotnet templates"
-    ["Projects templates"
-     ("Co" "Console" mymy-sharper-transient-new-console)
-     ("Wa" "ASP.NET Core Web API" mymy-sharper-transient-new-web-api)
-     ("Wp" "ASP.NET Core Web App (MVC)" mymy-sharper-transient-new-mvc)
-     ("Wr" "ASP.NET Core Web App (Razor Pages)" mymy-sharper-transient-new-webapp)
-     ("Tn" "NUnit 3 Test Project" mymy-sharper-transient-new-nunit)
-     ("Tx" "xUnit Test Project" mymy-sharper-transient-new-xunit)
-     ("Cl" "Classlib Project" mymy-sharper-transient-new-classlib)
-     ]
-    ["Item templates"
-     ("g" "dotnet gitignore file" mymy-sharper-transient-new-gitignore)
-     ("e" "EditorConfig file" mymy-sharper-transient-new-editorconfig)
-     ("s" "Solution file" mymy-sharper-transient-new-sln)
-     ])
+    (transient-define-prefix mymy-sharper-transient-new ()
+      "Dotnet templates"
+      ["Projects templates"
+       ("Co" "Console" mymy-sharper-transient-new-console)
+       ("Wa" "ASP.NET Core Web API" mymy-sharper-transient-new-web-api)
+       ("Wp" "ASP.NET Core Web App (MVC)" mymy-sharper-transient-new-mvc)
+       ("Wr" "ASP.NET Core Web App (Razor Pages)" mymy-sharper-transient-new-webapp)
+       ("Tn" "NUnit 3 Test Project" mymy-sharper-transient-new-nunit)
+       ("Tx" "xUnit Test Project" mymy-sharper-transient-new-xunit)
+       ("Cl" "Classlib Project" mymy-sharper-transient-new-classlib)
+       ]
+      ["Item templates"
+       ("g" "dotnet gitignore file" mymy-sharper-transient-new-gitignore)
+       ("e" "EditorConfig file" mymy-sharper-transient-new-editorconfig)
+       ("s" "Solution file" mymy-sharper-transient-new-sln)
+       ])
 
-  :config
-  (transient-insert-suffix
-    #'sharper-main-transient "c"
-    '("w" "new" mymy-sharper-transient-new)))
+    :config
+    (transient-insert-suffix
+      #'sharper-main-transient "c"
+      '("w" "new" mymy-sharper-transient-new))))
 
-(use-package csproj-mode
-  :unless (mymy-is-android)
-  :ensure t
-  :config
-  (add-to-list 'auto-mode-alist '("\\.csproj\\'" . csproj-mode))
-  (add-hook 'csproj-mode-hook #'aggressive-indent-mode))
+(when mymy-is-not-android
+  (use-package csproj-mode
+    :ensure t
+    :config
+    (add-to-list 'auto-mode-alist '("\\.csproj\\'" . csproj-mode))
+    (add-hook 'csproj-mode-hook #'aggressive-indent-mode)))
 
-(use-package csharp-ts-mode
-  :unless (mymy-is-android)
-  :no-require t
-  :ensure nil
-  :config
-  (defun mymy-csharp-mode-hook ()
-    (setq-local flycheck-navigation-minimum-level 'error))
-  (add-hook 'csharp-ts-mode-hook #'mymy-csharp-mode-hook)
-  ;; (add-hook 'csharp-ts-mode-hook #'subword-mode)
+(when mymy-is-not-android
+  (use-package csharp-ts-mode
+    :no-require t
+    :ensure nil
+    :config
+    (defun mymy-csharp-mode-hook ()
+      (setq-local flycheck-navigation-minimum-level 'error))
+    (add-hook 'csharp-ts-mode-hook #'mymy-csharp-mode-hook)
+    ;; (add-hook 'csharp-ts-mode-hook #'subword-mode)
 
-  (with-eval-after-load 'compile
-    ;; Add support for going to line of error in stacktrace.
-    (add-to-list 'compilation-error-regexp-alist 'dotnet-stack-trace)
+    (with-eval-after-load 'compile
+      ;; Add support for going to line of error in stacktrace.
+      (add-to-list 'compilation-error-regexp-alist 'dotnet-stack-trace)
 
-    (add-to-list 'compilation-error-regexp-alist-alist
-                 '(dotnet-stack-trace
-                   "\\(?:^\\|\\s-+\\)at\\s-+\\(.*\\)\\s-+in\\s-+\\(.+\\):line\\s-+\\([0-9]+\\)"
-                   2 3 nil 2 1))))
+      (add-to-list 'compilation-error-regexp-alist-alist
+                   '(dotnet-stack-trace
+                     "\\(?:^\\|\\s-+\\)at\\s-+\\(.*\\)\\s-+in\\s-+\\(.+\\):line\\s-+\\([0-9]+\\)"
+                     2 3 nil 2 1)))))
 
 ;; * Git gutter
 (use-package diff-hl
@@ -3388,150 +3388,150 @@ then go back 1."
 
 
 ;; * Common lisp
-(use-package sly
-  :unless (mymy-is-android)
-  :ensure t
-  :config
-  ;; (general-define-key
-  ;;  :keymaps 'lisp-mode-map
-  ;;  "M-<f3>" '
-  ;;  )
-  (add-to-list 'display-buffer-alist
-               '("\\*sly-\\(description\\|db\\)"
-                 (display-buffer-reuse-window display-buffer-in-direction)
-                 (direction . right)
-                 (window-height . 0.43)
-                 ))
-  (add-to-list 'display-buffer-alist
-               '("\\*sly-mrepl"
-                 (display-buffer-reuse-window display-buffer-in-direction)
-                 (direction . bottom)
-                 (dedicated . t)
-                 (reusable-frames . visible)
-                 (window-height . 0.37)))
-  (setq inferior-lisp-program "/usr/bin/sbcl --dynamic-space-size 1024")
-  (setq sly-lisp-implementations
-        '((sbcl ("sbcl" "--dynamic-space-size" "1024")))))
+(when mymy-is-not-android
+  (use-package sly
+    :ensure t
+    :config
+    ;; (general-define-key
+    ;;  :keymaps 'lisp-mode-map
+    ;;  "M-<f3>" '
+    ;;  )
+    (add-to-list 'display-buffer-alist
+                 '("\\*sly-\\(description\\|db\\)"
+                   (display-buffer-reuse-window display-buffer-in-direction)
+                   (direction . right)
+                   (window-height . 0.43)
+                   ))
+    (add-to-list 'display-buffer-alist
+                 '("\\*sly-mrepl"
+                   (display-buffer-reuse-window display-buffer-in-direction)
+                   (direction . bottom)
+                   (dedicated . t)
+                   (reusable-frames . visible)
+                   (window-height . 0.37)))
+    (setq inferior-lisp-program "/usr/bin/sbcl --dynamic-space-size 1024")
+    (setq sly-lisp-implementations
+          '((sbcl ("sbcl" "--dynamic-space-size" "1024"))))))
 
 
 ;; * Web mode
-(use-package web-mode
-  :unless (mymy-is-android)
-  :ensure t
-  :init
-  ;; Neat trick
-  (define-derived-mode vue-web-mode web-mode "Vue")
-  (define-derived-mode razor-web-mode web-mode "Razor")
-  (define-derived-mode php-web-mode web-mode "PHP")
-  (add-to-list 'auto-mode-alist '("\\.vue\\'" . vue-web-mode))
+(when mymy-is-not-android
+  (use-package web-mode
+    :ensure t
+    :init
+    ;; Neat trick
+    (define-derived-mode vue-web-mode web-mode "Vue")
+    (define-derived-mode razor-web-mode web-mode "Razor")
+    (define-derived-mode php-web-mode web-mode "PHP")
+    (add-to-list 'auto-mode-alist '("\\.vue\\'" . vue-web-mode))
 
-  ;; CSharp
-  (add-to-list 'auto-mode-alist '("\\.razor\\'" . razor-web-mode))
-  (add-to-list 'auto-mode-alist '("\\.cshtml\\'" . razor-web-mode))
+    ;; CSharp
+    (add-to-list 'auto-mode-alist '("\\.razor\\'" . razor-web-mode))
+    (add-to-list 'auto-mode-alist '("\\.cshtml\\'" . razor-web-mode))
 
-  (add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.html\\'" . web-mode))
 
-  (add-to-list 'auto-mode-alist '("\\.php\\'" . php-web-mode))
-  ;; (add-to-list 'auto-mode-alist '("\\.css\\'" . web-mode))
-  ;; (add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
+    (add-to-list 'auto-mode-alist '("\\.php\\'" . php-web-mode))
+    ;; (add-to-list 'auto-mode-alist '("\\.css\\'" . web-mode))
+    ;; (add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
 
-  ;; (add-hook 'web-mode-hook #'emmet-mode)
-  (add-hook 'vue-web-mode-hook #'mymy-vue-hook)
-  (add-hook 'php-web-mode-hook #'lsp))
+    ;; (add-hook 'web-mode-hook #'emmet-mode)
+    (add-hook 'vue-web-mode-hook #'mymy-vue-hook)
+    (add-hook 'php-web-mode-hook #'lsp)))
 
 ;; * Ispell/Aspell
-(use-package ispell
-  :unless (mymy-is-android)
-  :ensure nil
-  ;; https://200ok.ch/posts/2020-08-22_setting_up_spell_checking_with_multiple_dictionaries.html
-  :config
-  (setq ispell-program-name "hunspell")
-  ;; Configure German, Swiss German, and two variants of English.
-  (setq ispell-dictionary "en_US,es_ES")
-  (setq ispell-alternate-dictionary (expand-file-name (concat dropbox-dir "english_list.txt")))
-  ;; ispell-set-spellchecker-params has to be called
-  ;; before ispell-hunspell-add-multi-dic will work
-  (ispell-set-spellchecker-params)
-  (ispell-hunspell-add-multi-dic "en_US,es_ES")
-  ;; For saving words to the personal dictionary, don't infer it from
-  ;; the locale, otherwise it would save to ~/.hunspell_de_DE.
-  (setq ispell-personal-dictionary (concat dropbox-dir ".hunspell_personal"))
-  ;; The personal dictionary file has to exist, otherwise hunspell will
-  ;; silently not use it.
-  (unless (file-exists-p ispell-personal-dictionary)
-    (write-region "" nil ispell-personal-dictionary nil 0)))
+(when mymy-is-not-android
+  (use-package ispell
+    :ensure nil
+    ;; https://200ok.ch/posts/2020-08-22_setting_up_spell_checking_with_multiple_dictionaries.html
+    :config
+    (setq ispell-program-name "hunspell")
+    ;; Configure German, Swiss German, and two variants of English.
+    (setq ispell-dictionary "en_US,es_ES")
+    (setq ispell-alternate-dictionary (expand-file-name (concat dropbox-dir "english_list.txt")))
+    ;; ispell-set-spellchecker-params has to be called
+    ;; before ispell-hunspell-add-multi-dic will work
+    (ispell-set-spellchecker-params)
+    (ispell-hunspell-add-multi-dic "en_US,es_ES")
+    ;; For saving words to the personal dictionary, don't infer it from
+    ;; the locale, otherwise it would save to ~/.hunspell_de_DE.
+    (setq ispell-personal-dictionary (concat dropbox-dir ".hunspell_personal"))
+    ;; The personal dictionary file has to exist, otherwise hunspell will
+    ;; silently not use it.
+    (unless (file-exists-p ispell-personal-dictionary)
+      (write-region "" nil ispell-personal-dictionary nil 0))))
 
-(use-package jinx
-  :unless (mymy-is-android)
-  :ensure t
-  :config
-  (dolist (hook '(text-mode-hook))
-    (add-hook hook #'jinx-mode))
-  (general-define-key
-   :states '(normal)
-   :keymaps 'text-mode-map
-   "z=" 'jinx-correct)
-  :bind (("M-$" . jinx-correct)
-         ("C-M-$" . jinx-languages)))
+(when mymy-is-not-android
+  (use-package jinx
+    :ensure t
+    :config
+    (dolist (hook '(text-mode-hook))
+      (add-hook hook #'jinx-mode))
+    (general-define-key
+     :states '(normal)
+     :keymaps 'text-mode-map
+     "z=" 'jinx-correct)
+    :bind (("M-$" . jinx-correct)
+           ("C-M-$" . jinx-languages))))
 
 
 ;; * Restclient
-(use-package restclient
-  :unless (mymy-is-android)
-  :ensure (restclient :files ("*.el"))
-  ;; :ensure t
-  :after (jq-mode)
-  :config
-  (add-to-list 'auto-mode-alist '("\\.http\\'" . restclient-mode))
-  (require 'restclient-jq))
+(when mymy-is-not-android
+  (use-package restclient
+    :ensure (restclient :files ("*.el"))
+    ;; :ensure t
+    :after (jq-mode)
+    :config
+    (add-to-list 'auto-mode-alist '("\\.http\\'" . restclient-mode))
+    (require 'restclient-jq)))
 
-(use-package jq-mode
-  :unless (mymy-is-android)
-  :ensure t)
+(when mymy-is-not-android
+  (use-package jq-mode
+    :ensure t))
 
 ;; * Nix
-(use-package nix-ts-mode
-  :unless (mymy-is-android)
-  :ensure t
-  :mode "\\.nix\\'")
+(when mymy-is-not-android
+  (use-package nix-ts-mode
+    :ensure t
+    :mode "\\.nix\\'"))
 
 
 ;; * Harpoon
-(use-package harpoon
-  :unless (mymy-is-android)
-  ;; Nah, feel like the other approach I was going can adapt to emacs
-  :disabled
-  :ensure t
-  :config
-  (general-define-key
-   :states '(normal motion visual)
-   :prefix "SPC"
-   :keymaps 'global-map
-   "jj" 'harpoon-add-file
-   "jc" 'harpoon-clear
-   "jf" 'harpoon-toggle-file
-   "1" 'harpoon-go-to-1
-   "2" 'harpoon-go-to-2
-   "3" 'harpoon-go-to-3
-   "4" 'harpoon-go-to-4
-   )
+(when mymy-is-not-android
+  (use-package harpoon
+    ;; Nah, feel like the other approach I was going can adapt to emacs
+    :disabled
+    :ensure t
+    :config
+    (general-define-key
+     :states '(normal motion visual)
+     :prefix "SPC"
+     :keymaps 'global-map
+     "jj" 'harpoon-add-file
+     "jc" 'harpoon-clear
+     "jf" 'harpoon-toggle-file
+     "1" 'harpoon-go-to-1
+     "2" 'harpoon-go-to-2
+     "3" 'harpoon-go-to-3
+     "4" 'harpoon-go-to-4
+     )
 
-  (global-set-key (kbd "C-c h <return>") 'harpoon-add-file)
-  (global-set-key (kbd "C-c h m") 'harpoon-toggle-quick-menu)
-  (global-set-key (kbd "C-c h c") 'harpoon-clear)
-  ;; (global-set-key (kbd "C-c h 1") 'harpoon-go-to-1)
-  ;; (global-set-key (kbd "C-c h 2") 'harpoon-go-to-2)
-  ;; (global-set-key (kbd "C-c h 3") 'harpoon-go-to-3)
-  ;; (global-set-key (kbd "C-c h 4") 'harpoon-go-to-4)
+    (global-set-key (kbd "C-c h <return>") 'harpoon-add-file)
+    (global-set-key (kbd "C-c h m") 'harpoon-toggle-quick-menu)
+    (global-set-key (kbd "C-c h c") 'harpoon-clear)
+    ;; (global-set-key (kbd "C-c h 1") 'harpoon-go-to-1)
+    ;; (global-set-key (kbd "C-c h 2") 'harpoon-go-to-2)
+    ;; (global-set-key (kbd "C-c h 3") 'harpoon-go-to-3)
+    ;; (global-set-key (kbd "C-c h 4") 'harpoon-go-to-4)
 
-  ;; (global-set-key (kbd "C-c h f") 'harpoon-toggle-file)
-  ;; (global-set-key (kbd "C-c h h") 'harpoon-toggle-quick-menu)
-  ;; (global-set-key (kbd "C-c h c") 'harpoon-clear)
-  ;; (global-set-key (kbd "C-c h 1") 'harpoon-go-to-1)
-  ;; (global-set-key (kbd "C-c h 2") 'harpoon-go-to-2)
-  ;; (global-set-key (kbd "C-c h 3") 'harpoon-go-to-3)
-  ;; (global-set-key (kbd "C-c h 4") 'harpoon-go-to-4)
-  )
+    ;; (global-set-key (kbd "C-c h f") 'harpoon-toggle-file)
+    ;; (global-set-key (kbd "C-c h h") 'harpoon-toggle-quick-menu)
+    ;; (global-set-key (kbd "C-c h c") 'harpoon-clear)
+    ;; (global-set-key (kbd "C-c h 1") 'harpoon-go-to-1)
+    ;; (global-set-key (kbd "C-c h 2") 'harpoon-go-to-2)
+    ;; (global-set-key (kbd "C-c h 3") 'harpoon-go-to-3)
+    ;; (global-set-key (kbd "C-c h 4") 'harpoon-go-to-4)
+    ))
 
 (use-package bookmark-harpoon
   ;; Making this work with bookmark is kind of difficult. If we can
@@ -3708,39 +3708,39 @@ then go back 1."
 
   )
 
-(use-package bookmark+
-  :unless (mymy-is-android)
-  :ensure nil
-  :no-require t
-  :config
-  (let ((bookmarkplus-dir (concat user-emacs-directory "custom/bookmark-plus/"))
-        (emacswiki-base "https://www.emacswiki.org/emacs/download/")
-        (bookmark-files '("bookmark+.el" "bookmark+-mac.el" "bookmark+-bmu.el" "bookmark+-key.el" "bookmark+-lit.el" "bookmark+-1.el")))
-    (require 'url)
-    (add-to-list 'load-path bookmarkplus-dir)
-    (make-directory bookmarkplus-dir t)
-    (mapcar (lambda (arg)
-              (let ((local-file (concat bookmarkplus-dir arg)))
-                (unless (file-exists-p local-file)
-                  (url-copy-file (concat emacswiki-base arg) local-file t))))
-            bookmark-files)
-    (require 'bookmark+-mac)
-    (byte-recompile-directory bookmarkplus-dir 0)
-    (require 'bookmark+))
-  (defvar mymy-quick-access-tag "quick_access")
+(when mymy-is-not-android
+  (use-package bookmark+
+    :ensure nil
+    :no-require t
+    :config
+    (let ((bookmarkplus-dir (concat user-emacs-directory "custom/bookmark-plus/"))
+          (emacswiki-base "https://www.emacswiki.org/emacs/download/")
+          (bookmark-files '("bookmark+.el" "bookmark+-mac.el" "bookmark+-bmu.el" "bookmark+-key.el" "bookmark+-lit.el" "bookmark+-1.el")))
+      (require 'url)
+      (add-to-list 'load-path bookmarkplus-dir)
+      (make-directory bookmarkplus-dir t)
+      (mapcar (lambda (arg)
+                (let ((local-file (concat bookmarkplus-dir arg)))
+                  (unless (file-exists-p local-file)
+                    (url-copy-file (concat emacswiki-base arg) local-file t))))
+              bookmark-files)
+      (require 'bookmark+-mac)
+      (byte-recompile-directory bookmarkplus-dir 0)
+      (require 'bookmark+))
+    (defvar mymy-quick-access-tag "quick_access")
 
-  (defun mymy-quick-access ()
-    (interactive)
-    (let ((alist (bmkp-some-tags-alist-only (list mymy-quick-access-tag))))
-      (thread-last
-        (bookmark-completing-read "Bookmark" (bmkp-default-bookmark-name alist) alist)
-        ;; (bookmark-jump)
-        (bookmark-get-filename)
-        (find-file))))
-  (general-define-key
-   :prefix "C-c h"
-   "b" #'consult-bookmark
-   "f" #'mymy-quick-access))
+    (defun mymy-quick-access ()
+      (interactive)
+      (let ((alist (bmkp-some-tags-alist-only (list mymy-quick-access-tag))))
+        (thread-last
+          (bookmark-completing-read "Bookmark" (bmkp-default-bookmark-name alist) alist)
+          ;; (bookmark-jump)
+          (bookmark-get-filename)
+          (find-file))))
+    (general-define-key
+     :prefix "C-c h"
+     "b" #'consult-bookmark
+     "f" #'mymy-quick-access)))
 
 (use-package dogears
   :disabled
@@ -3758,225 +3758,225 @@ then go back 1."
   (dogears-mode))
 
 ;; * Lua
-(use-package lua-mode
-  :unless (mymy-is-android)
-  :ensure t
-  :mode "\\.lua$"
-  :hook (lua-mode . lsp)
-  :config
-  (with-eval-after-load 'lsp-mode
-    ;; Loading some neovim libraries to pry vim plugins
-    (setq lsp-lua-workspace-library
-          (ht ("/usr/share/nvim/runtime/lua" t)))))
+(when mymy-is-not-android
+  (use-package lua-mode
+    :ensure t
+    :mode "\\.lua$"
+    :hook (lua-mode . lsp)
+    :config
+    (with-eval-after-load 'lsp-mode
+      ;; Loading some neovim libraries to pry vim plugins
+      (setq lsp-lua-workspace-library
+            (ht ("/usr/share/nvim/runtime/lua" t))))))
 
 ;; * Leetcode
-(use-package leetcode
-  :unless (mymy-is-android)
-  :ensure t
-  :init
-  ;; (setq leetcode-prefer-language "python3")
-  (setq leetcode-prefer-language "c")
-  (setq leetcode-prefer-sql "mysql")
-  (setq leetcode-save-solutions t)
-  (setq leetcode-directory (concat main-dropbox-dir
-                                   "leecode"
-                                   ))
-  )
+(when mymy-is-not-android
+  (use-package leetcode
+    :ensure t
+    :init
+    ;; (setq leetcode-prefer-language "python3")
+    (setq leetcode-prefer-language "c")
+    (setq leetcode-prefer-sql "mysql")
+    (setq leetcode-save-solutions t)
+    (setq leetcode-directory (concat main-dropbox-dir
+                                     "leecode"
+                                     ))
+    ))
 
 ;; * Zig
-(use-package zig-mode
-  :unless (mymy-is-android)
-  :ensure t
-  :config
-  ;; Slow on river project, don't know why
-  (setq zig-format-on-save nil))
+(when mymy-is-not-android
+  (use-package zig-mode
+    :ensure t
+    :config
+    ;; Slow on river project, don't know why
+    (setq zig-format-on-save nil)))
 
-(use-package lsp-zig
-  :unless (mymy-is-android)
-  :after (zig-mode lsp-mode)
-  :ensure nil
-  :no-require t
-  :hook (zig-mode . lsp))
+(when mymy-is-not-android
+  (use-package lsp-zig
+    :after (zig-mode lsp-mode)
+    :ensure nil
+    :no-require t
+    :hook (zig-mode . lsp)))
 
 ;; * tab-bar
-(use-package tab-bar
-  :unless (mymy-is-android)
-  ;; From https://www.reddit.com/r/emacs/comments/r16adq/comment/hlxl1ek/
-  :bind (:map tab-prefix-map ("p" . my/new-project-tab))
-  :init
-  (defun my/new-project-tab ()
-    (interactive)
-    (other-tab-prefix)
-    (projectile-switch-project)
-    (tab-rename (projectile-project-name)))
-  :config
-  (gsetq tab-bar-show nil)
-  (tab-bar-mode)
-  )
+(when mymy-is-not-android
+  (use-package tab-bar
+    ;; From https://www.reddit.com/r/emacs/comments/r16adq/comment/hlxl1ek/
+    :bind (:map tab-prefix-map ("p" . my/new-project-tab))
+    :init
+    (defun my/new-project-tab ()
+      (interactive)
+      (other-tab-prefix)
+      (projectile-switch-project)
+      (tab-rename (projectile-project-name)))
+    :config
+    (gsetq tab-bar-show nil)
+    (tab-bar-mode)
+    ))
 
 ;; * Ace window
-(use-package ace-window
-  :unless (mymy-is-android)
-  :ensure t
-  :init
-  ;;global could be cool if I didn't use a tiling window manager.
-  (setq aw-scope 'frame)
-  ;; (setq aw-keys '(?a ?r ?s ?t ?h ?n ?e ?i ?o))
-  (setq aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9))
-  (setq aw-ignore-current nil)
-  :config
-  (general-define-key
-   :keymaps 'override
-   ;; "M-o" 'ace-window
-   ;; "C-x o" 'ace-window
-   "M-u" 'ace-window
-   ;; "M-y" 'ace-window
-   ))
+(when mymy-is-not-android
+  (use-package ace-window
+    :ensure t
+    :init
+    ;;global could be cool if I didn't use a tiling window manager.
+    (setq aw-scope 'frame)
+    ;; (setq aw-keys '(?a ?r ?s ?t ?h ?n ?e ?i ?o))
+    (setq aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9))
+    (setq aw-ignore-current nil)
+    :config
+    (general-define-key
+     :keymaps 'override
+     ;; "M-o" 'ace-window
+     ;; "C-x o" 'ace-window
+     "M-u" 'ace-window
+     ;; "M-y" 'ace-window
+     )))
 
 
 ;; * Vterm
-(use-package vterm
-  :unless (mymy-is-android)
-  :ensure t
-  :demand t
-  :config
-  (defun mymy-terminal-configuration-hook ()
-    (setq-local show-trailing-whitespace nil)
-    (setq-local display-line-numbers nil)
-    (setq-local mode-line-format
-                '((:eval
-                   (mymy-mode-line-word-with-padding
-                    (concat
-                     (when (equal (buffer-name)
-                                  (multi-vterm-dedicated-get-buffer-name))
-                       "Dedicated ")
-                     "VTerm")
-                    )
-                   )))
-    ;; Let's not mix evil and emacs
-    (evil-emacs-state)
-    )
+(when mymy-is-not-android
+  (use-package vterm
+    :ensure t
+    :demand t
+    :config
+    (defun mymy-terminal-configuration-hook ()
+      (setq-local show-trailing-whitespace nil)
+      (setq-local display-line-numbers nil)
+      (setq-local mode-line-format
+                  '((:eval
+                     (mymy-mode-line-word-with-padding
+                      (concat
+                       (when (equal (buffer-name)
+                                    (multi-vterm-dedicated-get-buffer-name))
+                         "Dedicated ")
+                       "VTerm")
+                      )
+                     )))
+      ;; Let's not mix evil and emacs
+      (evil-emacs-state)
+      )
 
-  (defun vterm-directory-sync ()
-    "Synchronize current working directory."
-    (interactive)
-    (when vterm--process
-      (let* ((pid (process-id vterm--process))
-             (dir (file-truename (format "/proc/%d/cwd/" pid))))
-        (setq default-directory dir))))
+    (defun vterm-directory-sync ()
+      "Synchronize current working directory."
+      (interactive)
+      (when vterm--process
+        (let* ((pid (process-id vterm--process))
+               (dir (file-truename (format "/proc/%d/cwd/" pid))))
+          (setq default-directory dir))))
 
-  (defun mymy-vterm-copy-hook ()
-    (if vterm-copy-mode
-        (evil-motion-state)
-      (evil-emacs-state)))
+    (defun mymy-vterm-copy-hook ()
+      (if vterm-copy-mode
+          (evil-motion-state)
+        (evil-emacs-state)))
 
-  (defun vterm-directory-sync ()
-    "Synchronize current working directory."
-    (interactive)
-    (when vterm--process
-      (let* ((pid (process-id vterm--process))
-             (dir (file-truename (format "/proc/%d/cwd/" pid))))
-        (setq default-directory dir))))
+    (defun vterm-directory-sync ()
+      "Synchronize current working directory."
+      (interactive)
+      (when vterm--process
+        (let* ((pid (process-id vterm--process))
+               (dir (file-truename (format "/proc/%d/cwd/" pid))))
+          (setq default-directory dir))))
 
-  (defun mymy-vterm-find-file ()
-    "Simple wrapper around"
-    (interactive)
-    (vterm-directory-sync)
-    (call-interactively #'find-file)
-    )
+    (defun mymy-vterm-find-file ()
+      "Simple wrapper around"
+      (interactive)
+      (vterm-directory-sync)
+      (call-interactively #'find-file)
+      )
 
-  (defun mymy-vterm-change-directory-to-last-buffer ()
-    "Change vterm's directory to the directory of the last visited buffer."
-    (interactive)
-    (let* ((last-buffer (other-buffer (current-buffer) t))
-           (last-buffer-dir (with-current-buffer last-buffer
-                              (expand-file-name default-directory))))
-      (when (and (buffer-live-p last-buffer)
-                 (not (eq (buffer-local-value 'major-mode last-buffer) 'vterm-mode)))
-        ;; Space before cd so that in zsh itsn't saved in history
-        (vterm-send-string (concat " cd " (shell-quote-argument last-buffer-dir)))
-        (vterm-send-return))))
+    (defun mymy-vterm-change-directory-to-last-buffer ()
+      "Change vterm's directory to the directory of the last visited buffer."
+      (interactive)
+      (let* ((last-buffer (other-buffer (current-buffer) t))
+             (last-buffer-dir (with-current-buffer last-buffer
+                                (expand-file-name default-directory))))
+        (when (and (buffer-live-p last-buffer)
+                   (not (eq (buffer-local-value 'major-mode last-buffer) 'vterm-mode)))
+          ;; Space before cd so that in zsh itsn't saved in history
+          (vterm-send-string (concat " cd " (shell-quote-argument last-buffer-dir)))
+          (vterm-send-return))))
 
-  ;; Show vterm terminals at the bottom, courtesy of
-  ;; https://github.com/jixiuf/vterm-toggle/issues/33#issuecomment-1098390727
-  (add-to-list 'display-buffer-alist
-               '("\\*vterm"
-                 (display-buffer-reuse-window display-buffer-in-direction)
-                 (direction . top)
-                 (dedicated . t)
-                 (mode . vterm-mode)
-                 (reusable-frames . visible)
-                 (window-height . 0.3)))
+    ;; Show vterm terminals at the bottom, courtesy of
+    ;; https://github.com/jixiuf/vterm-toggle/issues/33#issuecomment-1098390727
+    (add-to-list 'display-buffer-alist
+                 '("\\*vterm"
+                   (display-buffer-reuse-window display-buffer-in-direction)
+                   (direction . top)
+                   (dedicated . t)
+                   (mode . vterm-mode)
+                   (reusable-frames . visible)
+                   (window-height . 0.3)))
 
-  (general-define-key
-   :keymaps 'global
-   "M-<f1>" #'multi-vterm-project
-   "M-<f2>" #'mymy-multi-vterm-dedicated-toggle)
+    (general-define-key
+     :keymaps 'global
+     "M-<f1>" #'multi-vterm-project
+     "M-<f2>" #'mymy-multi-vterm-dedicated-toggle)
 
-  (general-define-key
-   :keymaps 'vterm-mode-map
-   ;; Enter and never allow to go back
-   "C-z" #'vterm--self-insert
-   "C-q" #'vterm-send-next-key
-   ;; For some reason shell side configuration doesn't work
-   "C-x C-f" #'mymy-vterm-find-file
-   "C-c C-d" #'mymy-vterm-change-directory-to-last-buffer
-   )
+    (general-define-key
+     :keymaps 'vterm-mode-map
+     ;; Enter and never allow to go back
+     "C-z" #'vterm--self-insert
+     "C-q" #'vterm-send-next-key
+     ;; For some reason shell side configuration doesn't work
+     "C-x C-f" #'mymy-vterm-find-file
+     "C-c C-d" #'mymy-vterm-change-directory-to-last-buffer
+     )
 
-  (general-define-key
-   :states '(motion emacs)
-   :keymaps 'vterm-mode-map
-   ;; Enter and never allow to go back
-   "C-z" #'vterm--self-insert
-   )
+    (general-define-key
+     :states '(motion emacs)
+     :keymaps 'vterm-mode-map
+     ;; Enter and never allow to go back
+     "C-z" #'vterm--self-insert
+     )
 
-  :hook
-  (vterm-mode . mymy-terminal-configuration-hook)
-  (vterm-copy-mode . mymy-vterm-copy-hook))
+    :hook
+    (vterm-mode . mymy-terminal-configuration-hook)
+    (vterm-copy-mode . mymy-vterm-copy-hook)))
 
-(use-package multi-vterm
-  :unless (mymy-is-android)
-  :after (vterm)
-  :ensure t
-  :init
-  (defun mymy-multi-vterm-dedicated-toggle ()
-    "Toggle dedicated vterm buffer while respecting displa-buffer-alist"
-    (interactive)
-    (let ((dedicated-buffer (multi-vterm-get-buffer 'dedicated)))
-      (if-let (dedicated-window (get-buffer-window dedicated-buffer))
-          (if (eq dedicated-window (selected-window))
-              ;; Shown and focused, delete it
-              (delete-window dedicated-window)
-            ;; Not focused, then focus
-            (select-window dedicated-window))
-        ;; Now shown, then show it
-        (select-window (display-buffer dedicated-buffer)))))
-  )
+(when mymy-is-not-android
+  (use-package multi-vterm
+    :after (vterm)
+    :ensure t
+    :init
+    (defun mymy-multi-vterm-dedicated-toggle ()
+      "Toggle dedicated vterm buffer while respecting displa-buffer-alist"
+      (interactive)
+      (let ((dedicated-buffer (multi-vterm-get-buffer 'dedicated)))
+        (if-let (dedicated-window (get-buffer-window dedicated-buffer))
+            (if (eq dedicated-window (selected-window))
+                ;; Shown and focused, delete it
+                (delete-window dedicated-window)
+              ;; Not focused, then focus
+              (select-window dedicated-window))
+          ;; Now shown, then show it
+          (select-window (display-buffer dedicated-buffer)))))
+    ))
 
 ;; * Python
-(use-package poetry
-  :unless (mymy-is-android)
-  :ensure t
+(when mymy-is-not-android
+  (use-package poetry
+    :ensure t
 ;;; TODO: Need to solve the initial lag when opening a pyhton file.
-  :config
-  ;; This is necessary for anything that uses virtual envs
-  (setenv "WORKON_HOME" "~/.cache/pypoetry/virtualenvs/")
-  (add-to-list 'display-buffer-alist
-               '("\\*poetry\\*"
-                 (display-buffer-no-window)
-                 ))
-  ;; (general-define-key
-  ;;  "C-c c" 'poetry)
-  ;; :hook
-  ;; (python-mode . poetry-tracking-mode)
-  )
+    :config
+    ;; This is necessary for anything that uses virtual envs
+    (setenv "WORKON_HOME" "~/.cache/pypoetry/virtualenvs/")
+    (add-to-list 'display-buffer-alist
+                 '("\\*poetry\\*"
+                   (display-buffer-no-window)
+                   ))
+    ;; (general-define-key
+    ;;  "C-c c" 'poetry)
+    ;; :hook
+    ;; (python-mode . poetry-tracking-mode)
+    ))
 
-(use-package pdf-tools
-  :unless (mymy-is-android)
-  :ensure t
-  :config
-  (pdf-loader-install) ; On demand loading, leads to faster startup time
-  )
+(when mymy-is-not-android
+  (use-package pdf-tools
+    :ensure t
+    :config
+    (pdf-loader-install) ; On demand loading, leads to faster startup time
+    ))
 
 (use-package saveplace-pdf-view
   :ensure t
@@ -3989,9 +3989,9 @@ then go back 1."
   (save-place-mode 1)
   )
 
-(use-package org-noter
-  :unless (mymy-is-android)
-  :after (pdf-tools)
-  :ensure t
-  :config
-  (setq org-noter-doc-split-percentage '(0.7 . 0.3)))
+(when mymy-is-not-android
+  (use-package org-noter
+    :after (pdf-tools)
+    :ensure t
+    :config
+    (setq org-noter-doc-split-percentage '(0.7 . 0.3))))
