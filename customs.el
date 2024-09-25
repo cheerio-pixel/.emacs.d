@@ -7,7 +7,8 @@
  '(haskell-process-type 'cabal-repl)
  '(read-extended-command-predicate #'command-completion-default-include-p)
  '(safe-local-variable-values
-   '((eval setq-local hl-todo--regexp
+   '((checkdoc-package-keywords-flag)
+     (eval setq-local hl-todo--regexp
            (concat "\\["
                    (hl-todo--regexp)
                    "|"))

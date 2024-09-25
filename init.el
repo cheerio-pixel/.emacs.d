@@ -770,6 +770,8 @@ current window."
                                 bookmark
                                 ;; vterm
                                 pdf
+                                compile
+                                comint
                                 sly)))
 
 ;; Integration of lispy with evil
@@ -827,7 +829,9 @@ current window."
         (elisp "https://github.com/Wilfred/tree-sitter-elisp")
         (go "https://github.com/tree-sitter/tree-sitter-go")
         (html "https://github.com/tree-sitter/tree-sitter-html")
-        (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+        ;; (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+        ;; Having problems with identation, see https://github.com/llemaitre19/jtsx/issues/12
+        (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "v0.21.3" "src")
         (json "https://github.com/tree-sitter/tree-sitter-json")
         (make "https://github.com/alemuller/tree-sitter-make")
         (markdown "https://github.com/ikatyang/tree-sitter-markdown")
@@ -879,6 +883,7 @@ current window."
     (setq lsp-auto-execute-action nil)
     (setq lsp-completion-provider :none)
     (setq lsp-signature-function #'lsp-signature-posframe)
+    (setq lsp-semantic-tokens-enable t)
     :config
     (define-key lsp-mode-map (kbd "M-?") #'lsp-find-references)
     (define-key lsp-mode-map (kbd "M-/") #'lsp-find-implementation)
@@ -891,6 +896,31 @@ current window."
     (define-key lsp-signature-mode-map (kbd "C-M-p") #'lsp-signature-previous)
     ;; (define-key lsp-signature-mode-map (kbd "M-n") #'lsp-signature-next)
     ;; (define-key lsp-signature-mode-map (kbd "M-p") #'lsp-signature-previous)
+    ))
+
+(when mymy-is-not-android
+  (use-package lsp-vue
+    :after (lsp-mode)
+    :ensure nil
+    :no-require t
+    :config
+    ;; It seems that now disabling talsp-volar-take-over-modeke over is recommended
+    (setq lsp-volar-take-over-mode nil)
+    ;; (require 'lsp-volar)
+    ;; ;; Also takes over in non vue projects, which is kind of annoying.
+    ;; (el-patch-defun lsp-volar--activate-p (filename &optional _)
+    ;;   "Check if the volar-language-server should be enabled base on FILENAME."
+    ;;   (if lsp-volar-take-over-mode
+    ;;       (or (or
+    ;;            (and (lsp-workspace-root) (lsp-volar--vue-project-p (lsp-workspace-root)))
+    ;;            (and (lsp-workspace-root) lsp-volar-activate-file (f-file-p (f-join (lsp-workspace-root) lsp-volar-activate-file))))
+    ;;           (or (el-patch-remove
+    ;;                 ;; Why would I want a volar server in a non vue project?
+    ;;                 (or (string-match-p "\\.mjs\\|\\.[jt]sx?\\'" filename)
+    ;;                     (and (derived-mode-p 'js-mode 'typescript-mode 'typescript-ts-mode)
+    ;;                          (not (derived-mode-p 'json-mode)))))
+    ;;               (string= (file-name-extension filename) "vue")))
+    ;;     (string= (file-name-extension filename) "vue")))
     ))
 
 ;; (use-package lsp-snippet-tempel
@@ -1000,7 +1030,34 @@ current window."
     (add-hook 'haskell-mode-hook #'lsp)
     (add-hook 'haskell-literate-mode-hook #'lsp)
     (setenv "PATH" (concat (getenv "PATH") ":" (expand-file-name "~/.ghcup/bin/")))
+    ;; (setq lsp-haskell-server-args `("-d" "-l" ,lsp-haskell-server-log-file))
     (setq lsp-haskell-server-path (expand-file-name "~/.ghcup/bin/haskell-language-server-wrapper"))))
+
+
+(comment
+ (lsp-register-client
+  (make-lsp--client
+   :new-connection (lsp-stdio-connection (lambda () (expand-file-name "~/.cabal/bin/static-ls")))
+   ;; Should run under haskell-mode, haskell-literate-mode and haskell-tng-mode. We need to list haskell-literate-mode even though it's a derived mode of haskell-mode.
+   :major-modes '(haskell-mode haskell-literate-mode haskell-tng-mode haskell-cabal-mode)
+   ;; This is arbitrary.
+   :server-id 'static-ls-haskell
+   ;; :synchronize-sections '("haskell")
+   ;; This is somewhat irrelevant, but it is listed in lsp-language-id-configuration, so
+   ;; we should set something consistent here.
+   :language-id "haskell"
+   ;; :completion-in-comments? lsp-haskell-completion-in-comments
+   ;; :action-filter #'lsp-haskell--action-filter
+   :priority 1
+   )))
+
+(when mymy-is-not-android
+  (add-hook 'html-mode-hook #'lsp)
+  (add-hook 'tsx-ts-mode-hook #'lsp)
+  (add-hook 'typescript-ts-mode-hook #'lsp)
+  (add-hook 'js-mode-hook #'lsp)
+  (add-hook 'js-ts-mode-hook #'lsp)
+  )
 
 (when mymy-is-not-android
   (use-package dap-mode
@@ -1103,7 +1160,15 @@ current window."
     :ensure t
     :config
     (define-key haskell-mode-map [f8] 'haskell-navigate-imports)
+    (define-key haskell-mode-map (kbd "C-c C-c") 'haskell-compile)
+    ;; (define-key interactive-haskell-mode-map (kbd "C-c C-c") 'haskell-compile)
+    ;; (gsetq haskell-process-type 'cabal-repl)
+    ;; For some reason, when I'm not using auto is not setting the root dir
+    ;; of the project. Maybe is due to the fact that the function version
+    ;; of this variable doesn't set inferior-haskell-root-dir
+    (gsetq haskell-process-type 'auto)
     (custom-set-variables '(haskell-process-type 'cabal-repl))))
+
 
 ;; * Magit
 (when mymy-is-not-android
@@ -1193,12 +1258,35 @@ current window."
   :ensure t
   ;; TODO: Come here later
   :init
+  (setq projectile-keymap-prefix (kbd "C-c k"))
+
+  (defun mymy-search-upwards-with-ripgrep (dir glob-pattern)
+    "Search for a file matching GLOB-PATTERN from DIR upwards using ripgrep.
+If ripgrep is not available, fall back to `locate-dominating-file`.
+Return the directory of the file if found, or nil if not found."
+    ;; TODO: Fix this, doesnt work for some reason when used many times
+    (if (or t (not (executable-find "rg")))
+        (projectile-locate-dominating-file dir glob-pattern)
+      (let* ((expanded-dir (expand-file-name dir))
+             (dir-to-use (if (file-directory-p expanded-dir)
+                             expanded-dir
+                           (file-name-directory expanded-dir)))
+             (home-dir (expand-file-name "~"))
+             (search-command
+              (concat "dir=" (shell-quote-argument dir-to-use)
+                      "; while [[ $dir != " (shell-quote-argument home-dir) " ]]; do "
+                      "rg --files --max-depth 1 -g " (shell-quote-argument glob-pattern)
+                      " \"$dir\" --max-count 1 && exit 0; dir=$(dirname \"$dir\"); done"))
+             (output (shell-command-to-string search-command)))
+        (if (string-empty-p (string-trim output))
+            nil
+          (file-name-directory (string-trim output))))))
 
   (defun mymy-projectile-root-csharp (dir)
     "Retrieve the root directory of a C# project in DIR.
 This function gives priority to .sln files over .csproj files."
-    (let ((root (or (projectile-locate-dominating-file dir "*.sln")
-                    (projectile-locate-dominating-file dir "*.csproj"))))
+    (let ((root (or (mymy-search-upwards-with-ripgrep dir "*.sln")
+                    (mymy-search-upwards-with-ripgrep dir "*.csproj"))))
       (and root (expand-file-name root))))
   ;; This is my fault, but some projects are just not git repositories so I
   ;; have to do some preprocesing in emacs to compensate.
@@ -1212,6 +1300,15 @@ This function gives priority to .sln files over .csproj files."
   (setq projectile-completion-system 'auto)
   (setq projectile-enable-caching t)
   :config
+  (setq projectile-run-use-comint-mode t)
+  (define-key projectile-command-map
+              (kbd ".")
+              #'projectile-repeat-last-command
+              )
+
+  (define-key projectile-mode-map projectile-keymap-prefix 'projectile-command-map)
+  ;; (global-set-key projectile-keymap-prefix projectile-command-map)
+
   (setq projectile-project-root-functions
         '(projectile-root-local
           projectile-root-marked
@@ -1245,6 +1342,9 @@ This function gives priority to .sln files over .csproj files."
   ;;              #'not-mymy-find-nearest-chsarp-project t)
   ;; (add-to-list 'projectile-project-root-files
   ;;              "*.sln")
+
+  ;; (benchmark-run 10
+  ;;   (projectile-open-projects))
 
   ;; From https://emacs.stackexchange.com/a/71165
   (defun smart-switch-project ()
@@ -1388,9 +1488,14 @@ This function gives priority to .sln files over .csproj files."
       (define-key (kbd "D") #'projectile-dired)
       (define-key (kbd "i") #'projectile-invalidate-cache)
       (define-key (kbd "k") #'projectile-kill-buffers)
-      (define-key (kbd "r") #'projectile-replace)
-      (define-key (kbd "R") #'projectile-replace-regexp)
-      (define-key (kbd "g") #'consult-ripgrep)))
+      ;; (define-key (kbd "r") #'projectile-replace)
+      ;; (define-key (kbd "R") #'projectile-replace-regexp)
+      (define-key (kbd "g") #'consult-ripgrep)
+      (define-key (kbd "c") #'projectile-compile-project)
+      (define-key (kbd "t") #'projectile-test-project)
+      (define-key (kbd "r") #'projectile-run-project)
+      (define-key (kbd ".") #'projectile-repeat-last-command)
+      ))
 
   (general-define-key
    :states '(normal motion visual)
@@ -2575,71 +2680,55 @@ By default, all subentries are counted; restrict with LEVEL."
               ("u" . org-agenda-previous-line))
   :init
   (setq mymy-org-agenda-tags-width 0)
-  (setq org-agenda-custom-commands
-        '(("n" . "Custom commands")
-          ("no" "Notes" tags "notes"
-           ((org-tags-match-list-sublevels t))
-           )
-          ("nn" "Simple NEXT list"
-           ((todo "NEXT"
-                  ((org-agenda-overriding-header "")
-                   (org-super-agenda-groups
-                    ;; I know that is not necessary to specify the todo
-                    ;; type since its already specified. Is just
-                    ;; redundancy.
-                    '(( :name "Scheduled"
-                        :and ( :todo "NEXT"
-                               :scheduled t
-                               )
-                        )
-                      ( :name "Floating tasks"
-                        :todo "NEXT")
-                      (:discard (:anything t))))))))
-          ("nh" "Homework NEXT list"
-           ((;; tags-todo "school"
-             agenda ""
-             ((org-agenda-overriding-header "")
-              (org-agenda-span 1)
-              (org-agenda-sorting-strategy
-               (quote ((agenda time-up priority-down tag-up))))
-              ;; (org-deadline-warning-days 0)
-              (org-super-agenda-groups
-               ;; I know that is not necessary to specify the todo
-               ;; type since its already specified. Is just
-               ;; redundancy.
-               '((:name "Scheduled"
-                        :and (:todo "NEXT"
-                                    :scheduled t))
-                 (:name "Now"
-                        :todo "NEXT")
-                 (:name "Later"
-                        :anything t))))))
-           ((org-agenda-tag-filter-preset '("+school"))))
-          ("nt" "Agenda and all TODOs"
-           ((agenda #1="")
-            ;; (agenda "" ((org-agenda-overriding-header (mymy-get-count-of-tags))
-            ;;             ;; No time grid
-            ;;             (org-agenda-time-grid nil)
-            ;;             ;; Delete the date
-            ;;             (org-agenda-format-date (lambda (x) (ignore x) ""))
-            ;;             ))
-            (alltodo #1#)))
-          ("o" "Agenda for today" ;; agenda ""
-           ((todo "TODO"
-                  ((org-agenda-overriding-header "")
-                   (org-super-agenda-groups
-                    '((:name "Homework"
-                             :and (:todo ("TODO" "NEXT") :tag "school"))
-                      (:discard (:anything t))))))
-            (agenda "" ((org-agenda-span 'day)
-                        (org-agenda-overriding-header "Today's agenda")))
-            (todo "NEXT"
-                  ((org-agenda-overriding-header "")
-                   (org-super-agenda-groups
-                    '((:name "Floating tasks"
-                             :and (:todo "NEXT" :scheduled nil))
-                      (:discard (:anything t)))))))
-           ((org-agenda-compact-blocks nil)))))
+  (defconst mymy-org-agenda-custom-commands-file
+    (expand-file-name
+     "agenda-views.eld"
+     mymy-organization-system-directory-text
+     )
+    )
+  (defvar mymy-org-agenda-custom-commands-timestamp nil
+    "Timestamp for `org-agenda-custom-commands'")
+
+  (defun mymy-org-agenda-load-file (file)
+    ;; Taken from tempel
+    (with-temp-buffer
+      (insert "(\n")
+      (insert-file-contents file)
+      (goto-char (point-max))
+      (insert "\n)")
+      (goto-char (point-min))
+      (read (current-buffer))))
+
+  (defun mymy-org-agenda-reload-file (file old-timestamp)
+    (let ((new-timestamp
+           (time-convert
+            (file-attribute-modification-time
+             (file-attributes (file-truename file)))
+            'integer)))
+      (unless (and
+               old-timestamp
+               (equal
+                old-timestamp
+                new-timestamp))
+        `(,new-timestamp . ,(mymy-org-agenda-load-file file)))))
+
+  (defun mymy-org-agenda-commands-maybe-reload (&rest ignore)
+    (when-let ((result (mymy-org-agenda-reload-file
+                        mymy-org-agenda-custom-commands-file
+                        mymy-org-agenda-custom-commands-timestamp)))
+      (setq
+       mymy-org-agenda-custom-commands-timestamp
+       (car result))
+      (setq
+       org-agenda-custom-commands
+       (cdr result))
+      result))
+
+  (advice-add #'org-agenda :before #'mymy-org-agenda-commands-maybe-reload)
+
+  ;; (setq org-agenda-custom-commands
+  ;;       (mymy-org-agenda-load-file mymy-org-agenda-custom-commands-file)
+  ;;       )
 
   ;; Previously called org-agenda-ndays
   ;; (setq org-agenda-span 1)
@@ -2913,7 +3002,8 @@ then go back 1."
    "R" #'denote-rename-file-using-front-matter
    )
 
-  (global-set-key (kbd "C-c m") mymy-denote-map))
+  ;; (global-set-key (kbd "C-c m") mymy-denote-map)
+  )
 
 ;; * Todo
 (use-package hl-todo
@@ -3478,6 +3568,55 @@ then go back 1."
     (add-hook 'vue-web-mode-hook #'mymy-vue-hook)
     (add-hook 'php-web-mode-hook #'lsp)))
 
+(when mymy-is-not-android
+  (use-package jtsx
+    :ensure t
+    :mode (("\\.jsx?\\'" . jtsx-jsx-mode)
+           ("\\.tsx\\'" . jtsx-tsx-mode)
+           ("\\.ts\\'" . jtsx-typescript-mode))
+    :commands jtsx-install-treesit-language
+    :hook ((jtsx-jsx-mode . hs-minor-mode)
+           (jtsx-tsx-mode . hs-minor-mode)
+           (jtsx-typescript-mode . hs-minor-mode))
+    :config
+    ;; Optional customizations
+    (gsetq js-indent-level 2)
+    (gsetq typescript-ts-mode-indent-offset 4)
+    (gsetq jtsx-switch-indent-offset 0)
+    (gsetq jtsx-indent-statement-block-regarding-standalone-parent nil)
+    (gsetq jtsx-jsx-element-move-allow-step-out t)
+    (gsetq jtsx-enable-jsx-electric-closing-element t)
+    (gsetq jtsx-enable-electric-open-newline-between-jsx-element-tags t)
+    (gsetq jtsx-enable-jsx-element-tags-auto-sync nil)
+    (gsetq jtsx-enable-all-syntax-highlighting-features t)
+    (defun jtsx-bind-keys-to-mode-map (mode-map)
+      "Bind keys to MODE-MAP."
+      (define-key mode-map (kbd "C-c C-j") 'jtsx-jump-jsx-element-tag-dwim)
+      (define-key mode-map (kbd "C-c j o") 'jtsx-jump-jsx-opening-tag)
+      (define-key mode-map (kbd "C-c j c") 'jtsx-jump-jsx-closing-tag)
+      (define-key mode-map (kbd "C-c j r") 'jtsx-rename-jsx-element)
+      (define-key mode-map (kbd "C-c <down>") 'jtsx-move-jsx-element-tag-forward)
+      (define-key mode-map (kbd "C-c <up>") 'jtsx-move-jsx-element-tag-backward)
+      (define-key mode-map (kbd "C-c C-<down>") 'jtsx-move-jsx-element-forward)
+      (define-key mode-map (kbd "C-c C-<up>") 'jtsx-move-jsx-element-backward)
+      (define-key mode-map (kbd "C-c C-S-<down>") 'jtsx-move-jsx-element-step-in-forward)
+      (define-key mode-map (kbd "C-c C-S-<up>") 'jtsx-move-jsx-element-step-in-backward)
+      (define-key mode-map (kbd "C-c j w") 'jtsx-wrap-in-jsx-element)
+      (define-key mode-map (kbd "C-c j u") 'jtsx-unwrap-jsx)
+      (define-key mode-map (kbd "C-c j d") 'jtsx-delete-jsx-node)
+      (define-key mode-map (kbd "C-c j t") 'jtsx-toggle-jsx-attributes-orientation)
+      (define-key mode-map (kbd "C-c j h") 'jtsx-rearrange-jsx-attributes-horizontally)
+      (define-key mode-map (kbd "C-c j v") 'jtsx-rearrange-jsx-attributes-vertically))
+    (defun jtsx-bind-keys-to-jtsx-jsx-mode-map ()
+      (jtsx-bind-keys-to-mode-map jtsx-jsx-mode-map))
+
+    (defun jtsx-bind-keys-to-jtsx-tsx-mode-map ()
+      (jtsx-bind-keys-to-mode-map jtsx-tsx-mode-map))
+
+    (add-hook 'jtsx-jsx-mode-hook 'jtsx-bind-keys-to-jtsx-jsx-mode-map)
+    (add-hook 'jtsx-tsx-mode-hook 'jtsx-bind-keys-to-jtsx-tsx-mode-map))
+  )
+
 ;; * Ispell/Aspell
 (when mymy-is-not-android
   (use-package ispell
@@ -4034,3 +4173,88 @@ then go back 1."
     :ensure t
     :config
     (setq org-noter-doc-split-percentage '(0.7 . 0.3))))
+
+
+;; * Scala
+(when mymy-is-not-android
+  (use-package scala-mode
+    :ensure t
+    :interpreter
+    ("scala" . scala-mode)
+    :config
+    (defun mymy-scala-hook ()
+      (add-to-list
+       'compilation-error-regexp-alist-alist
+       '(scala-stacktrace
+         "^\\[error\\] \\([.a-zA-Z0-9_/\\\\-]+[.scala]\\):\\([0-9]+\\):\\([0-9]+\\):"
+         1 2 3 2 1)
+       )
+      (add-to-list
+       'compilation-error-regexp-alist
+       'scala-stacktrace
+       )
+      )
+    (with-eval-after-load 'projectile
+      (projectile-register-project-type 'mymysbt '("build.sbt")
+                                        :project-file "build.sbt"
+                                        :src-dir "main"
+                                        :test-dir "test"
+                                        :compile "sbtn compile"
+                                        :test "sbtn test"
+                                        :test-suffix "Spec")
+      )
+    :hook
+    (scala-mode . mymy-scala-hook)
+    (scala-mode . lsp)
+    (sbt-mode . mymy-scala-hook)
+    )
+  ;; (use-package scala-ts-mode
+  ;;   :ensure t
+  ;;   :config
+  ;;   (defun mymy-scala-ts-hook ()
+  ;;     (setq-local treesit-font-lock-level 4)
+  ;;     )
+
+  ;;   (add-hook 'scala-ts-mode-hook #'mymy-scala-ts-hook)
+  ;;   )
+
+
+  (use-package sbt-mode
+    :ensure t
+    :commands sbt-start sbt-command
+    ;; :config
+    ;; WORKAROUND: allows using SPACE when in the minibuffer
+    ;; (substitute-key-definition
+    ;;  'minibuffer-complete-word
+    ;;  'self-insert-command
+    ;;  minibuffer-local-completion-map)
+
+    ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
+    ;; (setq sbt:program-options '("-Dsbt.supershell=false"))
+    )
+  ;; Add metals backend for lsp-mode
+  (use-package lsp-metals
+    :after (lsp scala-mode)
+    :ensure t
+    :config
+    (gsetq lsp-metals-server-command
+           (expand-file-name
+            "~/.local/bin/metals"
+            )
+           )
+    ;; You might set metals server options via -J arguments. This might not always work, for instance when
+    ;; metals is installed using nix. In this case you can use JAVA_TOOL_OPTIONS environment variable.
+    (gsetq lsp-metals-server-args '(;; Metals claims to support range formatting by default but it supports range
+                                    ;; formatting of multiline strings only. You might want to disable it so that
+                                    ;; emacs can use indentation provided by scala-mode.
+                                    "-J-Dmetals.allow-multiline-string-formatting=off"
+                                    ;; Enable unicode icons. But be warned that emacs might not render unicode
+                                    ;; correctly in all cases.
+                                    "-J-Dmetals.icons=unicode"))
+    ;; In case you want semantic highlighting. This also has to be enabled in lsp-mode using
+    ;; `lsp-semantic-tokens-enable' variable. Also you might want to disable highlighting of modifiers
+    ;; setting `lsp-semantic-tokens-apply-modifiers' to `nil' because metals sends `abstract' modifier
+    ;; which is mapped to `keyword' face.
+    ;; (gsetq lsp-metals-enable-semantic-highlighting t)
+    )
+  )
