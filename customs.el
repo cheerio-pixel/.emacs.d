@@ -7,17 +7,40 @@
  '(haskell-process-type 'cabal-repl)
  '(read-extended-command-predicate #'command-completion-default-include-p)
  '(safe-local-variable-values
-   '((checkdoc-package-keywords-flag)
+   '((eval spec-keywords 1)
+     (elisp-lint-indent-specs
+      (describe . 1)
+      (it . 1)
+      (thread-first . 0)
+      (cl-flet . 1)
+      (cl-flet* . 1)
+      (org-element-map . defun)
+      (org-roam-dolist-with-progress . 2)
+      (org-roam-with-temp-buffer . 1)
+      (org-with-point-at . 1)
+      (magit-insert-section . defun)
+      (magit-section-case . 0)
+      (org-roam-with-file . 2))
+     (elisp-lint-ignored-validators "byte-compile" "package-lint")
+     (org-tag-alist
+      (:startgroup)
+      ("@phone")
+      ("@pc")
+      (:endgroup)
+      ("ARCHIVE")
+      ("resources")
+      ("projects")
+      ("watch")
+      ("math")
+      ("extras")
+      ("additions")
+      ("references")
+      ("readings")
+      ("movies"))
      (eval setq-local hl-todo--regexp
            (concat "\\["
                    (hl-todo--regexp)
                    "|"))
-     (cov-lcov-file-name . "./test/ProyectoFinal.Domain.Tests/coverage.info")
-     (package-lint-main-file . "haskell-mode.el")
-     (etags-regen-ignores "test/manual/etags/")
-     (etags-regen-regexp-alist
-      (("c" "objc")
-       "/[ \11]*DEFVAR_[A-Z_ \11(]+\"\\([^\"]+\\)\"/\\1/" "/[ \11]*DEFVAR_[A-Z_ \11(]+\"[^\"]+\",[ \11]\\([A-Za-z0-9_]+\\)/\\1/"))
      (org-tag-alist
       (:startgroup)
       ("@phone")
@@ -32,6 +55,7 @@
       ("additions")
       ("references")
       ("readings"))
+     (org-export-initial-scope . buffer)
      (mymy-org-default-export-directory . "~/Dropbox (Maestral)/org/artifacts/"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

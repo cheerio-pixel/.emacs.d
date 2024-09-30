@@ -142,6 +142,8 @@ FILTER-FN: Takes a plist of an object and returns true."
   (interactive)
   (switch-to-buffer nil))
 
+
+
 (defun new-line-dwim ()
   (interactive)
   (let ((break-open-pair (or (and (looking-back "{") (looking-at "}"))
@@ -149,7 +151,11 @@ FILTER-FN: Takes a plist of an object and returns true."
                              (and (looking-back "(") (looking-at ")"))
                              (and (looking-back "\\[") (looking-at "\\]")))))
     (cond
-     ((save-excursion (comment-beginning))
+     (;; (save-excursion (comment-beginning))
+      (condition-case nil
+          (save-excursion
+            (comment-beginning))
+        (error nil))
       (call-interactively #'default-indent-new-line)
       )
      (t

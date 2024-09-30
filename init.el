@@ -324,6 +324,7 @@
   ;; * Lib Requeries
   (require 'functions.el)
   (require 'vars.el)
+  (require 'spec-keywords)
 
   (defcustom powerline-buffer-size-suffix t
     "Display the buffer size suffix."
@@ -745,6 +746,7 @@ current window."
   (setq evil-insert-state-cursor '(bar "#00FF00")
         evil-visual-state-cursor '(box "#FF00FF")
         evil-normal-state-cursor '(hollow "#E2E8EF")))
+
 
 ;; Extensions with evil and others
 (use-package evil-collection
@@ -2082,6 +2084,17 @@ It is essentially the element include but with args."
 (use-package org
   :after doct org-contrib
   :init
+  ;; See C-c C-u, C-c C-b, C-c C-p, C-c C-n
+  ;; (with-eval-after-load 'evil
+  ;;   (with-eval-after-load 'general
+  ;;     (general-define-key
+  ;;      :keymaps 'outline-mode-map
+  ;;      :state '(normal visual motion)
+  ;;      "gb" 'org-back-to-heading
+  ;;      "gB" 'mymy-org-back-to-heading
+  ;;      )
+  ;;     )
+  ;;   )
   ;; (setq org-export-publishing-directory "./artifacts")
   (gsetq org-file-apps
          '((auto-mode . emacs)
@@ -2093,11 +2106,14 @@ It is essentially the element include but with args."
 
   (gsetq org-directory (expand-file-name "text/" mymy-organization-system-directory))
 
-  (setq mymy-org-gtd-file "2023-12-23_GTD.org")
-  (setq mymy-org-inbox-file "2023-12-26_inbox.org")
-  (setq mymy-org-projects-file "2024-01-05_projects.org")
-  (setq mymy-org-done-file "2024-01-09_done.org")
+  (setq mymy-org-gtd-file "20240928T212555--gtd.org")
+  (setq mymy-org-inbox-file "20240929T081115--inbox.org")
+  (setq mymy-org-projects-file "20240112T082246--projects.org")
+  (setq mymy-org-done-file "20240910T103629--done.org")
   (setq mymy-org-school-file "20240117T132013--school.org")
+  (setq org-agenda-file-regexp "\\`[^.][0-9]*T[0-9]*--.*\\.org\\'")
+  ;; (setq org-agenda-file-regexp "\\`[^.].*\\.org\\'")
+
   (gsetq org-agenda-files
          (list org-directory)
          ;; (list mymy-org-gtd-file
@@ -2148,7 +2164,13 @@ It is essentially the element include but with args."
                         ":END:"
                         ""
                         "- What to do"
-                        "  "))
+                        ""
+                        "  "
+                        ""
+                        "- Why do it"
+                        ""
+                        " "
+                        ))
             ("Documentation" :keys "d"
              :type entry
              :file ,mymy-org-inbox-file
@@ -2165,36 +2187,44 @@ It is essentially the element include but with args."
                         ""
                         "  ACTION ")
              :children (("Standard" :keys "d")))
-            ("Homework" :keys "h"
-             :type entry
-             :file ,mymy-org-school-file
-             :headline "Inbox"
-             :template ("* TODO %? [/]"
-                        ":PROPERTIES:"
-                        ":CREATED: %<%Y-%m-%d-%H-%M-%S>"
-                        ":END:"
-                        ""
-                        "DEADLINE: %^{Deadline}T"
-                        "SCHEDULED: %^{Scheduled}t"
-                        ""
-                        "- Tasks"
-                        "  - [ ] "
-                        ""
-                        "- Assignment"
-                        ""
-                        "  "
-                        )
-             )
-            ("Note" :keys "n"
-             :type entry
-             :file ,mymy-org-inbox-file
-             :headline "Notes"
-             :template ("* %? :notes:"
-                        ":PROPERTIES:"
-                        ":CREATED: %<%Y-%m-%d-%H-%M-%S>"
-                        ":END:"
-                        ""
-                        "- Elements: Content, Concept, Composition. Main idea, Examples, Related")))))
+            ;; I don't have that many, and have reached a workflow where I
+            ;; manually create this things in the tasks.
+            ;; ("Homework" :keys "h"
+            ;;  :type entry
+            ;;  :file ,mymy-org-school-file
+            ;;  :headline "Inbox"
+            ;;  :template ("* TODO %? [/]"
+            ;;             ":PROPERTIES:"
+            ;;             ":CREATED: %<%Y-%m-%d-%H-%M-%S>"
+            ;;             ":END:"
+            ;;             ""
+            ;;             "DEADLINE: %^{Deadline}T"
+            ;;             "SCHEDULED: %^{Scheduled}t"
+            ;;             ""
+            ;;             "- Tasks"
+            ;;             "  - [ ] "
+            ;;             ""
+            ;;             "- Assignment"
+            ;;             ""
+            ;;             "  "
+            ;;             )
+            ;;  )
+
+            ;; I have achived another workflow where all of this things are
+            ;; worked out after creating the node. So the note is just the
+            ;; content, other notes can surround it and append the other
+            ;; elements.
+            ;; ("Note" :keys "n"
+            ;;  :type entry
+            ;;  :file ,mymy-org-inbox-file
+            ;;  :headline "Notes"
+            ;;  :template ("* %? :notes:"
+            ;;             ":PROPERTIES:"
+            ;;             ":CREATED: %<%Y-%m-%d-%H-%M-%S>"
+            ;;             ":END:"
+            ;;             ""
+            ;;             "- Elements: Content, Concept, Composition. Main idea, Examples, Related"))
+            )))
 
   ;; Org define keys (:prefix C-c o)
   (general-define-key
@@ -2203,11 +2233,13 @@ It is essentially the element include but with args."
    "w" 'hydra-org-web-tools/body
    "a" 'org-agenda
    "t" 'mymy-org-clock-toggle
+   "s" 'my/org-agenda-rest
    )
   (general-define-key
    "<f12>" 'org-agenda
    "C-c a" 'org-agenda
    "C-c c" 'org-capture
+   "C-c s" 'my/org-agenda-rest
    )
 
   ;; Set indentation level one to one with src declaration
@@ -2361,9 +2393,45 @@ By default, all subentries are counted; restrict with LEVEL."
      (java . t)
      (csharp . t)
      (lisp . t)
+     (shell . t)
      ;; (restclient . t)
      ))
   :config
+  (defcustom mymy-org-run-commands '(("drg" . "/usr/bin/dragon-drop %n")
+                                     ("pdf" . "/usr/bin/zathura %n")
+                                     )
+    "List of alist of the form (NAME . COMMAND) where COMMAND is template that takes:
+%n for the name of the file.
+
+COMMAND will be run asynchronously")
+
+  (defun mymy-org-run-command-on-current-pdf (&optional arg)
+    (interactive "P")
+    (let ((target (expand-file-name (org-export-output-file-name ".pdf" (null arg)))))
+      (unless (file-exists-p target)
+        (org-latex-export-to-pdf nil t))
+      (when-let (process (alist-get
+                          (completing-read "Command to run: "
+                                           mymy-org-run-commands
+                                           nil t)
+                          mymy-org-run-commands
+                          nil nil #'equal)
+                         )
+        (let ((display-buffer-alist (cons (list shell-command-buffer-name-async
+                                                '(display-buffer-no-window))
+                                          display-buffer-alist)))
+          (async-shell-command
+           (format-spec
+            process
+            `((?n . ,(shell-quote-argument target)))))))))
+
+  (with-eval-after-load 'general
+    (general-define-key
+     :keymaps 'org-mode-map
+     "C-c v" #'mymy-org-run-command-on-current-pdf
+     )
+    )
+
   (org-link-set-parameters
    "attach"
    :follow (lambda (filename)
@@ -2617,13 +2685,14 @@ By default, all subentries are counted; restrict with LEVEL."
           ("TODO" . (:foreground "#F09432" :weight bold))
           ("KILL" . (:foreground "red" :weight bold))
           ("SOMEDAY" . (:foreground "#F09432" :weight italics))
+          ("OTHER" . (:foreground "yellow" :weight bold))
           ;; PROJect, as in something without a clear goal
           ;; ("PROJ" . (:foreground "white" :weight bold))
           ))
 
   (setq org-todo-keywords
-        '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(s)")
-          (type "KILL(k)" "SOMEDAY(o)")
+        '((sequence "TODO(t@/!)" "NEXT(n@/!)" "OTHER(h@/!)" "|" "DONE(s@/!)")
+          (type "KILL(k@/!)" "SOMEDAY(o@/)")
           ;; (type "PROJ(p)")
           ))
 
@@ -2647,11 +2716,25 @@ By default, all subentries are counted; restrict with LEVEL."
                                      python-shell-interpreter "python3"))))
 
 (when mymy-is-not-android
+  (use-package emacsql
+    :ensure t
+    :config
+    (emacsql-fix-vector-indentation)
+    )
   (use-package org-roam
+    :after (emacsql)
     :ensure t
     :init
     (setq org-roam-directory (expand-file-name
                               mymy-organization-system-directory-text))
+    (setq org-roam-dailies-directory "daily/")
+    (setq org-roam-capture-templates
+          '(("d" "default" plain "%?"
+             ;; Denote timestamp
+             :target (file+head "%<%Y%m%dT%H%M%S>--${slug}.org"
+                                "#+title: ${title}\n")
+             :unnarrowed t))
+          )
     :config
     (general-define-key
      :keymap 'global
@@ -2679,6 +2762,15 @@ By default, all subentries are counted; restrict with LEVEL."
               ("n" . org-agenda-next-line)
               ("u" . org-agenda-previous-line))
   :init
+  (setq org-agenda-skip-function-global
+        '(org-agenda-skip-entry-if 'todo '("KILL"))
+        )
+  (general-define-key
+   :states '(normal motion visual)
+   :keymaps 'org-agenda-mode-map
+   "C-<tab>" 'org-agenda-show-and-scroll-up
+   )
+
   (setq mymy-org-agenda-tags-width 0)
   (defconst mymy-org-agenda-custom-commands-file
     (expand-file-name
@@ -2686,6 +2778,7 @@ By default, all subentries are counted; restrict with LEVEL."
      mymy-organization-system-directory-text
      )
     )
+
   (defvar mymy-org-agenda-custom-commands-timestamp nil
     "Timestamp for `org-agenda-custom-commands'")
 
@@ -2725,6 +2818,27 @@ By default, all subentries are counted; restrict with LEVEL."
       result))
 
   (advice-add #'org-agenda :before #'mymy-org-agenda-commands-maybe-reload)
+
+  ;; Modified what is necessary
+  ;; https://www.reddit.com/r/emacs/comments/yfqq6g/comment/iujgmh3/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+  ;; Why is the name so weird?
+  (defun my/org-agenda-rest (&optional arg)
+    "Prompt to select a custom agenda view and display the agenda,
+bypassing the dispatch buffer."
+    (interactive "P")
+    (when arg (org-check-for-org-mode))
+    (let* ((views
+            (cl-loop for (key . body) in org-agenda-custom-commands
+                     ;; Skip leader keys, which have no body
+                     when (consp body)
+                     collect (cons (car body) key)
+                     ))
+           (view (alist-get (completing-read "Select an agenda view: " views) views nil nil #'equal))
+           (restr (pcase current-prefix-arg
+                    ('(4) 'buffer)
+                    ('(16) 'subtree)
+                    (_ nil))))
+      (org-agenda nil view restr)))
 
   ;; (setq org-agenda-custom-commands
   ;;       (mymy-org-agenda-load-file mymy-org-agenda-custom-commands-file)
@@ -2796,7 +2910,11 @@ By default, all subentries are counted; restrict with LEVEL."
    :prefix "SPC"
    "o p" 'org-pomodoro
    "o c" 'org-capture
-   "o a" 'org-agenda))
+   "o a" 'org-agenda
+   "o i" 'org-clock-in
+   "o o" 'org-clock-out
+   "o g" 'org-clock-goto
+   ))
 
 (use-package org-superstar
   :after org
@@ -2894,6 +3012,7 @@ By default, all subentries are counted; restrict with LEVEL."
 
 ;;* Denote
 (use-package denote
+  :defer 5
   :ensure t
   :hook (;; Note: Only works on files that have an identifier on their
          ;; filename
