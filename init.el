@@ -477,6 +477,12 @@ current window."
        word
        paddings))
     )
+
+  (add-to-list 'display-buffer-alist '("\\*WoMan *"
+                                       (display-buffer-reuse-window display-buffer-in-direction)
+                                       (direction . bottom)
+                                       (window-height . 0.4)
+                                       ))
   )
 
 (use-package saveplace
@@ -898,6 +904,14 @@ current window."
     (define-key lsp-signature-mode-map (kbd "C-M-p") #'lsp-signature-previous)
     ;; (define-key lsp-signature-mode-map (kbd "M-n") #'lsp-signature-next)
     ;; (define-key lsp-signature-mode-map (kbd "M-p") #'lsp-signature-previous)
+    (setq lsp-clients-angular-language-server-command
+          '("node"
+            "/usr/lib/node_modules/@angular/language-server"
+            "--ngProbeLocations"
+            "/usr/lib/node_modules"
+            "--tsProbeLocations"
+            "/usr/lib/node_modules"
+            "--stdio"))
     ))
 
 (when mymy-is-not-android
@@ -979,9 +993,14 @@ current window."
     (python-ts-mode . mymy-python-lsp-hook)))
 
 (use-package lsp-omnisharp
+  :after (lsp-mode)
   :ensure nil
   :no-require t
   :config
+  (setq
+   lsp-csharp-server-path
+   (lsp-package-path 'omnisharp-roslyn)
+   )
 
   (setenv "DOTNET_RUNTIME_ID" "linux-x64")
   :hook (csharp-ts-mode . lsp))
@@ -1013,10 +1032,52 @@ current window."
     (add-hook 'java-mode-hook 'lsp)
     (add-hook 'java-ts-mode-hook 'lsp)
 
+    (defconst mymy-lsp-java-jvm-locations "/usr/lib/jvm"
+      "Path to the directory with all java sdk"
+      )
+
+    (gsetq
+     lsp-java-java-path
+     (expand-file-name
+      "bin/java"
+      (getenv "JAVA_HOME")
+      )
+     )
+
+    (gsetq
+     lsp-java-import-gradle-java-home
+     (getenv "JAVA_HOME")
+     )
+
+    ;; (gsetq
+    ;;  lsp-java-configuration-runtimes
+    ;;  []
+    ;;  )
+
+    (gsetq
+     lsp-java-configuration-runtimes
+     [( :name "JavaSE-17"
+        :path "/usr/lib/jvm/java-17-openjdk"
+        :default t)
+      ( :name "JavaSE-11"
+        :path "/usr/lib/jvm/java-11-openjdk")
+      ( :name "JavaSE-1.8"
+        :path "/usr/lib/jvm/java-8-openjdk")
+      ;; ( :name "JavaSE-21"
+      ;;   :path "/usr/lib/jvm/java-21-openjdk")
+      ;; ( :name "JavaSE-22"
+      ;;   :path "/usr/lib/jvm/java-22-openjdk")
+      ])
+
     (gsetq
      lsp-java-compile-null-analysis-mode
      "interactive "
      )
+    (gsetq lsp-java-imports-gradle-wrapper-checksums
+           [( :sha256 "ebb6eaf164c425ffe76f9744a324feb774e750d821ed212d4c41f452adea248e"
+              :allowed t)
+            ]
+           )
     ))
 
 (when mymy-is-not-android
@@ -1302,6 +1363,8 @@ This function gives priority to .sln files over .csproj files."
   (setq projectile-completion-system 'auto)
   (setq projectile-enable-caching t)
   :config
+  (gsetq projectile-create-missing-test-files
+         t)
   (setq projectile-run-use-comint-mode t)
   (define-key projectile-command-map
               (kbd ".")
@@ -1475,7 +1538,9 @@ This function gives priority to .sln files over .csproj files."
         '(consult-projectile--source-projectile-buffer
           consult-projectile--source-projectile-file
           consult-projectile--source-projectile-dir
-          consult-projectile--source-projectile-open-project))
+          ;; TODO: Make `projectile-project-root' faster
+          ;; consult-projectile--source-projectile-open-project
+          ))
 
   (defvar mymy-projectile-map
     (-doto (make-sparse-keymap)
@@ -1718,7 +1783,7 @@ This function gives priority to .sln files over .csproj files."
   :config
   (gsetq corfu-cycle t)      ;; Enable cycling for `corfu-next/previous'
   (gsetq corfu-auto t)       ;; Enable auto completion
-  (gsetq corfu-separator ?\s) ;; Orderless field separator
+  ;; (gsetq corfu-separator ?\s) ;; Orderless field separator
   ;; (gsetq corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
   ;; (gsetq corfu-quit-no-match nil)      ;; Never quit, even if there is no match
   (gsetq corfu-preview-current nil) ;; Disable current candidate preview
@@ -2226,15 +2291,15 @@ It is essentially the element include but with args."
             ;;             "- Elements: Content, Concept, Composition. Main idea, Examples, Related"))
             )))
 
-  ;; Org define keys (:prefix C-c o)
-  (general-define-key
-   :prefix "C-c o"
-   "c" 'org-capture
-   "w" 'hydra-org-web-tools/body
-   "a" 'org-agenda
-   "t" 'mymy-org-clock-toggle
-   "s" 'my/org-agenda-rest
-   )
+  ;; ;; Org define keys (:prefix C-c o)
+  ;; (general-define-key
+  ;;  :prefix "C-c o"
+  ;;  "c" 'org-capture
+  ;;  "w" 'hydra-org-web-tools/body
+  ;;  "a" 'org-agenda
+  ;;  "t" 'mymy-org-clock-toggle
+  ;;  "s" 'my/org-agenda-rest
+  ;;  )
   (general-define-key
    "<f12>" 'org-agenda
    "C-c a" 'org-agenda
@@ -2395,6 +2460,7 @@ By default, all subentries are counted; restrict with LEVEL."
      (lisp . t)
      (shell . t)
      ;; (restclient . t)
+     (haskell . t)
      ))
   :config
   (defcustom mymy-org-run-commands '(("drg" . "/usr/bin/dragon-drop %n")
@@ -2439,7 +2505,57 @@ COMMAND will be run asynchronously")
                           (concat mymy-organization-system-directory-attachments)
                           find-file))
    :help-echo "Filename in the `mymy-organization-system-directory-attachments' directory"
-   :face '(:foreground "DarkSeaGreen" :underline t))
+   :face '(:foreground "DarkSeaGreen" :underline t)
+   :export (lambda (path desc format)
+             (let ((full-path (concat mymy-organization-system-directory-attachments path)))
+               (org-export-string-as
+                (if desc
+                    (format "[[%s][%s]]" full-path desc)
+                  (format "[[%s]]" full-path))
+                format t)))
+   )
+
+  (defconst mymy-org-attach-prefix "attach:"
+    "The part of the text in org mode that starts a link")
+
+  (with-eval-after-load 'cape
+    ;; Basically stolen from cape
+    (defun mymy-org-attach-complete-at-point ()
+      "Complete file name for attach:' links in Org mode."
+      (pcase-let* ((default-directory mymy-organization-system-directory-attachments)
+                   (prefix (and (looking-back (concat mymy-org-attach-prefix "[^]]*")
+                                              (line-beginning-position))
+                                (match-beginning 0)))
+                   (`(,beg . ,end) (if prefix
+                                       (cons (+ prefix (length mymy-org-attach-prefix)) (point))
+                                     (cape--bounds 'filename)))
+                   (non-essential t)
+                   (file (buffer-substring-no-properties beg end)))
+        (when prefix
+          `(,beg ,end
+                 ,(cape--nonessential-table #'read-file-name-internal)
+                 :company-prefix-length t
+                 :exclusive no
+                 :annotation-function
+                 ,(lambda (cand)
+                    (let ((type (if (file-directory-p (expand-file-name cand default-directory))
+                                    "Dir" "File")))
+                      (format " (%s)" type)))
+                 :company-docsig
+                 ,(lambda (cand)
+                    (let ((full-path (expand-file-name cand default-directory)))
+                      (format "%s (%s)" full-path (file-size-human-readable (file-attribute-size (file-attributes full-path))))))))))
+
+    (org-link-set-parameters
+     "attach"
+     :complete #'mymy-org-attach-complete-at-point)
+
+    (defun mymy-org-attach-setup ()
+      "Set up completion-at-point and link parameters for `attach:' links."
+      (add-hook 'completion-at-point-functions #'mymy-org-attach-complete-at-point nil t))
+
+    (add-hook 'org-mode-hook #'mymy-org-attach-setup)
+    )
 
   ;; Load after corfu, could be any completion framework
   (with-eval-after-load 'corfu
@@ -2908,12 +3024,17 @@ bypassing the dispatch buffer."
    :states '(normal motion)
    :keymaps 'override
    :prefix "SPC"
-   "o p" 'org-pomodoro
-   "o c" 'org-capture
-   "o a" 'org-agenda
-   "o i" 'org-clock-in
-   "o o" 'org-clock-out
-   "o g" 'org-clock-goto
+   :non-normal-prefix "C-c"
+   "o p" #'org-pomodoro
+   "o c" #'org-capture
+   "o a" #'org-agenda
+   "o i" #'org-clock-in
+   "o o" #'org-clock-out
+   "o g" #'org-clock-goto
+   "o t" #'mymy-org-clock-toggle
+   "o l" #'org-toggle-link-display
+   ;; "o w" #'hydra-org-web-tools/body
+   "o s" #'my/org-agenda-rest
    ))
 
 (use-package org-superstar
@@ -2997,6 +3118,12 @@ bypassing the dispatch buffer."
     (interactive)
     (setq olivetti-body-width (+ 4 fill-column))))
 
+(use-package stripes
+  :ensure t
+  :config
+  (setq stripes-unit 1)
+  )
+
 ;; * Flycheck
 (use-package flycheck
   :ensure t
@@ -3008,6 +3135,30 @@ bypassing the dispatch buffer."
   ;;  "M-n" 'flycheck-next-error
   ;;  "M-p" 'flycheck-previous-error
   ;;  )
+
+  (defun mymy-flycheck-error-list-mode-hook ()
+    (visual-line-mode 1)
+    (with-eval-after-load 'stripes
+      (stripes-mode 1)
+      )
+    )
+
+  (add-hook
+   'flycheck-error-list-mode-hook
+   #'mymy-flycheck-error-list-mode-hook
+   )
+
+  ;; (add-to-list 'display-buffer-alist
+  ;;              '((major-mode . flycheck-error-list-mode)
+  ;;                (display-buffer-in-side-window)
+  ;;                (window-height . 0.30)
+  ;;                (window-width . 0.55)
+  ;;                (dedicated . t)
+  ;;                (side . bottom)
+  ;;                (slot . 0)
+  ;;                (window-parameters . ((no-other-window . t)
+  ;;                                      (no-delete-other-windows . t)
+  ;;                                      (mode-line-format . 'none)))))
   )
 
 ;;* Denote
@@ -4297,6 +4448,7 @@ then go back 1."
 ;; * Scala
 (when mymy-is-not-android
   (use-package scala-mode
+    :disabled t
     :ensure t
     :interpreter
     ("scala" . scala-mode)
@@ -4313,30 +4465,68 @@ then go back 1."
        'scala-stacktrace
        )
       )
-    (with-eval-after-load 'projectile
-      (projectile-register-project-type 'mymysbt '("build.sbt")
-                                        :project-file "build.sbt"
-                                        :src-dir "main"
-                                        :test-dir "test"
-                                        :compile "sbtn compile"
-                                        :test "sbtn test"
-                                        :test-suffix "Spec")
-      )
     :hook
     (scala-mode . mymy-scala-hook)
     (scala-mode . lsp)
     (sbt-mode . mymy-scala-hook)
     )
-  ;; (use-package scala-ts-mode
-  ;;   :ensure t
-  ;;   :config
-  ;;   (defun mymy-scala-ts-hook ()
-  ;;     (setq-local treesit-font-lock-level 4)
-  ;;     )
+  (use-package scala-ts-mode
+    :ensure t
+    :config
+    (defun mymy-scala-ts-hook ()
+      (setq-local treesit-font-lock-level 4)
+      (treesit-font-lock-recompute-features)
+      (setq-local lsp-semantic-tokens-apply-modifiers nil)
+      )
 
-  ;;   (add-hook 'scala-ts-mode-hook #'mymy-scala-ts-hook)
-  ;;   )
+    (add-hook 'scala-ts-mode-hook #'mymy-scala-ts-hook)
+    :hook
+    (scala-ts-mode . lsp)
+    )
 
+  (use-package polymode
+    ;; Doesn't work, for some reason. Tested in minimal setup, works there
+    :disabled t
+    :ensure t
+    :demand t
+    :config
+    (define-hostmode poly-scala-ts-hostmode nil
+      ""
+      :mode 'scala-ts-mode
+      )
+
+    (define-innermode poly-sql-expr-scala-innermode nil
+      ""
+      :mode 'sql-mode
+      :head-matcher (rx "sql"
+                        (= 3 (char "\"'"))
+                        (* (any space))
+                        )
+      :tail-matcher (rx
+                     (= 3 (char "\"'")
+                        )
+                     )
+      :head-mode 'host
+      :tail-mode 'host
+      )
+
+    (define-polymode poly-scala-ts-sql-mode nil
+      ""
+      :hostmode 'poly-scala-ts-hostmode
+      :innermodes '(poly-sql-expr-scala-innermode)
+      )
+    )
+
+  (with-eval-after-load 'projectile
+    (projectile-register-project-type 'mymysbt '("build.sbt")
+                                      :project-file "build.sbt"
+                                      :src-dir "main"
+                                      :test-dir "test"
+                                      :run "sbtn run"
+                                      :compile "sbtn compile"
+                                      :test "sbtn test"
+                                      :test-suffix "Suite")
+    )
 
   (use-package sbt-mode
     :ensure t
@@ -4356,24 +4546,68 @@ then go back 1."
     :after (lsp scala-mode)
     :ensure t
     :config
-    (gsetq lsp-metals-server-command
-           (expand-file-name
-            "~/.local/bin/metals"
-            )
-           )
+    ;; (setq lsp-metals-server-command
+    ;;       (expand-file-name
+    ;;        "~/.local/bin/metals"
+    ;;        ))
+
     ;; You might set metals server options via -J arguments. This might not always work, for instance when
     ;; metals is installed using nix. In this case you can use JAVA_TOOL_OPTIONS environment variable.
-    (gsetq lsp-metals-server-args '(;; Metals claims to support range formatting by default but it supports range
-                                    ;; formatting of multiline strings only. You might want to disable it so that
-                                    ;; emacs can use indentation provided by scala-mode.
-                                    "-J-Dmetals.allow-multiline-string-formatting=off"
-                                    ;; Enable unicode icons. But be warned that emacs might not render unicode
-                                    ;; correctly in all cases.
-                                    "-J-Dmetals.icons=unicode"))
+    (setq lsp-metals-server-args '(;; Metals claims to support range formatting by default but it supports range
+                                   ;; formatting of multiline strings only. You might want to disable it so that
+                                   ;; emacs can use indentation provided by scala-mode.
+                                   "-J-Dmetals.allow-multiline-string-formatting=off"
+                                   ;; Enable unicode icons. But be warned that emacs might not render unicode
+                                   ;; correctly in all cases.
+                                   "-J-Dmetals.icons=unicode"))
     ;; In case you want semantic highlighting. This also has to be enabled in lsp-mode using
     ;; `lsp-semantic-tokens-enable' variable. Also you might want to disable highlighting of modifiers
     ;; setting `lsp-semantic-tokens-apply-modifiers' to `nil' because metals sends `abstract' modifier
     ;; which is mapped to `keyword' face.
-    ;; (gsetq lsp-metals-enable-semantic-highlighting t)
+    (setq lsp-metals-enable-semantic-highlighting t)
     )
+  )
+
+;; * Dart
+
+(use-package dart-mode
+  :defer 5
+  :ensure t
+  :hook (dart-mode . lsp)
+  )
+
+(use-package lsp-dart
+  :ensure t
+  :after (dart-mode lsp)
+  :config
+  (defun lsp-dart-dap--populate-flutter-start-file-args (conf)
+    "Populate CONF with the required arguments for Flutter debug."
+    (let ((pre-conf (-> conf
+                        lsp-dart-dap--base-debugger-args
+                        (dap--put-if-absent :type "flutter")
+                        (dap--put-if-absent :flutterMode "debug")
+                        (dap--put-if-absent :program (or (lsp-dart-get-project-entrypoint)
+                                                         (buffer-file-name))))))
+      (lambda (start-debugging-callback)
+        (lsp-dart-dap--flutter-get-or-start-device
+         (-lambda (args)
+           (let ((device-id (lsp-get args :id))
+                 (device-name (lsp-get args :name)))
+             (funcall start-debugging-callback
+                      (-> pre-conf
+                          (dap--put-if-absent :deviceId device-id)
+                          (dap--put-if-absent :deviceName device-name)
+                          (dap--put-if-absent :dap-server-path (if (lsp-dart-dap-use-sdk-debugger-p)
+                                                                   (append (lsp-dart-flutter-command) (list "debug_adapter" "-d" device-id))
+                                                                 lsp-dart-dap-flutter-debugger-program))
+                          (dap--put-if-absent :flutterPlatform "default")
+                          (dap--put-if-absent :toolArgs `("-d" ,device-id))
+                          (dap--put-if-absent :name (concat "Flutter (" device-name ")"))))
+             ))))))
+  )
+
+
+;; * Yaml
+(use-package yaml-mode
+  :ensure t
   )
