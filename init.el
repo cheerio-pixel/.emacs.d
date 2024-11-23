@@ -3888,7 +3888,7 @@ then go back 1."
   )
 
 ;; * Ispell/Aspell
-(when mymy-is-not-android
+(when (and mymy-is-not-android mymy-we-are-not-at-work)
   (use-package ispell
     :ensure nil
     ;; https://200ok.ch/posts/2020-08-22_setting_up_spell_checking_with_multiple_dictionaries.html
@@ -3909,7 +3909,7 @@ then go back 1."
     (unless (file-exists-p ispell-personal-dictionary)
       (write-region "" nil ispell-personal-dictionary nil 0))))
 
-(when mymy-is-not-android
+(when (and mymy-is-not-android mymy-we-are-not-at-work)
   (use-package jinx
     :ensure t
     :config
