@@ -64,6 +64,11 @@
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
+(when (eq system-type 'windows-nt)
+  ;; Windows has limit of like 512 handles
+  (setq elpaca-queue-limit 10)
+  )
+
 ;; Install use-package support
 (elpaca elpaca-use-package
   ;; Enable use-package :ensure support for Elpaca.
@@ -912,7 +917,9 @@ current window."
             "--tsProbeLocations"
             "/usr/lib/node_modules"
             "--stdio"))
-    ))
+    :hook (web-mode . lsp)
+    )
+  )
 
 (when mymy-is-not-android
   (use-package lsp-vue
