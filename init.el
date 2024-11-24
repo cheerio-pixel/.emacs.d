@@ -896,8 +896,13 @@ current window."
     (setq lsp-auto-execute-action nil)
     (setq lsp-completion-provider :none)
     (setq lsp-signature-function #'lsp-signature-posframe)
-    (setq lsp-semantic-tokens-enable t)
+    (setq lsp-semantic-tokens-enable nil)
     :config
+    (setq lsp-modeline-code-actions-enable nil)
+    (setq lsp-modeline-diagnostics-enable nil)
+    (setq lsp-modeline-workspace-status-enable nil)
+    (setq lsp-signature-doc-lines 1)
+
     (define-key lsp-mode-map (kbd "M-?") #'lsp-find-references)
     (define-key lsp-mode-map (kbd "M-/") #'lsp-find-implementation)
     (define-key lsp-mode-map (kbd "M-.") #'lsp-find-definition)
@@ -4484,6 +4489,7 @@ then go back 1."
       (setq-local treesit-font-lock-level 4)
       (treesit-font-lock-recompute-features)
       (setq-local lsp-semantic-tokens-apply-modifiers nil)
+      (setq-local lsp-semantic-tokens-enable t)
       )
 
     (add-hook 'scala-ts-mode-hook #'mymy-scala-ts-hook)
@@ -4498,30 +4504,30 @@ then go back 1."
     :demand t
     :config
     (define-hostmode poly-scala-ts-hostmode nil
-      ""
-      :mode 'scala-ts-mode
-      )
+                     ""
+                     :mode 'scala-ts-mode
+                     )
 
     (define-innermode poly-sql-expr-scala-innermode nil
-      ""
-      :mode 'sql-mode
-      :head-matcher (rx "sql"
-                        (= 3 (char "\"'"))
-                        (* (any space))
-                        )
-      :tail-matcher (rx
-                     (= 3 (char "\"'")
-                        )
-                     )
-      :head-mode 'host
-      :tail-mode 'host
-      )
+                      ""
+                      :mode 'sql-mode
+                      :head-matcher (rx "sql"
+                                        (= 3 (char "\"'"))
+                                        (* (any space))
+                                        )
+                      :tail-matcher (rx
+                                     (= 3 (char "\"'")
+                                        )
+                                     )
+                      :head-mode 'host
+                      :tail-mode 'host
+                      )
 
     (define-polymode poly-scala-ts-sql-mode nil
-      ""
-      :hostmode 'poly-scala-ts-hostmode
-      :innermodes '(poly-sql-expr-scala-innermode)
-      )
+                     ""
+                     :hostmode 'poly-scala-ts-hostmode
+                     :innermodes '(poly-sql-expr-scala-innermode)
+                     )
     )
 
   (with-eval-after-load 'projectile
