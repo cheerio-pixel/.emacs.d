@@ -57,10 +57,17 @@
       ("readings"))
      (org-export-initial-scope . buffer)
      (mymy-org-default-export-directory . "~/Dropbox (Maestral)/org/artifacts/"))))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 120 :width normal))))
+ ;; '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 130 :width normal))))
+ ;; '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 120 :width normal))))
+ `(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal
+                        :height ,(if (string= "tic12" (system-name))
+                                     160
+                                   120)
+                        :width normal))))
  '(olivetti-fringe ((t (:foreground "#353535" :background "#353535")))))

@@ -310,6 +310,8 @@
   ;; Outer limit of 10x (960mb).
   ;; Note that the default is x100), but this seems too high.
   (setq undo-outer-limit 1006632960)
+
+  (global-hl-line-mode)
   ;; * Set the font
   (custom-set-faces
    ;; custom-set-faces was added by Custom.
@@ -325,9 +327,8 @@
                           :width normal))))
    '(olivetti-fringe ((t (:foreground "#353535" :background "#353535")))))
 
-  (global-hl-line-mode)
-
   ;; * Load path
+
 
   (add-to-list 'load-path (concat user-emacs-directory "lib/"))
 
