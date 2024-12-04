@@ -1885,7 +1885,10 @@ This function gives priority to .sln files over .csproj files."
     :config
     (global-set-key (kbd "C-<f5>") #'terminal-here-launch)
     (global-set-key (kbd "C-<f6>") #'terminal-here-project-launch)
-    (setq terminal-here-linux-terminal-command '("kitty" "--single-instance"))
+    (setq terminal-here-linux-terminal-command (if (string= "tic12" (system-name))
+                                                   ;; Run windows terminal (wt) and then run wsl
+                                                   '("wt.exe" "wsl")
+                                                 '("kitty" "--single-instance")))
     (setq terminal-here-command-flag "--")
     ;; (when (executable-find "poetry")
     ;;   (global-set-key (kbd "C-<f3>") (lambda () (interactive) (terminal-here-launch (list (executable-find "poetry") "shell")))))
