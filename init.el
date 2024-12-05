@@ -1887,7 +1887,7 @@ This function gives priority to .sln files over .csproj files."
     (global-set-key (kbd "C-<f6>") #'terminal-here-project-launch)
     (setq terminal-here-linux-terminal-command (if (string= "tic12" (system-name))
                                                    ;; Run windows terminal (wt) and then run wsl
-                                                   '("wt.exe" "wsl")
+                                                   '("/mnt/c/Users/froque/AppData/Local/Microsoft/WindowsApps/wt.exe" "wsl")
                                                  '("kitty" "--single-instance")))
     (setq terminal-here-command-flag "--")
     ;; (when (executable-find "poetry")
