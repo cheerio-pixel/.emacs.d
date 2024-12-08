@@ -25,7 +25,7 @@
 
 ;; * Elpaca boostrap
 
-(defvar elpaca-installer-version 0.7)
+(defvar elpaca-installer-version 0.8)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
@@ -33,7 +33,7 @@
                               :ref nil :depth 1
                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
                               :build (:not elpaca--activate-package)))
-(let* ((repo (expand-file-name "elpaca/" elpaca-repos-directory))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
        (build (expand-file-name "elpaca/" elpaca-builds-directory))
        (order (cdr elpaca-order))
        (default-directory repo))
@@ -42,18 +42,18 @@
     (make-directory repo t)
     (when (< emacs-major-version 28) (require 'subr-x))
     (condition-case-unless-debug err
-        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
-                                                 ,@(when-let ((depth (plist-get order :depth)))
-                                                     (list (format "--depth=%d" depth) "--no-single-branch"))
-                                                 ,(plist-get order :repo) ,repo))))
-                 ((zerop (call-process "git" nil buffer t "checkout"
-                                       (or (plist-get order :ref) "--"))))
-                 (emacs (concat invocation-directory invocation-name))
-                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                 ((require 'elpaca))
-                 ((elpaca-generate-autoloads "elpaca" repo)))
+        (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                  ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                  ,@(when-let* ((depth (plist-get order :depth)))
+                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                  ,(plist-get order :repo) ,repo))))
+                  ((zerop (call-process "git" nil buffer t "checkout"
+                                        (or (plist-get order :ref) "--"))))
+                  (emacs (concat invocation-directory invocation-name))
+                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                  ((require 'elpaca))
+                  ((elpaca-generate-autoloads "elpaca" repo)))
             (progn (message "%s" (buffer-string)) (kill-buffer buffer))
           (error "%s" (with-current-buffer buffer (buffer-string))))
       ((error) (warn "%s" err) (delete-directory repo 'recursive))))
@@ -310,6 +310,8 @@
   ;; Outer limit of 10x (960mb).
   ;; Note that the default is x100), but this seems too high.
   (setq undo-outer-limit 1006632960)
+
+  (global-hl-line-mode)
   ;; * Set the font
   (custom-set-faces
    ;; custom-set-faces was added by Custom.
@@ -317,12 +319,16 @@
    ;; Your init file should contain only one such instance.
    ;; If there is more than one, they won't work right.
    ;; '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 130 :width normal))))
-   '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 120 :width normal))))
+   ;; '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 120 :width normal))))
+   `(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal
+                          :height ,(if (string= "tic12" (system-name))
+                                       160
+                                     120)
+                          :width normal))))
    '(olivetti-fringe ((t (:foreground "#353535" :background "#353535")))))
 
-  (global-hl-line-mode)
-
   ;; * Load path
+
 
   (add-to-list 'load-path (concat user-emacs-directory "lib/"))
 
@@ -1881,7 +1887,10 @@ This function gives priority to .sln files over .csproj files."
     :config
     (global-set-key (kbd "C-<f5>") #'terminal-here-launch)
     (global-set-key (kbd "C-<f6>") #'terminal-here-project-launch)
-    (setq terminal-here-linux-terminal-command '("kitty" "--single-instance"))
+    (setq terminal-here-linux-terminal-command (if (string= "tic12" (system-name))
+                                                   ;; Run windows terminal (wt) and then run wsl
+                                                   '("/mnt/c/Users/froque/AppData/Local/Microsoft/WindowsApps/wt.exe" "wsl")
+                                                 '("kitty" "--single-instance")))
     (setq terminal-here-command-flag "--")
     ;; (when (executable-find "poetry")
     ;;   (global-set-key (kbd "C-<f3>") (lambda () (interactive) (terminal-here-launch (list (executable-find "poetry") "shell")))))
