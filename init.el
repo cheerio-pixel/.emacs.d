@@ -895,9 +895,11 @@ current window."
           '(semgrep-ls emmet-ls))
     (setq lsp-auto-execute-action nil)
     (setq lsp-completion-provider :none)
-    (setq lsp-signature-function #'lsp-signature-posframe)
+    ;; (setq lsp-signature-function #'lsp-signature-posframe)
+    (setq lsp-signature-function #'lsp-lv-message)
     (setq lsp-semantic-tokens-enable nil)
     :config
+    (setq lsp-eldoc-enable-hover t)
     (setq lsp-modeline-code-actions-enable nil)
     (setq lsp-modeline-diagnostics-enable nil)
     (setq lsp-modeline-workspace-status-enable nil)
@@ -1305,7 +1307,7 @@ current window."
    ;; "M-n" 'dabbrev-expand
    ;; "C-c s u" 'straight-use-package
    ;; "C-c s g" 'straight-get-recipe
-   "C-;" 'iedit-mode
+   ;; "C-;" 'iedit-mode
    "C-M-;" 'iedit-mode
    "M-<" #'xref-go-back
    "M->" #'xref-go-forward)
