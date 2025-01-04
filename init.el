@@ -914,7 +914,7 @@ current window."
     (define-key lsp-mode-map (kbd "M-?") #'lsp-find-references)
     (define-key lsp-mode-map (kbd "M-/") #'lsp-find-implementation)
     (define-key lsp-mode-map (kbd "M-.") #'lsp-find-definition)
-    (define-key lsp-mode-map (kbd "C-;") #'lsp-iedit-highlights)
+    ;; (define-key lsp-mode-map (kbd "C-;") #'lsp-iedit-highlights)
     (define-key lsp-mode-map (kbd "C-M-;") #'lsp-iedit-highlights)
     ;; (define-key lsp-signature-mode-map (kbd "M-N") #'lsp-signature-next)
     ;; (define-key lsp-signature-mode-map (kbd "M-p") #'lsp-signature-previous)
@@ -4500,7 +4500,7 @@ then go back 1."
       (setq-local treesit-font-lock-level 4)
       (treesit-font-lock-recompute-features)
       (setq-local lsp-semantic-tokens-apply-modifiers nil)
-      (setq-local lsp-semantic-tokens-enable t)
+      ;; (setq-local lsp-semantic-tokens-enable t)
       )
 
     (add-hook 'scala-ts-mode-hook #'mymy-scala-ts-hook)
