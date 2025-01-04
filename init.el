@@ -587,9 +587,12 @@ current window."
 (use-package f
   :ensure f)
 
+(use-package seq :ensure t)
+
 ;; The best menu library
 (use-package transient
   :ensure t)
+
 
 ;;When installing a package used in the init file itself,
 ;;e.g. a package which adds a use-package key word,
