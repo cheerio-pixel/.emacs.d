@@ -494,6 +494,8 @@ current window."
                                        (direction . bottom)
                                        (window-height . 0.4)
                                        ))
+
+  (global-set-key (kbd "C-{") #'evil-newline-same-indent)
   )
 
 (use-package saveplace
@@ -914,6 +916,7 @@ current window."
     (setq lsp-modeline-workspace-status-enable nil)
     (setq lsp-signature-doc-lines 1)
 
+    ;; (define-key lsp-mode-map (kbd "M-RET") #'lsp-execute-code-action)
     (define-key lsp-mode-map (kbd "M-?") #'lsp-find-references)
     (define-key lsp-mode-map (kbd "M-/") #'lsp-find-implementation)
     (define-key lsp-mode-map (kbd "M-.") #'lsp-find-definition)
@@ -925,6 +928,7 @@ current window."
     (define-key lsp-signature-mode-map (kbd "C-M-p") #'lsp-signature-previous)
     ;; (define-key lsp-signature-mode-map (kbd "M-n") #'lsp-signature-next)
     ;; (define-key lsp-signature-mode-map (kbd "M-p") #'lsp-signature-previous)
+
     (when (executable-find "emacs-lsp-booster")
       (defun lsp-booster--advice-json-parse (old-fn &rest args)
         "Try to parse bytecode instead of json."
@@ -954,9 +958,11 @@ current window."
                   (setcar orig-result command-from-exec-path))
                 (message "Using emacs-lsp-booster for %s!" orig-result)
                 (cons "emacs-lsp-booster" orig-result))
-            )))
-      (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
+            orig-result)))
+      (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
+      )
 
+    (require 'lsp-angular)
     (setq lsp-clients-angular-language-server-command
           '("node"
             "/usr/lib/node_modules/@angular/language-server"
@@ -966,6 +972,7 @@ current window."
             "/usr/lib/node_modules"
             "--stdio"))
     :hook (web-mode . lsp)
+
     )
   )
 
@@ -1768,7 +1775,9 @@ This function gives priority to .sln files over .csproj files."
 
   (general-define-key
    :keymaps 'override
-   "M-<return>" 'mymy-act-at-point)
+   "M-<return>" 'mymy-act-at-point
+   "M-RET" 'mymy-act-at-point
+   )
   ;; (setq embark-verbose-indicator-display-action '(display-buffer-reuse-window))
   )
 

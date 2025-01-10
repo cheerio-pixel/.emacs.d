@@ -23,6 +23,17 @@
                            (point)))))
     (delete-minibuffer-contents)))
 
+(with-eval-after-load 'evil
+  (defun evil-newline-same-indent ()
+    "Create a new line with the same indentation as the current line."
+    (interactive)
+    (let ((indent (current-indentation))
+          (evil-auto-indent nil)
+          )
+      (evil-open-below 1)
+      (indent-to indent))))
+
+
 (defun mymy-kill-new (s)
   (kill-new (format "%S" s)))
 

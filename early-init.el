@@ -6,4 +6,5 @@
 
 (setenv "LSP_USE_PLISTS" "true")
 
+(setq lsp-use-plists t)
 

@@ -985,6 +985,7 @@ AFTER-UPDATE-FN is a function that takes the contents of the buffer and the posi
   :request-handlers (ht ("razor/htmlOnTypeFormatting" #'ignore)
                         ("textDocument/onTypeFormatting" #'ignore)
                         ("razor/provideCodeActions" #'ignore)
+                        ("razor/provideHtmlDocumentColor" #'ignore)
                         ("razor/completion" #'lsp-razor-handle-razor-completion)
                         ;; ("razor/provideCodeActions" #'lsp-razor--provide-code-actions-request-handler)
                         )
