@@ -4,3 +4,6 @@
 ;; Setup custom file for auto-generated configuration from emacs
 (setq custom-file (expand-file-name "customs.el" user-emacs-directory))
 
+(setenv "LSP_USE_PLISTS" "true")
+
+
