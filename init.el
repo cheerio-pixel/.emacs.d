@@ -685,6 +685,7 @@ current window."
 ;; Sync shell env variables to emacs env variables
 (use-package exec-path-from-shell
   :ensure t
+  :demand t
   :config
   (add-to-list 'exec-path-from-shell-variables "ANDROID_HOME")
   (add-to-list 'exec-path-from-shell-variables "ANDROID_SDK_ROOT")
@@ -1907,6 +1908,13 @@ This function gives priority to .sln files over .csproj files."
   ;; (corfu-popupinfo-mode -1)
   )
 
+(use-package corfu-terminal
+  :ensure t
+  :config
+  (unless (display-graphic-p)
+    (corfu-terminal-mode +1))
+  )
+
 (use-package cape
   :ensure t
   :after (corfu)
@@ -1933,7 +1941,7 @@ This function gives priority to .sln files over .csproj files."
     (global-set-key (kbd "C-<f6>") #'terminal-here-project-launch)
     (setq terminal-here-linux-terminal-command (if (string= "tic12" (system-name))
                                                    ;; Run windows terminal (wt) and then run wsl
-                                                   '("/mnt/c/Users/froque/AppData/Local/Microsoft/WindowsApps/wt.exe" "wsl")
+                                                   '("wt.exe" "wsl")
                                                  '("kitty" "--single-instance")))
     (setq terminal-here-command-flag "--")
     ;; (when (executable-find "poetry")
