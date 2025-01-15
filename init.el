@@ -930,6 +930,14 @@ current window."
     ;; (define-key lsp-signature-mode-map (kbd "M-n") #'lsp-signature-next)
     ;; (define-key lsp-signature-mode-map (kbd "M-p") #'lsp-signature-previous)
 
+
+    ;; https://www.reddit.com/r/emacs/comments/ql8cyp/corfu_orderless_and_lsp/?rdt=40464
+    (defun corfu-lsp-setup ()
+      (setq-local completion-category-defaults nil))
+    (add-hook 'lsp-mode-hook #'corfu-lsp-setup)
+
+
+
     (when (executable-find "emacs-lsp-booster")
       (defun lsp-booster--advice-json-parse (old-fn &rest args)
         "Try to parse bytecode instead of json."
@@ -949,13 +957,13 @@ current window."
       (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
         "Prepend emacs-lsp-booster command to lsp CMD."
         (let ((orig-result (funcall old-fn cmd test?)))
-          (if (and (not test?)                             ;; for check lsp-server-present?
+          (if (and (not test?) ;; for check lsp-server-present?
                    (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
                    lsp-use-plists
-                   (not (functionp 'json-rpc-connection))  ;; native json-rpc
+                   (not (functionp 'json-rpc-connection)) ;; native json-rpc
                    (executable-find "emacs-lsp-booster"))
               (progn
-                (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+                (when-let ((command-from-exec-path (executable-find (car orig-result)))) ;; resolve command from exec-path (in case not found in $PATH)
                   (setcar orig-result command-from-exec-path))
                 (message "Using emacs-lsp-booster for %s!" orig-result)
                 (cons "emacs-lsp-booster" orig-result))
@@ -1062,13 +1070,52 @@ current window."
   :config
   (setq
    lsp-csharp-server-path
-   (lsp-package-path 'omnisharp-roslyn)
+   (expand-file-name (concat dropbox-dir "omnisharp/net6.0/OmniSharp"))
    )
+  (lsp-register-client
+   (make-lsp-client :new-connection
+                    (lsp-stdio-connection
+                     #'(lambda ()
+                         (append
+                          (list (lsp-csharp--language-server-path) "-lsp"
+                                ;; "-l" "Debug"
+                                ;; "--loglevel"
+                                ;; "Trace"
+                                )
+                          (when lsp-razor-rzls-test-dll
+                            (list "--plugin" lsp-razor-rzls-test-dll)
+                            )
+                          (when lsp-csharp-solution-file
+                            (list "-s" (expand-file-name lsp-csharp-solution-file)))))
+                     #'(lambda ()
+                         (when-let ((binary (lsp-csharp--language-server-path)))
+                           (f-exists? binary))))
+                    :activation-fn (lsp-activate-on "csharp" "aspnetcorerazor")
+                    :server-id 'omnisharp-razor
+                    :priority 0
+                    :uri->path-fn #'lsp-csharp--omnisharp-uri->path-fn
+                    :action-handlers (ht ("omnisharp/client/findReferences" 'lsp-csharp--action-client-find-references))
+                    :notification-handlers (ht ("o#/projectadded" 'ignore)
+                                               ("o#/projectchanged" 'ignore)
+                                               ("o#/projectremoved" 'ignore)
+                                               ("o#/packagerestorestarted" 'ignore)
+                                               ("o#/msbuildprojectdiagnostics" 'ignore)
+                                               ("o#/packagerestorefinished" 'ignore)
+                                               ("o#/unresolveddependencies" 'ignore)
+                                               ("o#/error" 'lsp-csharp--handle-os-error)
+                                               ("o#/testmessage" 'lsp-csharp--handle-os-testmessage)
+                                               ("o#/testcompleted" 'lsp-csharp--handle-os-testcompleted)
+                                               ("o#/projectconfiguration" 'ignore)
+                                               ("o#/projectdiagnosticstatus" 'ignore)
+                                               ("o#/backgrounddiagnosticstatus" 'ignore)
+                                               )
+                    :download-server-fn #'lsp-csharp--omnisharp-download-server))
 
   (setenv "DOTNET_RUNTIME_ID" "linux-x64")
   :hook (csharp-ts-mode . lsp))
 
 (use-package lsp-razor
+  :disabled
   :after (lsp-mode web-mode)
   :ensure nil
   :load-path "lsp-razor.el"
