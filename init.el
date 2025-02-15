@@ -403,6 +403,8 @@ current window."
   ;; * Frame
   (add-to-list 'default-frame-alist
                '(internal-border-width . 20))
+  (add-to-list 'default-frame-alist
+               '(undecorated . t))
 
   (set-frame-parameter (selected-frame) 'internal-border-width 20)
 
@@ -1882,6 +1884,22 @@ This function gives priority to .sln files over .csproj files."
 (use-package nerd-icons
   :ensure t)
 
+;; * sxhkdrc-mode
+
+(use-package sxhkdrc-mode
+  :ensure t
+  :init
+  (add-to-list
+   'auto-mode-alist
+   '("swhkdrc\\'" . sxhkdrc-mode)
+   )
+  )
+
+;; * Yuck mode
+
+(use-package yuck-mode
+  :ensure )
+
 ;; * Terminal here
 ;; Love this, just a open-system terminal here
 (when mymy-is-not-android
@@ -2853,8 +2871,7 @@ COMMAND will be run asynchronously")
   ;; (org-mode . auto-fill-mode)
   (org-mode . org-super-agenda-mode)
   (kill-emacs . (lambda () (org-clock-out nil t)))
-  (org-mode . (lambda () (setq-local tab-width 2
-                                     indent-tabs-mode nil
+  (org-mode . (lambda () (setq-local indent-tabs-mode nil
                                      python-shell-interpreter "python3"))))
 
 (when (and mymy-is-not-android mymy-we-are-not-at-work)
@@ -4570,13 +4587,13 @@ then go back 1."
     )
   ;; Add metals backend for lsp-mode
   (use-package lsp-metals
-    :after (lsp scala-mode)
+    :after (lsp-mode)
     :ensure t
-    :config
-    ;; (setq lsp-metals-server-command
-    ;;       (expand-file-name
-    ;;        "~/.local/bin/metals"
-    ;;        ))
+    :init
+    (setq lsp-metals-server-command
+          (expand-file-name
+           "~/.local/share/coursier/bin/metals"
+           ))
 
     ;; You might set metals server options via -J arguments. This might not always work, for instance when
     ;; metals is installed using nix. In this case you can use JAVA_TOOL_OPTIONS environment variable.
@@ -4586,14 +4603,19 @@ then go back 1."
                                    "-J-Dmetals.allow-multiline-string-formatting=off"
                                    ;; Enable unicode icons. But be warned that emacs might not render unicode
                                    ;; correctly in all cases.
-                                   "-J-Dmetals.icons=unicode"))
+                                   "-J-Dmetals.icons=unicode"
+                                   "-J-Dmetals.client=emacs"
+                                   "-J-XX:+UseG1GC"
+                                   "-J-XX:+UseStringDeduplication"
+                                   ;; "-J-Xss4m"
+                                   ;; "-J-Xms100m"
+                                   ))
     ;; In case you want semantic highlighting. This also has to be enabled in lsp-mode using
     ;; `lsp-semantic-tokens-enable' variable. Also you might want to disable highlighting of modifiers
     ;; setting `lsp-semantic-tokens-apply-modifiers' to `nil' because metals sends `abstract' modifier
     ;; which is mapped to `keyword' face.
     (setq lsp-metals-enable-semantic-highlighting t)
-    )
-  )
+    ))
 
 ;; * Dart
 
