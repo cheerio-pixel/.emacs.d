@@ -496,6 +496,8 @@ current window."
                                        (direction . bottom)
                                        (window-height . 0.4)
                                        ))
+
+  (global-set-key (kbd "C-{") #'evil-newline-same-indent)
   )
 
 (use-package saveplace
@@ -685,6 +687,7 @@ current window."
 ;; Sync shell env variables to emacs env variables
 (use-package exec-path-from-shell
   :ensure t
+  :demand t
   :config
   (add-to-list 'exec-path-from-shell-variables "ANDROID_HOME")
   (add-to-list 'exec-path-from-shell-variables "ANDROID_SDK_ROOT")
@@ -916,6 +919,7 @@ current window."
     (setq lsp-modeline-workspace-status-enable nil)
     (setq lsp-signature-doc-lines 1)
 
+    ;; (define-key lsp-mode-map (kbd "M-RET") #'lsp-execute-code-action)
     (define-key lsp-mode-map (kbd "M-?") #'lsp-find-references)
     (define-key lsp-mode-map (kbd "M-/") #'lsp-find-implementation)
     (define-key lsp-mode-map (kbd "M-.") #'lsp-find-definition)
@@ -927,6 +931,49 @@ current window."
     (define-key lsp-signature-mode-map (kbd "C-M-p") #'lsp-signature-previous)
     ;; (define-key lsp-signature-mode-map (kbd "M-n") #'lsp-signature-next)
     ;; (define-key lsp-signature-mode-map (kbd "M-p") #'lsp-signature-previous)
+
+
+    ;; https://www.reddit.com/r/emacs/comments/ql8cyp/corfu_orderless_and_lsp/?rdt=40464
+    (defun corfu-lsp-setup ()
+      (setq-local completion-category-defaults nil))
+    (add-hook 'lsp-mode-hook #'corfu-lsp-setup)
+
+
+
+    (when (executable-find "emacs-lsp-booster")
+      (defun lsp-booster--advice-json-parse (old-fn &rest args)
+        "Try to parse bytecode instead of json."
+        (or
+         (when (equal (following-char) ?#)
+           (let ((bytecode (read (current-buffer))))
+             (when (byte-code-function-p bytecode)
+               (funcall bytecode))))
+         (apply old-fn args)))
+      (advice-add (if (progn (require 'json)
+                             (fboundp 'json-parse-buffer))
+                      'json-parse-buffer
+                    'json-read)
+                  :around
+                  #'lsp-booster--advice-json-parse)
+
+      (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+        "Prepend emacs-lsp-booster command to lsp CMD."
+        (let ((orig-result (funcall old-fn cmd test?)))
+          (if (and (not test?) ;; for check lsp-server-present?
+                   (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+                   lsp-use-plists
+                   (not (functionp 'json-rpc-connection)) ;; native json-rpc
+                   (executable-find "emacs-lsp-booster"))
+              (progn
+                (when-let ((command-from-exec-path (executable-find (car orig-result)))) ;; resolve command from exec-path (in case not found in $PATH)
+                  (setcar orig-result command-from-exec-path))
+                (message "Using emacs-lsp-booster for %s!" orig-result)
+                (cons "emacs-lsp-booster" orig-result))
+            orig-result)))
+      (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
+      )
+
+    (require 'lsp-angular)
     (setq lsp-clients-angular-language-server-command
           '("node"
             "/usr/lib/node_modules/@angular/language-server"
@@ -936,6 +983,7 @@ current window."
             "/usr/lib/node_modules"
             "--stdio"))
     :hook (web-mode . lsp)
+
     )
   )
 
@@ -1024,13 +1072,52 @@ current window."
   :config
   (setq
    lsp-csharp-server-path
-   (lsp-package-path 'omnisharp-roslyn)
+   (expand-file-name (concat dropbox-dir "omnisharp/net6.0/OmniSharp"))
    )
+  (lsp-register-client
+   (make-lsp-client :new-connection
+                    (lsp-stdio-connection
+                     #'(lambda ()
+                         (append
+                          (list (lsp-csharp--language-server-path) "-lsp"
+                                ;; "-l" "Debug"
+                                ;; "--loglevel"
+                                ;; "Trace"
+                                )
+                          (when lsp-razor-rzls-test-dll
+                            (list "--plugin" lsp-razor-rzls-test-dll)
+                            )
+                          (when lsp-csharp-solution-file
+                            (list "-s" (expand-file-name lsp-csharp-solution-file)))))
+                     #'(lambda ()
+                         (when-let ((binary (lsp-csharp--language-server-path)))
+                           (f-exists? binary))))
+                    :activation-fn (lsp-activate-on "csharp" "aspnetcorerazor")
+                    :server-id 'omnisharp-razor
+                    :priority 0
+                    :uri->path-fn #'lsp-csharp--omnisharp-uri->path-fn
+                    :action-handlers (ht ("omnisharp/client/findReferences" 'lsp-csharp--action-client-find-references))
+                    :notification-handlers (ht ("o#/projectadded" 'ignore)
+                                               ("o#/projectchanged" 'ignore)
+                                               ("o#/projectremoved" 'ignore)
+                                               ("o#/packagerestorestarted" 'ignore)
+                                               ("o#/msbuildprojectdiagnostics" 'ignore)
+                                               ("o#/packagerestorefinished" 'ignore)
+                                               ("o#/unresolveddependencies" 'ignore)
+                                               ("o#/error" 'lsp-csharp--handle-os-error)
+                                               ("o#/testmessage" 'lsp-csharp--handle-os-testmessage)
+                                               ("o#/testcompleted" 'lsp-csharp--handle-os-testcompleted)
+                                               ("o#/projectconfiguration" 'ignore)
+                                               ("o#/projectdiagnosticstatus" 'ignore)
+                                               ("o#/backgrounddiagnosticstatus" 'ignore)
+                                               )
+                    :download-server-fn #'lsp-csharp--omnisharp-download-server))
 
   (setenv "DOTNET_RUNTIME_ID" "linux-x64")
   :hook (csharp-ts-mode . lsp))
 
 (use-package lsp-razor
+  :disabled
   :after (lsp-mode web-mode)
   :ensure nil
   :load-path "lsp-razor.el"
@@ -1738,7 +1825,9 @@ This function gives priority to .sln files over .csproj files."
 
   (general-define-key
    :keymaps 'override
-   "M-<return>" 'mymy-act-at-point)
+   "M-<return>" 'mymy-act-at-point
+   "M-RET" 'mymy-act-at-point
+   )
   ;; (setq embark-verbose-indicator-display-action '(display-buffer-reuse-window))
   )
 
@@ -1868,6 +1957,13 @@ This function gives priority to .sln files over .csproj files."
   ;; (corfu-popupinfo-mode -1)
   )
 
+(use-package corfu-terminal
+  :ensure t
+  :config
+  (unless (display-graphic-p)
+    (corfu-terminal-mode +1))
+  )
+
 (use-package cape
   :ensure t
   :after (corfu)
@@ -1910,7 +2006,7 @@ This function gives priority to .sln files over .csproj files."
     (global-set-key (kbd "C-<f6>") #'terminal-here-project-launch)
     (setq terminal-here-linux-terminal-command (if (string= "tic12" (system-name))
                                                    ;; Run windows terminal (wt) and then run wsl
-                                                   '("/mnt/c/Users/froque/AppData/Local/Microsoft/WindowsApps/wt.exe" "wsl")
+                                                   '("wt.exe" "wsl")
                                                  '("kitty" "--single-instance")))
     (setq terminal-here-command-flag "--")
     ;; (when (executable-find "poetry")
