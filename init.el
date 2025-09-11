@@ -1084,9 +1084,9 @@ current window."
                                 ;; "--loglevel"
                                 ;; "Trace"
                                 )
-                          (when lsp-razor-rzls-test-dll
-                            (list "--plugin" lsp-razor-rzls-test-dll)
-                            )
+                          ;; (when lsp-razor-rzls-test-dll
+                          ;;   (list "--plugin" lsp-razor-rzls-test-dll)
+                          ;;   )
                           (when lsp-csharp-solution-file
                             (list "-s" (expand-file-name lsp-csharp-solution-file)))))
                      #'(lambda ()
@@ -2218,6 +2218,8 @@ This function gives priority to .sln files over .csproj files."
   (defun tempel-setup-capf ()
     ;; Add the Tempel Capf to `completion-at-point-functions'.
     ;; `tempel-expand' only triggers on exact matches. Alternatively use
+
+
     ;; `tempel-complete' if you want to see all matches, but then you
     ;; should also configure `tempel-trigger-prefix', such that Tempel
     ;; does not trigger too often when you don't expect it. NOTE: We add
