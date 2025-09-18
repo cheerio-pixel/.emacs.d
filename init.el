@@ -767,6 +767,12 @@ current window."
    "r" (list mymy-replace-map :which-key "Replace")
    "m" #'magit)
 
+  (defun meain/evil-yank-advice (orig-fn beg end &rest args)
+    (pulse-momentary-highlight-region beg end)
+    (apply orig-fn beg end args))
+
+  (advice-add 'evil-yank :around 'meain/evil-yank-advice)
+
   ;; Change shape and color of each state
   (setq evil-insert-state-cursor '(bar "#00FF00")
         evil-visual-state-cursor '(box "#FF00FF")
@@ -808,6 +814,7 @@ current window."
   :init
   (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode)
   :config
+  (advice-add 'lispyville-yank :around 'meain/evil-yank-advice)
   (lispyville-set-key-theme '(operators c-w additional)))
 
 (use-package evil-surround
