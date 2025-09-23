@@ -3415,6 +3415,19 @@ then go back 1."
                   (funcall denote-open-link-function path)
                 (user-error "Cannot resolve the denote link at point")))))
         (user-error "No denote link found at point"))))
+  (defun mymy-denote-copy-current-as-link ()
+    (interactive)
+    (let ((filename (f-base (buffer-file-name))))
+      (when (length> filename 15)
+        (kill-new (concat
+                   "[[denote:"
+                   (substring filename 0 15)
+                   "]]"))
+        )
+      )
+    )
+
+  
 
 
   :config
@@ -3438,6 +3451,7 @@ then go back 1."
    "w" '((lambda () (interactive) (consult-ripgrep denote-directory)) :which-key "Grep in denote dir")
    "l" #'denote-find-link
    "." #'mymy-denote-find-link-at-point
+   "k" #'mymy-denote-copy-current-as-link
 
    "r" #'denote-rename-file
    "R" #'denote-rename-file-using-front-matter
