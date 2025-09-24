@@ -498,6 +498,32 @@ current window."
                                        ))
 
   (global-set-key (kbd "C-{") #'evil-newline-same-indent)
+  (unless window-system
+    (when (getenv "DISPLAY")
+      (defun xsel-cut-function (text &optional push)
+        (with-temp-buffer
+          (insert text)
+          (call-process-region (point-min) (point-max) "xsel" nil 0 nil "--input" "--clipboard")))
+      (defun xsel-paste-function()
+        (let ((xsel-output (shell-command-to-string "xsel --output --clipboard")))
+          (unless (string= (car kill-ring) xsel-output)
+            xsel-output )))
+      (setq interprogram-cut-function 'xsel-cut-function)
+      (setq interprogram-paste-function 'xsel-paste-function)
+      ))
+  (unless window-system
+    (when (getenv "WAYLAND_DISPLAY")
+      (defun wl-copy-cut-function (text &optional push)
+        (with-temp-buffer
+          (insert text)
+          (call-process-region (point-min) (point-max) "wl-copy" nil 0 nil)))
+
+      (defun wl-copy-paste-function ()
+        (let ((wl-output (shell-command-to-string "wl-paste")))
+          (unless (string= (car kill-ring) wl-output)
+            wl-output)))
+      (setq interprogram-cut-function 'wl-copy-cut-function)
+      (setq interprogram-paste-function 'wl-copy-paste-function)))
   )
 
 (use-package saveplace
@@ -767,8 +793,14 @@ current window."
    "r" (list mymy-replace-map :which-key "Replace")
    "m" #'magit)
 
+  (defun meain/evil-yank-advice (orig-fn beg end &rest args)
+    (pulse-momentary-highlight-region beg end)
+    (apply orig-fn beg end args))
+
+  (advice-add 'evil-yank :around 'meain/evil-yank-advice)
+
   ;; Change shape and color of each state
-  (setq evil-insert-state-cursor '(bar "#00FF00")
+  (setq esvil-insert-state-cursor '(bar "#00FF00")
         evil-visual-state-cursor '(box "#FF00FF")
         evil-normal-state-cursor '(hollow "#E2E8EF")))
 
@@ -808,6 +840,7 @@ current window."
   :init
   (general-add-hook '(emacs-lisp-mode-hook lisp-mode-hook) #'lispyville-mode)
   :config
+  (advice-add 'lispyville-yank :around 'meain/evil-yank-advice)
   (lispyville-set-key-theme '(operators c-w additional)))
 
 (use-package evil-surround
@@ -1262,7 +1295,7 @@ current window."
      :keymaps 'csharp-ts-mode-map
      "C-x C-e" #'mymy-dap-eval-dwim)
 
-    (setq dap-internal-terminal #'dap-internal-terminal-vterm)
+    ;; (setq dap-internal-terminal #'dap-internal-terminal-vterm)
 
     ;; TODO: Deal with default template, like dotnet.
     (dap-register-debug-template ".NET Core Launch (web)"
@@ -2218,6 +2251,8 @@ This function gives priority to .sln files over .csproj files."
   (defun tempel-setup-capf ()
     ;; Add the Tempel Capf to `completion-at-point-functions'.
     ;; `tempel-expand' only triggers on exact matches. Alternatively use
+
+
     ;; `tempel-complete' if you want to see all matches, but then you
     ;; should also configure `tempel-trigger-prefix', such that Tempel
     ;; does not trigger too often when you don't expect it. NOTE: We add
@@ -3318,7 +3353,7 @@ bypassing the dispatch buffer."
   (setq denote-file-type 'text)
   ;; (setq denote-link-button-action #'mymy-denote-link-button-action)
   ;; Let's first try the default action
-  (setq denote-link-button-action #'find-file-other-window)
+  (setq denote-open-link-function #'find-file-other-window)
 
   (defvar mymy-denote-mark-ring nil
     "Mark for position before link jumping in denote.")
@@ -3379,11 +3414,34 @@ then go back 1."
   (defun mymy-denote-find-link-at-point ()
     (interactive)
     ;; The same as `denote-link-return-links' but with user-error
-    (if-let ((id (get-text-property (point) 'denote-link-id))
-             (path (denote-get-path-by-id id)))
-        (funcall denote-link-button-action path)
-      (user-error "Cannot resolve the link at point"))
+    (save-excursion
+      (let ((case-fold-search nil)
+            (start (point)))
+        ;; Find the next closing bracket(s) after point
+        (when (re-search-forward "\\]+" (line-end-position) t)
+          ;; Now search backward for the complete [[denote:<id>]] pattern
+          (when (re-search-backward "\\[\\[denote:\\([^]]+\\)\\]\\]" (line-beginning-position) t)
+            ;; Verify that point was originally within this link
+            (when (and (>= start (match-beginning 0)) (<= start (match-end 0)))
+              (if-let ((id (match-string 1))
+                       (path (denote-get-path-by-id id)))
+                  (funcall denote-open-link-function path)
+                (user-error "Cannot resolve the denote link at point")))))
+        (user-error "No denote link found at point"))))
+  (defun mymy-denote-copy-current-as-link ()
+    (interactive)
+    (let ((filename (f-base (buffer-file-name))))
+      (when (length> filename 15)
+        (kill-new (concat
+                   "[[denote:"
+                   (substring filename 0 15)
+                   "]]"))
+        )
+      )
     )
+
+  
+
 
   :config
 
@@ -3406,6 +3464,7 @@ then go back 1."
    "w" '((lambda () (interactive) (consult-ripgrep denote-directory)) :which-key "Grep in denote dir")
    "l" #'denote-find-link
    "." #'mymy-denote-find-link-at-point
+   "k" #'mymy-denote-copy-current-as-link
 
    "r" #'denote-rename-file
    "R" #'denote-rename-file-using-front-matter
@@ -4424,6 +4483,7 @@ then go back 1."
 ;; * Vterm
 (when mymy-is-not-android
   (use-package vterm
+    :disabled
     :ensure t
     :demand t
     :config
@@ -4523,6 +4583,7 @@ then go back 1."
 
 (when mymy-is-not-android
   (use-package multi-vterm
+    :disabled
     :after (vterm)
     :ensure t
     :init
