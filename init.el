@@ -511,6 +511,19 @@ current window."
       (setq interprogram-cut-function 'xsel-cut-function)
       (setq interprogram-paste-function 'xsel-paste-function)
       ))
+  (unless window-system
+    (when (getenv "WAYLAND_DISPLAY")
+      (defun wl-copy-cut-function (text &optional push)
+        (with-temp-buffer
+          (insert text)
+          (call-process-region (point-min) (point-max) "wl-copy" nil 0 nil)))
+
+      (defun wl-copy-paste-function ()
+        (let ((wl-output (shell-command-to-string "wl-paste")))
+          (unless (string= (car kill-ring) wl-output)
+            wl-output)))
+      (setq interprogram-cut-function 'wl-copy-cut-function)
+      (setq interprogram-paste-function 'wl-copy-paste-function)))
   )
 
 (use-package saveplace
