@@ -4621,6 +4621,7 @@ then go back 1."
 
 (when mymy-is-not-android
   (use-package pdf-tools
+    :disabled
     :ensure t
     :config
     (pdf-loader-install) ; On demand loading, leads to faster startup time
