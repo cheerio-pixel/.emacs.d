@@ -6,10 +6,11 @@
  '(haskell-process-type 'cabal-repl)
  '(read-extended-command-predicate #'command-completion-default-include-p)
  '(safe-local-variable-values
-   '((org-tag-alist (:startgroup) ("@phone") ("@pc") (:endgroup) ("ARCHIVE")
-                    ("resources") ("projects") ("watch") ("math")
-                    ("extras") ("additions") ("references") ("readings")
-                    ("movies"))
+   '((eval setq-local hl-todo--regexp (concat "\\[" (hl-todo--regexp) "|"))
+     (org-tag-alist (:startgroup) ("@phone") ("@pc") (:endgroup)
+                    ("ARCHIVE") ("resources") ("projects") ("watch")
+                    ("math") ("extras") ("additions") ("references")
+                    ("readings") ("movies"))
      (mymy-org-default-export-directory
       . "~/Dropbox (Maestral)/org/artifacts/"))))
 

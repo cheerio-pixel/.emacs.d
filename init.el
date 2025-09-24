@@ -861,6 +861,7 @@ current window."
         (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "v0.21.3" "src")
         (json "https://github.com/tree-sitter/tree-sitter-json")
         (make "https://github.com/alemuller/tree-sitter-make")
+        (rust "https://github.com/tree-sitter/tree-sitter-rust" "v0.23.3")
         (markdown "https://github.com/ikatyang/tree-sitter-markdown")
         (dockerfile "https://github.com/camdencheek/tree-sitter-dockerfile")
         (python "https://github.com/tree-sitter/tree-sitter-python")
@@ -1084,9 +1085,6 @@ current window."
                                 ;; "--loglevel"
                                 ;; "Trace"
                                 )
-                          (when lsp-razor-rzls-test-dll
-                            (list "--plugin" lsp-razor-rzls-test-dll)
-                            )
                           (when lsp-csharp-solution-file
                             (list "-s" (expand-file-name lsp-csharp-solution-file)))))
                      #'(lambda ()
@@ -2153,6 +2151,7 @@ This function gives priority to .sln files over .csproj files."
     ("s" dirvish-quicksort)          ; remapped `dired-sort-toggle-or-edit'
     ("v" dirvish-vc-menu)            ; remapped `dired-view-file'
     ("TAB" dirvish-subtree-toggle)
+    ("C-TAB" dirvish-subtree-toggle)
     ("M-f" dirvish-history-go-forward)
     ("M-b" dirvish-history-go-backward)
     ("M-l" dirvish-ls-switches-menu)
@@ -2174,6 +2173,7 @@ This function gives priority to .sln files over .csproj files."
          ("v" . dirvish-vc-menu)     ; remapped `dired-view-file'
          ("TAB" . dirvish-subtree-toggle)
          ("C-<tab>" . dirvish-subtree-toggle)
+         ("M-<tab>" . dirvish-subtree-toggle)
          ("M-f" . dirvish-history-go-forward)
          ("M-b" . dirvish-history-go-backward)
          ("M-l" . dirvish-ls-switches-menu)
@@ -4701,8 +4701,9 @@ then go back 1."
                                    ;; correctly in all cases.
                                    "-J-Dmetals.icons=unicode"
                                    "-J-Dmetals.client=emacs"
-                                   "-J-XX:+UseG1GC"
-                                   "-J-XX:+UseStringDeduplication"
+                                   "-J-Xmx15G"
+                                   ;; "-J-XX:+UseG1GC"
+                                   ;; "-J-XX:+UseStringDeduplication"
                                    ;; "-J-Xss4m"
                                    ;; "-J-Xms100m"
                                    ))
@@ -4756,3 +4757,13 @@ then go back 1."
 (use-package yaml-mode
   :ensure t
   )
+
+;; * Rust
+(use-package rust-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode)))
+
+(use-package rustic
+  :ensure t
+  :after (rust-mode))
