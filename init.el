@@ -1284,7 +1284,7 @@ current window."
      :keymaps 'csharp-ts-mode-map
      "C-x C-e" #'mymy-dap-eval-dwim)
 
-    (setq dap-internal-terminal #'dap-internal-terminal-vterm)
+    ;; (setq dap-internal-terminal #'dap-internal-terminal-vterm)
 
     ;; TODO: Deal with default template, like dotnet.
     (dap-register-debug-template ".NET Core Launch (web)"
@@ -4470,6 +4470,7 @@ then go back 1."
 ;; * Vterm
 (when mymy-is-not-android
   (use-package vterm
+    :disabled
     :ensure t
     :demand t
     :config
@@ -4569,6 +4570,7 @@ then go back 1."
 
 (when mymy-is-not-android
   (use-package multi-vterm
+    :disabled
     :after (vterm)
     :ensure t
     :init
