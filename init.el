@@ -831,7 +831,8 @@ current window."
                                 pdf
                                 compile
                                 comint
-                                sly)))
+                                sly
+                                ebib)))
 
 ;; Integration of lispy with evil
 (use-package lispyville
@@ -3335,6 +3336,23 @@ bypassing the dispatch buffer."
   ;;                                      (mode-line-format . 'none)))))
   )
 
+;; * Ebib
+(use-package ebib
+  :ensure t
+  :config
+  (general-define-key
+   "C-c e" 'ebib
+   )
+  (gsetq
+   ebib-default-directory
+   (concat dropbox-dir "notes/")
+   ebib-preload-bib-files
+   (list
+    "references.bib"
+    )
+   )
+  )
+
 ;;* Denote
 (use-package denote
   :defer 5
@@ -4092,9 +4110,9 @@ then go back 1."
     ;; https://200ok.ch/posts/2020-08-22_setting_up_spell_checking_with_multiple_dictionaries.html
     :config
     (setq ispell-program-name "hunspell")
-    ;; Configure German, Swiss German, and two variants of English.
     (setq ispell-dictionary "en_US,es_ES")
-    (setq ispell-alternate-dictionary (expand-file-name (concat dropbox-dir "english_list.txt")))
+    (setq ispell-alternate-dictionary (expand-file-name (concat dropbox-dir ".aspell.es.pws")))
+    ;; (setq ispell-alternate-dictionary (expand-file-name (concat dropbox-dir "english_list.txt")))
     ;; ispell-set-spellchecker-params has to be called
     ;; before ispell-hunspell-add-multi-dic will work
     (ispell-set-spellchecker-params)

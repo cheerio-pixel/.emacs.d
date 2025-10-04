@@ -6,7 +6,8 @@
  '(haskell-process-type 'cabal-repl)
  '(read-extended-command-predicate #'command-completion-default-include-p)
  '(safe-local-variable-values
-   '((eval setq-local hl-todo--regexp (concat "\\[" (hl-todo--regexp) "|"))
+   '((eval citar-capf-setup)
+     (eval setq-local hl-todo--regexp (concat "\\[" (hl-todo--regexp) "|"))
      (org-export-initial-scope . buffer)
      (org-tag-alist (:startgroup) ("@phone") ("@pc") (:endgroup)
                     ("ARCHIVE") ("resources") ("projects") ("watch")
@@ -20,5 +21,5 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 160 :width normal))))
+ '(default ((t (:family "Fantasque Sans Mono" :foundry "outline" :slant normal :weight normal :height 120 :width normal))))
  '(olivetti-fringe ((t (:foreground "#353535" :background "#353535")))))
