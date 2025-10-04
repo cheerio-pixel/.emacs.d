@@ -3335,6 +3335,59 @@ bypassing the dispatch buffer."
   ;;                                      (mode-line-format . 'none)))))
   )
 
+;; * Citar
+(use-package citar
+  :ensure t
+  :config
+  (setopt citar-bibliography
+          (list
+           (concat
+            dropbox-dir
+            "notes/references.bib"
+            )
+           ))
+  (defconst mymy-citar-key-regexp
+    (concat "cite:@"
+            "\\(?:"
+            "{\\(?1:.*?\\)}"              ; brace-delimited key
+            "\\|"
+            "\\(?1:[[:alnum:]_][[:alnum:]]*\\(?:[:.#$%&+?<>~/-][[:alnum:]]+\\)*\\)"
+            "\\)")
+    "Regular expression for citation keys in the format 'citekey:@key'.
+Captures the actual key in group 1.")
+
+
+  (defun mymy-citar--insert-keys (citekeys)
+    "Insert CITEKEYS in the format 'citekey:@key'."
+    (insert (string-join (mapcar (lambda (x) (concat "cite:@" x)) citekeys) "; ")))
+
+  (defun mymy-citar-key-at-point ()
+    "Return citation key at point for 'citekey:@key' format.
+Returns (KEY . BOUNDS), where KEY is the citation key at point
+and BOUNDS is a pair of buffer positions. Citation keys are
+in the format 'citekey:@key'. Returns nil if there is no key at point."
+    (when (thing-at-point-looking-at mymy-citar-key-regexp)
+      (cons (match-string-no-properties 1)
+            (cons (match-beginning 0) (match-end 0)))))
+
+  ;; Configure for text-mode
+  (cl-pushnew
+   '((text-mode) .
+     ((insert-keys . mymy-citar--insert-keys)
+      (key-at-point . mymy-citar-key-at-point)))
+   citar-major-mode-functions)
+
+  :hook
+  (LaTeX-mode . citar-capf-setup)
+  (org-mode . citar-capf-setup))
+
+(use-package citar-embark
+  :ensure t
+  :after (citar embark)
+  :no-require
+  :config (citar-embark-mode))
+
+
 ;;* Denote
 (use-package denote
   :defer 5
@@ -3440,9 +3493,6 @@ then go back 1."
       )
     )
 
-  
-
-
   :config
 
   (general-define-key
@@ -3465,6 +3515,7 @@ then go back 1."
    "l" #'denote-find-link
    "." #'mymy-denote-find-link-at-point
    "k" #'mymy-denote-copy-current-as-link
+   "c" #'citar-insert-keys
 
    "r" #'denote-rename-file
    "R" #'denote-rename-file-using-front-matter
@@ -4094,11 +4145,13 @@ then go back 1."
     (setq ispell-program-name "hunspell")
     ;; Configure German, Swiss German, and two variants of English.
     (setq ispell-dictionary "en_US,es_ES")
-    (setq ispell-alternate-dictionary (expand-file-name (concat dropbox-dir "english_list.txt")))
+    (setq ispell-alternate-dictionary nil)
+    ;; (setq ispell-alternate-dictionary (expand-file-name (concat dropbox-dir "english_list.txt")))
     ;; ispell-set-spellchecker-params has to be called
     ;; before ispell-hunspell-add-multi-dic will work
     (ispell-set-spellchecker-params)
     (ispell-hunspell-add-multi-dic "en_US,es_ES")
+    (setopt text-mode-ispell-word-completion nil)
     ;; For saving words to the personal dictionary, don't infer it from
     ;; the locale, otherwise it would save to ~/.hunspell_de_DE.
     (setq ispell-personal-dictionary (concat dropbox-dir ".hunspell_personal"))
